@@ -4,23 +4,19 @@ public class Request {
     private int destinationFloor;
     private String direction;
 
-    public Request() {
-
+    public Request(){ }
+    public Request(String time, String direction, int startFloor, int destinationFloor) {
+        this.time = time;
+        this.direction = direction;
+        this.startFloor = startFloor;
+        this.destinationFloor = destinationFloor;
     }
 
-    public String getTime() {
-        null;
-    }
+    public String getTime() { return time; }
 
-    public int getStartFloor() {
-        null;
-    }
+    public int getStartFloor() { return startFloor; }
 
-    public int getDestinationFloor() {
-        null;
-    }
+    public int getDestinationFloor() { return destinationFloor; }
 
-    public String getDirection() {
-        null;
-    }
+    public String getDirection() { return direction; }
 }
