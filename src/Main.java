@@ -1,15 +1,21 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+/**
+ * The main class is responsible for creating & starting the threads
+ * Starting point of the program
+ *
+ * @author Lindsay
+ * @date February 2nd, 2024
+ */
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+//        Synchronizer synchronizer = new Synchronizer();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        Thread elevator, scheduler;  // 3rd thread would be floor thread (according to UML)??
+
+        elevator = new Thread(new Elevator(), "Elevator");
+        scheduler = new Thread(new Scheduler(new Synchronizer()), "Scheduler");
+
+        elevator.start();
+        scheduler.start();
     }
 }
