@@ -20,12 +20,16 @@ public class Elevator extends Thread {
     private final float floorHeight;
     private final float loadUnloadTime;
 
+    // Constants
+    public final static float VELOCITY = 1.75f;
+    public final static float LOAD_UNLOAD_TIME = 7.85f;
+
     /**
      * Default constructor.
      * @param synchronizer Synchronizer that elevator will be using.
      */
     public Elevator(Synchronizer synchronizer) {
-        this(synchronizer, 1, 1, 1.75f, 3.916f, 7.85f);
+        this(synchronizer, 1, 1, Elevator.VELOCITY, Floor.FLOOR_HEIGHT, Elevator.LOAD_UNLOAD_TIME);
     }
 
     /**
