@@ -8,12 +8,12 @@
 
 public class Main {
     public static void main(String[] args) {
-//        Synchronizer synchronizer = new Synchronizer();
+        Synchronizer synchronizer = new Synchronizer();
 
         Thread elevator, scheduler;  // 3rd thread would be floor thread (according to UML)??
 
-        elevator = new Thread(new Elevator(), "Elevator");
-        scheduler = new Thread(new Scheduler(new Synchronizer()), "Scheduler");
+        elevator = new Thread(new Elevator(synchronizer), "Elevator");
+        scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
 
         elevator.start();
         scheduler.start();
