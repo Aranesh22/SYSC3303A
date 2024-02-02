@@ -1,13 +1,14 @@
 import java.util.ArrayList;
 
 /**
- * The Synchronizer class is responsible for synchronizing the
+ * The Synchronizer class is a thread-safe class responsible for synchronizing the
  * Floor, Scheduler, and Elevator subsystems.
  * This includes synchronizing creating/retrieving requests,
  * setting/retrieving destination floor numbers, and setting/retrieving
  * current floor numbers.
  *
  * @author Pathum Danthanarayana, 101181411
+ * @version iteration1
  * @date February 1st, 2024
  */
 public class Synchronizer {
