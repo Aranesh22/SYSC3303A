@@ -11,14 +11,22 @@ public class Scheduler implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             // Check for new requests from floors
-            Request floorRequest = synchronizer.getDestinationFloor();
+            int floorRequest = synchronizer.getDestinationFloor();
 
-            if (floorRequest != null) {
+            // Check for Elevators Current floor status
+            int elevatorStatus = synchronizer.getCurrentFloor();
+
+            //Send Elevators current floor status to the floor
+            synchronizer.putCurrentFloor(elevatorStatus);
+
+
+            if (floorRequest < 1 || floorRequest > 7) { // Check if the floor request is valid
                 // Handle the request, for iteration 1, a simple FIFO strategy
-                processFloorRequest(floorRequest);
-
-                Response elevatorResponse = synchronizer.getElevatorResponse();
-                synchronizer.sendResponseToFloor(elevatorResponse);
+                processRequest(floorRequest);
+//                Response elevatorResponse = synchronizer.getElevatorResponse();
+//                synchronizer.sendResponseToFloor(elevatorResponse);
+            }else {
+                System.out.println("Invalid floor request");
             }
 
             // Sleep to simulate processing
@@ -31,14 +39,15 @@ public class Scheduler implements Runnable {
     }
 
     // Processes floor request and determines which elevator to service the request
-    private void processFloorRequest(Request request) {
+    private void processRequest(int request) {
         // In Iteration 1 we return the first elevator (ID 1) for all requests
         // In later iterations method will include logic to select the best elevator
-        System.out.println("Scheduler - Received request from floor: " + request.getStartFloor());
+        System.out.println("Scheduler - Received request from floor: " + synchronizer.getRequest().getStartFloor());
+
         int elevatorId = 1; // Placeholder for the chosen elevator ID.
 
         // Send request to elevator
-        synchronizer.putRequest(elevatorId, request);
+        synchronizer.putDestinationFloor(elevatorId, request);
         System.out.println("Scheduler - Sent request to Elevator: ");
     }
 
