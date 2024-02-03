@@ -63,3 +63,14 @@ These design decisions form the initial structure of our elevator control system
 
 ### Code Readability
 * We value writing clean, readable code and providing documentation. Each class and method includes JavaDoc comments to explain its purpose, inputs, and outputs. This help show our current understanding of the system and ensures that professors and TAs can easily understand and grade the system.
+
+## How to Run Project
+1. Compile and build the project.
+2. Run the program from the `Main` class.
+
+## FAQ
+**Q: The program is not running as expected**<br>
+A: Navigate to the menu at the top-left corner of IntelliJ, select `File`, click `Project Structure`, and ensure the settings 
+are the same as below:
+<img width="763" alt="project_structure" src="https://github.com/Aranesh22/SYSC3303A/assets/61627702/8d709f93-0ff3-4413-8851-c97b9189769a">
+
