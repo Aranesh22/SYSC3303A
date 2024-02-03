@@ -17,6 +17,7 @@ public class Floor extends Thread{
 
             Request obj = reqList.get(i);
             syncFloor.putRequest(obj);
+            System.out.println("Current Floor is " + syncFloor.getCurrentFloor());
 
         }
     }
@@ -54,7 +55,6 @@ public class Floor extends Thread{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
 
     }
     public float getHeight() {
