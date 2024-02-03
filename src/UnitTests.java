@@ -59,7 +59,7 @@ public class UnitTests {
 
     @Test
     void testRequest_getElevatorId(){
-        Request r = new Request("06:10:04:00", 1, 5, "up", 1)
+        Request r = new Request("06:10:04:00", 1, 5, "up", 1);
         assertEquals(1, r.getElevatorId());
     }
 }

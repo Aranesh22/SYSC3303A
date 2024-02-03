@@ -3,7 +3,7 @@
  * Request class is responsible for providing the message structure and information of requests
  * utilized by the synchronizer class
  *
- * @author Lindsay Dickson
+ * @author Lindsay Dickson, 101160876
  * @version Iteration1
  * @date February 2nd, 2024
  */
@@ -29,15 +29,21 @@ public class Request {
      * @param startFloor floor the request was made from
      * @param destinationFloor floor that user is attempting to travel to
      * @param direction will be either up/down
-     * @param elevatorId id of the elevator that made the request
+     *
      */
-    public Request(String time, int startFloor, int destinationFloor, String direction, int elevatorId) {
+    public Request(String time, int startFloor, int destinationFloor, String direction) {
         this.time = time;
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
         this.direction = direction;
-        this.elevatorId = elevatorId;
+        this.elevatorId = -1;
     }
+
+    /**
+     * Method to update the elevatorId once the request has been assigned to an elevator
+     * @param elevatorId
+     */
+    public void updateElevatorId(int elevatorId){ this.elevatorId = elevatorId; }
 
     public String getTime() { return time; }
 
