@@ -54,4 +54,13 @@ public class Request {
     public String getDirection() { return direction; }
 
     public int getElevatorId() { return elevatorId; }
+
+    /**
+     * Returns a readable string representation of request.
+     * @return String representation of request.
+     */
+    @Override
+    public String toString() {
+        return "Time:" + this.time + " | Request:" + this.startFloor + "->" + this.destinationFloor;
+    }
 }
