@@ -7,6 +7,8 @@ import java.util.ArrayList;
 public class Floor extends Thread{
 
     public final static float FLOOR_HEIGHT = 3.916f;
+    public final static float MIN_FLOOR = 1;
+    public final static float MAX_FLOOR = 7;
 
     private Synchronizer syncFloor;
 

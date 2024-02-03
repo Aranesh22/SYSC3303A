@@ -1,5 +1,5 @@
 /**
- * The Scheduler class manages elevator requests and coordinating
+ * The Scheduler class manages elevator requests and coordinates
  * the elevators based on the current system state. It receives requests
  * from floors, processes them, and assigns elevators to fulfill those requests.
  * It also checks the current floor status of elevators and sends the status to the floor.
@@ -65,7 +65,7 @@ public class Scheduler implements Runnable {
      * @return true if the floor request is within range, false otherwise
      */
     private boolean isValidFloorRequest(int floorRequest) {
-        return floorRequest >= 1 && floorRequest <= 7;
+        return floorRequest >= Floor.MIN_FLOOR && floorRequest <= Floor.MAX_FLOOR;
     }
 
     /**
