@@ -1,37 +1,14 @@
 /**
- *  class for basic unit testing
+ * Request Class Unit Tests
  * @version Iteration1
  * @date February 2, 2024
- *
- * will eventually be moved to its own directory
  */
+
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UnitTests {
-
-    //@BeforeEach
-    //public void init(){ }
-
-    /**
-     * Elevator.java Unit Tests
-     */
-
-    /**
-     * Floor.java Unit Tests
-     */
-
-    /**
-     * Scheduler.java Unit Tests
-     */
-
-    /**
-     * Synchronizer.java Unit Tests
-     */
-
-    /**
-     *  Request.java Unit Tests
-     */
+public class UTestRequest {
 
     @Test
     void testRequest_getTime() {
