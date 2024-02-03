@@ -1,24 +1,14 @@
 import java.io.*;
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class Floor extends Thread{
-
     public final static float FLOOR_HEIGHT = 3.916f;
-
     private Synchronizer syncFloor;
-
-
     ArrayList<Request> reqList = new ArrayList<>();
 
     public Floor(Synchronizer sync) {
-
-
         this.syncFloor = sync;
-
-
     }
 
     public synchronized void run() {
@@ -29,23 +19,16 @@ public class Floor extends Thread{
             syncFloor.putRequest(obj);
 
         }
-
-
-
     }
 
     public void parseReqFile() throws FileNotFoundException {
-
 
         String path = "data/data.csv";
         String line = "";
         try {
 
             BufferedReader readBuff = new BufferedReader(new FileReader(path));
-
-            int elvId = 0;
             while ((line = readBuff.readLine()) != null) {
-
 
                 String[] data = line.split(",");
                 System.out.println(data[0]);
@@ -58,19 +41,15 @@ public class Floor extends Thread{
                 int destFloor = Integer.parseInt(data[3]);
                 String direction = data[2];
 
-
                 Request req = new Request(time,floor,destFloor,direction);
-
                 reqList.add(req);
 
             }
 
             for (int i = 0; i < reqList.size(); i++) {
                 Request obj = reqList.get(i);
-                System.out.println(obj.getTime());
             }
         } catch (FileNotFoundException e) {
-
             e.printStackTrace();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -78,13 +57,7 @@ public class Floor extends Thread{
 
 
     }
-
-
     public float getHeight() {
-
         return FLOOR_HEIGHT;
     }
-
-
-
 }
