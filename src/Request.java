@@ -9,18 +9,21 @@
  */
 
 public class Request {
-    private String time;
-    private int startFloor;
-    private int destinationFloor;
-    private String direction;
-    private int elevatorId;
 
+    //Fields
+    private final String time;
+    private final int startFloor;
+    private final int destinationFloor;
+    private final String direction;
+
+    /*
+    Default constructor.
+     */
     public Request(){
         time = null;
         startFloor = -1;
         destinationFloor = -1;
         direction = null;
-        elevatorId = -1;
     }
 
     /**
@@ -36,24 +39,31 @@ public class Request {
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
         this.direction = direction;
-        this.elevatorId = -1;
     }
 
     /**
-     * Method to update the elevatorId once the request has been assigned to an elevator
-     * @param elevatorId
+     * Returns time of request.
+     * @return Time of request.
      */
-    public void updateElevatorId(int elevatorId){ this.elevatorId = elevatorId; }
-
     public String getTime() { return time; }
 
+    /**
+     * Returns starting floor of request.
+     * @return Integer representing the starting floor of the request.
+     */
     public int getStartFloor() { return startFloor; }
 
+    /**
+     * Returns destination floor of the request.
+     * @return Integer representing the destination floor of the request.
+     */
     public int getDestinationFloor() { return destinationFloor; }
 
+    /**
+     * Will be used for later iterations.
+     * @return Direction elevator is traveling.
+     */
     public String getDirection() { return direction; }
-
-    public int getElevatorId() { return elevatorId; }
 
     /**
      * Returns a readable string representation of request.
