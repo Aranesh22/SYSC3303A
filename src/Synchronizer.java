@@ -214,4 +214,32 @@ public class Synchronizer {
     public boolean isRunning() {
         return running;
     }
+
+    /**
+     * @return the destination floor of the elevator (for testing).
+     */
+    public int testGetDestinationFloor() {
+        return destinationFloor;
+    }
+
+    /**
+     * @return the elevator's status (for testing).
+     */
+    public int testGetElevatorStatus() {
+        return elevatorStatus;
+    }
+
+    /**
+     * @return the current floor of the elevator (for testing).
+     */
+    public int testGetCurrentFloor() {
+        return currentFloor;
+    }
+
+    /**
+     * @return the list of requests (for testing).
+     */
+    public ArrayList<Request> testGetRequests() {
+        return requests;
+    }
 }
