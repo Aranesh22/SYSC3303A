@@ -1,26 +1,14 @@
 import java.io.*;
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class Floor extends Thread{
-
     public final static float FLOOR_HEIGHT = 3.916f;
-    public final static float MIN_FLOOR = 1;
-    public final static float MAX_FLOOR = 7;
-
     private Synchronizer syncFloor;
-
-
     ArrayList<Request> reqList = new ArrayList<>();
 
     public Floor(Synchronizer sync) {
-
-
         this.syncFloor = sync;
-
-
     }
 
     public synchronized void run() {
@@ -29,25 +17,19 @@ public class Floor extends Thread{
 
             Request obj = reqList.get(i);
             syncFloor.putRequest(obj);
+            System.out.println("Current Floor is " + syncFloor.getCurrentFloor());
 
         }
-
-
-
     }
 
     public void parseReqFile() throws FileNotFoundException {
-
 
         String path = "data/data.csv";
         String line = "";
         try {
 
             BufferedReader readBuff = new BufferedReader(new FileReader(path));
-
-            int elvId = 0;
             while ((line = readBuff.readLine()) != null) {
-
 
                 String[] data = line.split(",");
                 System.out.println(data[0]);
@@ -60,33 +42,22 @@ public class Floor extends Thread{
                 int destFloor = Integer.parseInt(data[3]);
                 String direction = data[2];
 
-
                 Request req = new Request(time,floor,destFloor,direction);
-
                 reqList.add(req);
 
             }
 
             for (int i = 0; i < reqList.size(); i++) {
                 Request obj = reqList.get(i);
-                System.out.println(obj.getTime());
             }
         } catch (FileNotFoundException e) {
-
             e.printStackTrace();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-
     }
-
-
     public float getHeight() {
-
         return FLOOR_HEIGHT;
     }
-
-
-
 }
