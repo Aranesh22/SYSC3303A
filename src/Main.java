@@ -9,6 +9,7 @@
 
 public class Main {
     public static void main(String[] args) {
+
         Synchronizer synchronizer = new Synchronizer();
 
         Thread elevator, scheduler;  // 3rd thread would be floor thread (according to UML)??
