@@ -53,7 +53,7 @@ These design decisions form the initial structure of our elevator control system
 * For Iteration 1, a simple First-In-First-Out (FIFO) strategy handles elevator requests, which was implemented in the `Scheduler` class. This was chosen for its simplicity and fairness, ensuring that all requests are addressed in the order they are received. As we further iterate, we plan to optimize the response time and efficiency.
 
 ### Elevator Simulation
-* The `Elevator` class was designed to simulate the movement of an elevator car. We decided to implement a time delay to represent the elevator traveling between floors by implementing speed and acceleration calculations from Iteration 0 which provides a realistic feel to the system's operation.
+* The `Elevator` class was designed to simulate the movement of an elevator car. We decided to implement a time delay to represent the elevator traveling between floors by implementing speed calculations from Iteration 0 which provides a realistic feel to the system's operation.
 
 ### Error Handling
 * We have put initial error handling mechanisms in place, primarily in the input validation within the `Scheduler`. Invalid floor requests are logged with an error message. As we progress through the iterations, we will develop a comprehensive error handling mechanism to manage exceptions to maintain system stability.
@@ -66,7 +66,9 @@ These design decisions form the initial structure of our elevator control system
 
 ## How to Run Project
 1. Compile and build the project.
-2. Run the program from the `Main` class.
+2. Modify data.csv file if needed. Format must be 
+  ```[time(String)],[source floor(int)],[direction(up/down)],[destination floor(int)]```. data.csv file must end with ```END_REQUEST,-1,END,-1``` to signify end of file.
+3. Run the program from the `Main` class.
 
 ## FAQ
 **Q: The program is not running as expected**<br>

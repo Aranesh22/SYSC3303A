@@ -8,18 +8,21 @@
  */
 
 public class Main {
+    /**
+     * Starts the elevator control system/simulator.
+     * Creates and starts the scheduler,floor and elevator threads.
+     */
     public static void main(String[] args) {
 
         Synchronizer synchronizer = new Synchronizer();
-
         Thread elevator, scheduler, floor;
 
-        elevator = new Thread(new Elevator(synchronizer), "Elevator");
         scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
         floor = new Thread(new Floor(synchronizer), "Floor");
+        elevator = new Thread(new Elevator(synchronizer), "Elevator");
 
-        elevator.start();
         scheduler.start();
         floor.start();
+        elevator.start();
     }
 }

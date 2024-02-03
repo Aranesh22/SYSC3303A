@@ -49,9 +49,6 @@ public class Synchronizer {
         if (running) {
             // Check if last request
             Request request = requests.removeFirst();
-            if (requests.isEmpty()) {
-                running = false;
-            }
             // Notify threads in wait set
             notifyAll();
             return request;
@@ -211,8 +208,17 @@ public class Synchronizer {
     /**
      * @return whether the synchronizer is running or not.
      */
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
+        notifyAll();
         return running;
+    }
+
+    /**
+     * Stops synchronizer (Sets it to false).
+     */
+    public synchronized void stopRunning() {
+        notifyAll();
+        running = false;
     }
 
     /**
