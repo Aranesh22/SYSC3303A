@@ -25,59 +25,66 @@ public class Scheduler implements Runnable {
      */
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            handleFloorRequests();
-            handleElevatorStatus();
+        while (this.synchronizer.isRunning()) {
+            processRequest(getValidFloorRequest());
         }
     }
 
-    /**
-     * Validates incoming floorRequests and processes them if they are valid
-     */
-    private void handleFloorRequests() {
-        int floorRequest = synchronizer.getDestinationFloor();
-        if (isValidFloorRequest(floorRequest)) {
-            processRequest(floorRequest);
-        } else {
-            System.out.println("Scheduler: Invalid floor request - " + floorRequest);
+    public Request getValidFloorRequest() {
+        Request floorRequest;
+        // Loop until we get a valid floor request
+        while (true) {
+            floorRequest = synchronizer.getRequest();
+            if (isValidFloorRequest(floorRequest)) {
+                break;
+            } else {
+                System.out.println("Scheduler: Invalid floor request - " + floorRequest);
+            }
         }
+        return floorRequest;
     }
 
     /**
      * Checks the current floor of elevators and updates the floor status
      */
-    private void handleElevatorStatus() {
-        int elevatorStatus = synchronizer.getElevatorStatus();
-        int floorRequest = synchronizer.getDestinationFloor();
-
-        synchronizer.putCurrentFloor(elevatorStatus);
-
-        if (elevatorStatus == floorRequest) {
-            System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
-        }
+    private void handleElevatorStatus(int targetFloor) {
+        int elevatorStatus;
+        do {
+            elevatorStatus = synchronizer.getElevatorStatus();
+            //synchronizer.putCurrentFloor(elevatorStatus);
+        } while (elevatorStatus != targetFloor);
+        System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
     }
 
 
     /**
      * Validates if the floor request is valid
      *
-     * @param floorRequest The requested floor to be validated
+     * @param floorRequest The request to be validated
      * @return true if the floor request is within range, false otherwise
      */
-    private boolean isValidFloorRequest(int floorRequest) {
-        return floorRequest >= Floor.MIN_FLOOR && floorRequest <= Floor.MAX_FLOOR;
+    private boolean isValidFloorRequest(Request floorRequest) {
+        return (floorRequest.getStartFloor() >= Floor.MIN_FLOOR ) && (floorRequest.getStartFloor() <= Floor.MAX_FLOOR)
+                && (floorRequest.getDestinationFloor() >= Floor.MIN_FLOOR ) && (floorRequest.getDestinationFloor() <= Floor.MAX_FLOOR);
     }
 
     /**
      * Processes the floor request by determining which elevator should be dispatched.
      * This method is will be more complex in later iterations
      *
-     * @param request The floor number being requested
+     * @param request The request to be processed
      */
-    private void processRequest(int request) {
-        System.out.println("Scheduler: Received request for floor: " + request);
-        synchronizer.putDestinationFloor(request);
-        System.out.println("Scheduler: Dispatched elevator to floor: " + request);
+    private void processRequest(Request request) {
+        System.out.println("Scheduler: Received request: " + request);
+        this.sendElevatorToFloor(request.getStartFloor());
+        this.handleElevatorStatus(request.getStartFloor());
+        this.sendElevatorToFloor(request.getDestinationFloor());
+        this.handleElevatorStatus(request.getDestinationFloor());
+    }
+
+    public void sendElevatorToFloor(int floor) {
+        synchronizer.putDestinationFloor(floor);
+        System.out.println("Scheduler: Dispatched elevator to floor: " + floor);
     }
 
 }
