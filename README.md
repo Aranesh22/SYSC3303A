@@ -1,4 +1,4 @@
-# Elevator System
+# Elevator Control System - SYSC 3303 A
 
 This project simulates an elevator control system using a real-time multi-threading to manage multiple elevators and floor requests. The system ensures that all elevator cars operate efficiently and respond to user requests. The project is developed iteratively, with each iteration introducing new features and improvements.
 
