@@ -1,8 +1,10 @@
+
 /**
  * Request class is responsible for providing the message structure and information of requests
  * utilized by the synchronizer class
  *
- * @author Lindsay
+ * @author Lindsay Dickson
+ * @version Iteration1
  * @date February 2nd, 2024
  */
 
@@ -23,7 +25,7 @@ public class Request {
 
     /**
      * Overloaded constructor
-     * @param time time the request was made?
+     * @param time time the request was made
      * @param startFloor floor the request was made from
      * @param destinationFloor floor that user is attempting to travel to
      * @param direction will be either up/down
