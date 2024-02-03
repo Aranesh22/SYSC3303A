@@ -59,7 +59,7 @@ public class Floor extends Thread{
                 String direction = data[2];
 
 
-                Request req = new Request(time,floor,destFloor,direction,1);
+                Request req = new Request(time,floor,destFloor,direction);
 
                 reqList.add(req);
 
