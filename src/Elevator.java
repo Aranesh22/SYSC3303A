@@ -91,7 +91,7 @@ public class Elevator extends Thread {
         }
         // Update current floor and notify we have arrived at this floor.
         this.curFloor = floor;
-        System.out.println(this + " currently at floor " + this.curFloor);
+        System.out.println(this + ": Currently at floor " + this.curFloor);
         this.synchronizer.putElevatorStatus(this.curFloor);
     }
 
@@ -100,14 +100,14 @@ public class Elevator extends Thread {
      * (Doors opening -> Doors closing).
      */
     public void loadUnloadElevator() {
-        System.out.println(this + " opening doors.");
+        System.out.println(this + ": Opening doors.");
         // Sleep for the time it takes to load/unload elevator.
         try {
             Thread.sleep((long) this.loadUnloadTime);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(this + " closing doors");
+        System.out.println(this + ": Closing doors");
     }
 
     /**
