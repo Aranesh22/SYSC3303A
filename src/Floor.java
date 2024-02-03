@@ -13,7 +13,7 @@ public class Floor extends Thread{
 
     ArrayList<Request> reqList = new ArrayList<>();
 
-    public Floor(float heightPas, Synchronizer sync) {
+    public Floor(Synchronizer sync) {
 
 
         this.syncFloor = sync;
