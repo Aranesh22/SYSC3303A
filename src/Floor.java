@@ -29,6 +29,7 @@ public class Floor extends Thread{
         while (syncFloor.isRunning()) {
             System.out.println("Floor: Elevator at " + syncFloor.getCurrentFloor());
         }
+        System.out.println("Floor: Has exited");
     }
 
     public void parseReqFile() throws FileNotFoundException {

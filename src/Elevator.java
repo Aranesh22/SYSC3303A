@@ -62,6 +62,7 @@ public class Elevator extends Thread {
         while (this.synchronizer.isRunning()) {
             this.goToDestinationFloor(this.synchronizer.getDestinationFloor());
         }
+        System.out.println(this + ": Has exited");
     }
 
     /**
@@ -100,7 +101,7 @@ public class Elevator extends Thread {
      * (Doors opening -> Doors closing).
      */
     public void loadUnloadElevator() {
-        System.out.println(this + ": Opening doors.");
+        System.out.println(this + ": Opening doors");
         // Sleep for the time it takes to load/unload elevator.
         try {
             Thread.sleep((long) this.loadUnloadTime);

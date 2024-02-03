@@ -34,6 +34,7 @@ public class Scheduler implements Runnable {
         while (this.synchronizer.isRunning()) {
             processRequest(getValidFloorRequest());
         }
+        System.out.println("Scheduler: Has exited");
     }
 
     /**

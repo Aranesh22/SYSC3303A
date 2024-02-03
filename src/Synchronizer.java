@@ -208,14 +208,16 @@ public class Synchronizer {
     /**
      * @return whether the synchronizer is running or not.
      */
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
+        notifyAll();
         return running;
     }
 
     /**
      * Stops synchronizer (Sets it to false).
      */
-    public void stopRunning() {
+    public synchronized void stopRunning() {
+        notifyAll();
         running = false;
     }
 
