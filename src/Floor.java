@@ -1,7 +1,20 @@
+/**
+ * The floor class is responsbile or sending requests to the synchronizer by storing an array list
+ * of request objects
+ *
+ * @author Aranesh Athavan
+ * @version iteration1
+ * @date Feb 2, 2024
+ */
+
 import java.io.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+
+
+ */
 public class Floor extends Thread{
     public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
