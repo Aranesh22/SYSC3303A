@@ -67,10 +67,9 @@ class SchedulerTest {
         }
 
         void addRequest(Request request) {
-            // Logic to add request to internal list, if needed
             // For this subclass, we simulate that a request is always available
         }
 
-        // Implement other methods as needed
+
     }
 }
