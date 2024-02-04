@@ -11,7 +11,7 @@ import java.util.Objects;
  * @date February 2nd, 2024
  * @version iteration1
  */
-public class Scheduler implements Runnable {
+public class Scheduler extends Thread {
 
     // Fields
     private final Synchronizer synchronizer;
