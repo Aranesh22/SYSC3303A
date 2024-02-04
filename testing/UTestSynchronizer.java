@@ -44,10 +44,7 @@ public class UTestSynchronizer {
         // Create synchronizer
         Synchronizer synchronizer = new Synchronizer();
 
-        synchronizer.setRunning(false);
+        synchronizer.stopRunning();
         assertFalse(synchronizer.isRunning());
-
-        synchronizer.setRunning(true);
-        assertTrue(synchronizer.isRunning());
     }
 }
