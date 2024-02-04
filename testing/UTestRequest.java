@@ -1,5 +1,6 @@
 /**
  * Request Class Unit Tests
+ * @author Lindsay Dickson, 101160876
  * @version Iteration1
  * @date February 2, 2024
  */
