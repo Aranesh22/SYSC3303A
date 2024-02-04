@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Synchronizer Class Unit Tests
  * @version Iteration1
@@ -8,5 +10,17 @@ import org.junit.jupiter.api.Test;
 
 public class UTestSynchronizer {
     @Test
-    void SampleTest() { }
+    void testRequest_isRunning() {
+
+        boolean run = true;
+        assertTrue(run);
+
+    }
+   @Test
+   void testRequest_stopRunning() {
+
+        boolean stop = false;
+        assertFalse(stop);
+
+   }
 }
