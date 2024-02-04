@@ -12,21 +12,40 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
-
-
+ * The floor class is reposnible for creating requests and once it is called upon
+ * it then stores the data in the Synchronized object that was created
+ *
+ *  @author Aranesh Athavan
+ *  @version iteration1
+ *  @date Feb 2, 2024
  */
+
+
 public class Floor extends Thread{
+
+    /**
+     * Initlizating static data to be used through out the program
+     */
     public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
     public final static int DEFAULT_MAX_FLOOR = 7;
 
+    /**
+     * Creating an instance of Synchfronizer and a list to contain the requests
+     */
     private Synchronizer syncFloor;
     ArrayList<Request> reqList = new ArrayList<>();
 
+    /**
+     * Takes in @param sync to initalize the syncrhonnizer to be used for sending a putrequest
+     */
     public Floor(Synchronizer sync) {
         this.syncFloor = sync;
     }
 
+    /**
+     * The run function is used to create requests objects from the csv data
+     */
     public synchronized void run() {
         try {
             parseReqFile();
@@ -45,6 +64,10 @@ public class Floor extends Thread{
         System.out.println("Floor: Has exited");
     }
 
+    /**
+     *
+     * This function is reading through the data in csv and storing it in a request file
+     */
     public void parseReqFile() throws FileNotFoundException {
 
         String path = "data/data.csv";
