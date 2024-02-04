@@ -11,6 +11,34 @@ This project simulates an elevator control system using a real-time multi-thread
 🏅 Lindsay Dickson, 101160876<br>
 🏅 Harishan Amutheesan, 101154757<br>
 
+## Breakdown of Responsibilities (Iteration 1)
+* Yehan De Silva
+  * Developed Elevator class
+  * Code integration
+  * UML class diagram
+ 
+* Pathum Danthanarayana
+  * Developed Synchronizer class
+  * Developed JUnit tests for Synchronizer class
+  * UML class diagram
+  * README file
+
+* Aranesh Athavan
+  * Developed Floor class
+  * Developed JUnit tests for Floor class
+
+* Lindsay Dickson
+  * Developed Main class and Request class
+  * Developed JUnit tests for Request class, Elevator class
+  * UML Sequence diagram
+ 
+* Harishan Amutheesan
+  * Developed Scheduler class
+  * Developed JUnit tests for Scheduler class
+  * UML class diagram
+  * README file
+ 
+
 ## Iteration 0
 
 In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
@@ -60,6 +88,7 @@ These design decisions form the initial structure of our elevator control system
 
 ### Testing
 * To ensure the reliability of our system, we used JUnit testing to test each class and subsystem.
+* We only focused on testing the key functionalities of each subsystem (i.e., whether the subsystem is able to produce/consume, its state is correctly updated), as it is too difficult to test thread-related aspects like synchronization with JUnit tests.
 
 ### Code Readability
 * We value writing clean, readable code and providing documentation. Each class and method includes JavaDoc comments to explain its purpose, inputs, and outputs. This help show our current understanding of the system and ensures that professors and TAs can easily understand and grade the system.
