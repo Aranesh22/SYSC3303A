@@ -27,16 +27,7 @@ public class StateMachine {
      */
     public void setState(String stateName){
         this.currentState = states.get(stateName);
-        states.put("SampleState", new SampleState());
     }
 }
 
 
-/**
- * CONCRETE IMPLEMENTATIONS
- */
-class SampleState implements ElevatorState{
-
-
-
-}
