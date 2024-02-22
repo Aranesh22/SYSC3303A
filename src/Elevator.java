@@ -1,3 +1,6 @@
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Elevator thread class models a traction elevator used to move people around in a building.
  * It realistically models an elevator by replicating the various timing aspects of an elevator that were measured in
@@ -6,12 +9,14 @@
  * of all floors it passes by or arrives at.
  *
  * @author Yehan De Silva
- * @version iteration1
- * @date Feb 2, 2024
+ * @version iteration1, iteration2
+ * @date Feb 2, 2024 / Feb 21, 2024
+ *
  */
 
 public class Elevator extends Thread {
-
+    private Map<String, ElevatorState> states;
+    private ElevatorState currentState;
     // Fields
     private final Synchronizer synchronizer;
     private final int id;
@@ -30,6 +35,11 @@ public class Elevator extends Thread {
      */
     public Elevator(Synchronizer synchronizer) {
         this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, Floor.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
+        this.states = new HashMap<>();
+        addState("StationaryDoorsClosed", new StationaryDoorsClosed());
+        addState("StationaryDoorsOpen", new StationaryDoorsOpen());
+        addState("MovingDoorsClosed", new MovingDoorsClosed());
+        setState("StationaryDoorsClosed");
     }
 
     /**
@@ -48,6 +58,12 @@ public class Elevator extends Thread {
         this.velocity = velocity;
         this.floorHeight = floorHeight;
         this.loadUnloadTime = loadUnloadTime;
+        this.states = new HashMap<>();
+        addState("StationaryDoorsClosed", new StationaryDoorsClosed());
+        addState("StationaryDoorsOpen", new StationaryDoorsOpen());
+        addState("MovingDoorsClosed", new MovingDoorsClosed());
+        setState("StationaryDoorsClosed");
+
     }
 
     /**
@@ -72,11 +88,17 @@ public class Elevator extends Thread {
     public void goToDestinationFloor(int destinationFloor) {
         // Determine if elevator is going up or down and go to each floor in between.
         boolean movingUp = destinationFloor >= this.curFloor;
+        //update state
+        receiveRequest();
         while (this.curFloor != destinationFloor) {
             this.goToFloor(((movingUp)? (this.curFloor + 1 ): (this.curFloor - 1)));
         }
+        //Update the state
+
         // Once we arrive at destination, load/unload the elevator.
+        arriveAtFloor();
         this.loadUnloadElevator();
+
     }
 
     /**
@@ -99,15 +121,18 @@ public class Elevator extends Thread {
     /**
      * Simulates an elevator loading/unloading.
      * (Doors opening -> Doors closing).
+     * Implementation of the tExp timer for StationaryDoorsOpen state
      */
     public void loadUnloadElevator() {
         System.out.println(this + ": Opening doors");
         // Sleep for the time it takes to load/unload elevator.
         try {
             Thread.sleep((long) this.loadUnloadTime);
+            timerExpired();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
         System.out.println(this + ": Closing doors");
     }
 
@@ -127,4 +152,52 @@ public class Elevator extends Thread {
     public String toString() {
         return "Elevator " + this.id;
     }
-}
+
+
+
+//---------Iteration 2 Code
+    /**
+     * Adds a state to the state machine.
+     *
+     * @param stateName The name of the state.
+     * @param state     The state to be added.
+     */
+    public void addState(String stateName, ElevatorState state) {
+        states.put(stateName, state);
+    }
+
+    /**
+     * Sets the current state of the state machine
+     * @param stateName - Name of the state to set
+     */
+    public void setState(String stateName){
+        System.out.println("[STATE] "+stateName);
+        this.currentState = states.get(stateName);
+    }
+
+
+    /**
+     * simulates the event of the Elevator door timer expiring - signalling the doors will close
+     */
+    public void timerExpired(){
+        currentState.timerExpired(this);
+    }
+
+    /**
+     * simulates the event of the Elevator recieving a request from the scheduler
+     */
+    public void receiveRequest(){
+        currentState.receiveRequest(this);
+    }
+
+    /**
+     * simulates the event of the elevator arriving at the requested floor
+     */
+    public void arriveAtFloor(){
+        currentState.arriveAtFloor(this);
+    }
+
+
+
+
+}//end class
