@@ -1,4 +1,6 @@
 import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Scheduler class manages elevator requests and coordinates
@@ -8,13 +10,15 @@ import java.util.Objects;
  *
  * @author Harishan Amutheesan, 101154757
  * @author Yehan De Silva, 101185388
- * @date February 2nd, 2024
- * @version iteration1
+ * @date February 2nd, 2024 / February 22nd, 2024
+ * @version iteration1, iteration2
  */
 public class Scheduler extends Thread {
 
     // Fields
     private final Synchronizer synchronizer;
+    private Map<String, SchedulerState> states;
+    private SchedulerState currentState;
 
     /**
      * Constructor for Scheduler
@@ -23,6 +27,11 @@ public class Scheduler extends Thread {
      */
     public Scheduler(Synchronizer synchronizer) {
         this.synchronizer = synchronizer;
+        this.states = new HashMap<>();
+        addState("WaitingForFloorRequest", new WaitingForFloorRequest());
+        addState("SendingElevatorToStartingFloor", new SendingElevatorToStartingFloor());
+        addState("SendingElevatorToDestinationFloor", new SendingElevatorToDestinationFloor());
+        setState("WaitingForFloorRequest");
     }
 
     /**
@@ -53,6 +62,8 @@ public class Scheduler extends Thread {
         this.handleElevatorStatus(request.getStartFloor());
         this.sendElevatorToFloor(request.getDestinationFloor());
         this.handleElevatorStatus(request.getDestinationFloor());
+        this.receivedFloorRequest(); //State transition
+
     }
 
     /**
@@ -95,6 +106,7 @@ public class Scheduler extends Thread {
     public void sendElevatorToFloor(int floor) {
         synchronizer.putDestinationFloor(floor);
         System.out.println("Scheduler: Dispatched elevator to floor: " + floor);
+        this.receivedElevatorStatus(); //State transition
     }
 
     /**
@@ -109,5 +121,53 @@ public class Scheduler extends Thread {
             synchronizer.putCurrentFloor(elevatorStatus);
         } while (elevatorStatus != targetFloor);
         System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
+        this.endReceived(); //State transition
+    }
+
+//-----------------------------------------------Iteration 2--------------------------------------------//
+    /**
+     * Adds a new state to the state machine.
+     * This method is used for the state machine with all possible states.
+     *
+     * @param stateName The name of the state. This is used as the key in the map.
+     * @param state     The state to be added. This is the value associated with the key in the map.
+     */
+    public void addState(String stateName, SchedulerState state) {
+        states.put(stateName, state);
+    }
+
+    /**
+     * Changes the current state of the state machine.
+     * This method is used to transition from one state to another in response to an event.
+     *
+     * @param stateName The name of the state to transition to. This should match a key in the map.
+     */
+    public void setState(String stateName){
+        System.out.println("[STATE] "+stateName);
+        this.currentState = states.get(stateName);
+    }
+
+    /**
+     * Handles the event of receiving an end signal from the floor request.
+     * This method is used to delegate the handling of the endReceived event to the current state.
+     */
+    public void endReceived(){
+        currentState.endReceived(this);
+    }
+
+    /**
+     * Handles the event of receiving a new floor request from a floor.
+     * This method is used to delegate the handling of the receivedFloorRequest event to the current state.
+     */
+    public void receivedFloorRequest(){
+        currentState.receivedFloorRequest(this);
+    }
+
+    /**
+     * Handles the event of receiving an elevator status update.
+     * This method is used to delegate the handling of the receivedElevatorStatus event to the current state.
+     */
+    public void receivedElevatorStatus(){
+        currentState.receivedElevatorStatus(this);
     }
 }
