@@ -57,12 +57,16 @@ public class Scheduler extends Thread {
             this.synchronizer.stopRunning();
             return;
         }
+
         System.out.println("Scheduler: Received request: " + request);
+
         this.sendElevatorToFloor(request.getStartFloor());
         this.handleElevatorStatus(request.getStartFloor());
+        this.receivedElevatorStatus(); //State transition
         this.sendElevatorToFloor(request.getDestinationFloor());
         this.handleElevatorStatus(request.getDestinationFloor());
-        this.receivedFloorRequest(); //State transition
+        this.endReceived(); //State transition
+
 
     }
 
@@ -77,9 +81,11 @@ public class Scheduler extends Thread {
             floorRequest = synchronizer.getRequest();
             // Signifies no more requests
             if (Objects.equals(floorRequest.getTime(), "END_REQUEST")) {
+
                 return null;
             }
             else if (isValidFloorRequest(floorRequest)) {
+                this.receivedFloorRequest(); //State transition
                 break;
             } else {
                 System.out.println("Scheduler: Invalid floor request - " + floorRequest);
@@ -106,7 +112,7 @@ public class Scheduler extends Thread {
     public void sendElevatorToFloor(int floor) {
         synchronizer.putDestinationFloor(floor);
         System.out.println("Scheduler: Dispatched elevator to floor: " + floor);
-        this.receivedElevatorStatus(); //State transition
+
     }
 
     /**
@@ -120,8 +126,10 @@ public class Scheduler extends Thread {
             elevatorStatus = synchronizer.getElevatorStatus();
             synchronizer.putCurrentFloor(elevatorStatus);
         } while (elevatorStatus != targetFloor);
+
         System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
-        this.endReceived(); //State transition
+        endReceived(); //State transition
+
     }
 
 //-----------------------------------------------Iteration 2--------------------------------------------//
@@ -143,7 +151,7 @@ public class Scheduler extends Thread {
      * @param stateName The name of the state to transition to. This should match a key in the map.
      */
     public void setState(String stateName){
-        System.out.println("[STATE] "+stateName);
+        System.out.println("[Scheduler-STATE] " + stateName);
         this.currentState = states.get(stateName);
     }
 
