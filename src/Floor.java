@@ -70,7 +70,7 @@ public class Floor extends Thread{
      */
     public void parseReqFile() throws FileNotFoundException {
 
-        String path = "/data/data.csv";
+        String path = "data/data.csv";
         String line;
         try {
 

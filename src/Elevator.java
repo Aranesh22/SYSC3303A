@@ -35,7 +35,6 @@ public class Elevator extends Thread {
      */
     public Elevator(Synchronizer synchronizer) {
         this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, Floor.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
-        this.states = new HashMap<>();
     }
 
     /**
@@ -55,7 +54,7 @@ public class Elevator extends Thread {
         this.floorHeight = floorHeight;
         this.loadUnloadTime = loadUnloadTime;
         this.states = new HashMap<>();
-        initializeStates();
+        this.initializeStates();
     }
 
     /**
@@ -65,7 +64,7 @@ public class Elevator extends Thread {
         addState("StationaryDoorsClosed", new StationaryDoorsClosed());
         addState("StationaryDoorsOpen", new StationaryDoorsOpen());
         addState("MovingDoorsClosed", new MovingDoorsClosed());
-        setState("StationaryDoorsClosed");
+        this.setState("StationaryDoorsClosed");
     }
 
     /**

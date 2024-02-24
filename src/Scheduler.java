@@ -163,6 +163,13 @@ public class Scheduler extends Thread {
     }
 
     /**
+     * @return the current state of the Scheduler.
+     */
+    public SchedulerState getCurrentState() {
+        return currentState;
+    }
+
+    /**
      * Handles the event of receiving an end signal from the floor request.
      * This method is used to delegate the handling of the endReceived event to the current state.
      */
