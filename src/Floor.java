@@ -54,8 +54,8 @@ public class Floor extends Thread{
         }
         for (int i = 0; i < reqList.size(); i++) {
 
-            Request obj = reqList.get(i);
-            syncFloor.putRequest(obj);
+            Request request = reqList.get(i);
+            syncFloor.putRequest(request);
 
         }
         while (syncFloor.isRunning()) {
