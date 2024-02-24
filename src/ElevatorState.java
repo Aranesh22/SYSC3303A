@@ -11,19 +11,19 @@
 interface ElevatorState {
     /**
      * Handles the event of receiving a new request from Scheduler
-     * @param context
+     * @param context The Elevator context in which the state transition occurs.
      */
     void receiveRequest(Elevator context);
 
     /**
      * Handles the event of when the elevator door timer expires
-     * @param context
+     * @param context The Elevator context in which the state transition occurs.
      */
     void timerExpired(Elevator context);
 
     /**
      * Handles the event of when the elevator reaches its destination floor
-     * @param context
+     * @param context The Elevator context in which the state transition occurs.
      */
     void  arriveAtFloor(Elevator context);
 }
@@ -35,7 +35,6 @@ interface ElevatorState {
 class StationaryDoorsClosed implements  ElevatorState{
     /**
      * Event conditional on curFloor != desFloor
-     * @param context
      */
     @Override
     public void receiveRequest(Elevator context) {
@@ -55,7 +54,6 @@ class StationaryDoorsOpen implements ElevatorState{
 
     /**
      * Event Conditional on the expiry of the timer for elevator
-     * @param context
      */
     @Override
     public void timerExpired(Elevator context) {
@@ -77,7 +75,6 @@ class MovingDoorsClosed implements ElevatorState{
 
     /**
      * Event conditional on curFloor == desFloor
-     * @param context
      */
     @Override
     public void arriveAtFloor(Elevator context) {

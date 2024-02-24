@@ -36,10 +36,6 @@ public class Elevator extends Thread {
     public Elevator(Synchronizer synchronizer) {
         this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, Floor.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
         this.states = new HashMap<>();
-        addState("StationaryDoorsClosed", new StationaryDoorsClosed());
-        addState("StationaryDoorsOpen", new StationaryDoorsOpen());
-        addState("MovingDoorsClosed", new MovingDoorsClosed());
-        setState("StationaryDoorsClosed");
     }
 
     /**
@@ -59,11 +55,17 @@ public class Elevator extends Thread {
         this.floorHeight = floorHeight;
         this.loadUnloadTime = loadUnloadTime;
         this.states = new HashMap<>();
+        initializeStates();
+    }
+
+    /**
+     * Initializes the states for the Elevator.
+     */
+    private void initializeStates() {
         addState("StationaryDoorsClosed", new StationaryDoorsClosed());
         addState("StationaryDoorsOpen", new StationaryDoorsOpen());
         addState("MovingDoorsClosed", new MovingDoorsClosed());
         setState("StationaryDoorsClosed");
-
     }
 
     /**
@@ -171,7 +173,7 @@ public class Elevator extends Thread {
      * @param stateName - Name of the state to set
      */
     public void setState(String stateName){
-        System.out.println("[STATE] "+stateName);
+        System.out.println("[Elevator-STATE] "+stateName);
         this.currentState = states.get(stateName);
     }
 

@@ -28,6 +28,13 @@ public class Scheduler extends Thread {
     public Scheduler(Synchronizer synchronizer) {
         this.synchronizer = synchronizer;
         this.states = new HashMap<>();
+        initializeStates();
+    }
+
+    /**
+     * Initializes the states for the Scheduler.
+     */
+    private void initializeStates() {
         addState("WaitingForFloorRequest", new WaitingForFloorRequest());
         addState("SendingElevatorToStartingFloor", new SendingElevatorToStartingFloor());
         addState("SendingElevatorToDestinationFloor", new SendingElevatorToDestinationFloor());
