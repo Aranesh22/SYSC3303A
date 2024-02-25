@@ -62,19 +62,17 @@ public class Scheduler extends Thread {
     private void processRequest(Request request) {
         if (request == null) {
             this.synchronizer.stopRunning();
+            this.endReceived(); //State transition
             return;
         }
 
         System.out.println("Scheduler: Received request: " + request);
+        this.receivedFloorRequest(request); //State transition
 
         this.sendElevatorToFloor(request.getStartFloor());
         this.handleElevatorStatus(request.getStartFloor());
-        this.receivedElevatorStatus(); //State transition
         this.sendElevatorToFloor(request.getDestinationFloor());
         this.handleElevatorStatus(request.getDestinationFloor());
-        this.endReceived(); //State transition
-
-
     }
 
     /**
@@ -88,11 +86,9 @@ public class Scheduler extends Thread {
             floorRequest = synchronizer.getRequest();
             // Signifies no more requests
             if (Objects.equals(floorRequest.getTime(), "END_REQUEST")) {
-
                 return null;
             }
             else if (isValidFloorRequest(floorRequest)) {
-                this.receivedFloorRequest(); //State transition
                 break;
             } else {
                 System.out.println("Scheduler: Invalid floor request - " + floorRequest);
@@ -135,8 +131,7 @@ public class Scheduler extends Thread {
         } while (elevatorStatus != targetFloor);
 
         System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
-        endReceived(); //State transition
-
+        this.receivedElevatorStatus(); //State transition
     }
 
 //-----------------------------------------------Iteration 2--------------------------------------------//
@@ -163,6 +158,13 @@ public class Scheduler extends Thread {
     }
 
     /**
+     * @return the current state of the Scheduler.
+     */
+    public SchedulerState getCurrentState() {
+        return currentState;
+    }
+
+    /**
      * Handles the event of receiving an end signal from the floor request.
      * This method is used to delegate the handling of the endReceived event to the current state.
      */
@@ -173,9 +175,13 @@ public class Scheduler extends Thread {
     /**
      * Handles the event of receiving a new floor request from a floor.
      * This method is used to delegate the handling of the receivedFloorRequest event to the current state.
+     *
+     * @param request Request received
      */
-    public void receivedFloorRequest(){
-        currentState.receivedFloorRequest(this);
+    public void receivedFloorRequest(Request request) {
+        if (request != null) {
+            currentState.receivedFloorRequest(this);
+        }
     }
 
     /**

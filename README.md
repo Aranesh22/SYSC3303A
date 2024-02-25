@@ -11,6 +11,29 @@ This project simulates an elevator control system using a real-time multi-thread
 🏅 Lindsay Dickson, 101160876<br>
 🏅 Harishan Amutheesan, 101154757<br>
 
+## Breakdown of Responsibilities (Iteration 2)
+* Yehan De Silva
+  * Broke down possible states, events and actions 
+  * Constructed Elevator & Scheduler State Diagrams
+  * Updated README file
+ 
+* Pathum Danthanarayana
+  * UML sequence diagram + UML class diagram
+  * Developed JUnit tests for SchedulerState classes
+
+* Aranesh Athavan
+  * Planned approach on how to implement state design pattern in the project 
+  * UML sequence diagram + UML class diagram
+  * Developed JUnit tests for ElevatorState classes
+
+* Lindsay Dickson
+  * Planned approach on how to implement state design pattern in the project 
+  * Developped ElevatorState interface + inner state classes
+ 
+* Harishan Amutheesan
+  * Planned approach on how to implement state design pattern in the project 
+  * Developped SchedulerState interface + inner state classes
+ 
 ## Breakdown of Responsibilities (Iteration 1)
 * Yehan De Silva
   * Developed Elevator class
@@ -45,7 +68,8 @@ In Iteration 0, we focused on recording the systems basic functions for initial 
 
 ## Iteration 1
 
-Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the Floor, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.
+Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the Floor, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.  
+[Iteration 1 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%201)
 
 ### 🏢 Floor Subsystem
 
@@ -67,6 +91,19 @@ Iteration 1 implements Iteration 0 calculations by introducing the subsystems th
 
 * The Request class encapsulates the data related to a user's request for elevator service, including the starting floor, destination floor, and direction.
 
+## Iteration 2
+
+Iteration 2 builds upon iteration 1 by refactoring the project to follow the state design pattern. This iteration introduces the ElevatorState and SchedulerState files.  
+[Iteration 2 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%202)
+
+
+### 🛗Elevator State
+
+* The ElevatorState file consists of inner ElevatorState classes that models each possible Elevator State. Each of the inner classes implements the ElevatorState interface which outlines all possible Elevator Events.
+
+### ⏰ Scheduler State
+
+* The SchedulerState file consists of inner SchedulerState classes that models each possible Scheduler State. Each of the inner classes implements the SchedulerState interface which outlines all possible Scheduler Events.
 
 ## Design
 These design decisions form the initial structure of our elevator control system. With each iteration, we will refine our system to fit to specific iteration requirements. Here are the key design decisions we made:
