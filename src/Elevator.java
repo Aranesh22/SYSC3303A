@@ -176,6 +176,11 @@ public class Elevator extends Thread {
         this.currentState = states.get(stateName);
     }
 
+    public ElevatorState getCurrentState() {
+
+        return this.currentState;
+    }
+
 
     /**
      * simulates the event of the Elevator door timer expiring - signalling the doors will close

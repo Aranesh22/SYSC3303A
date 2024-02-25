@@ -26,8 +26,9 @@ interface ElevatorState {
      * @param context The Elevator context in which the state transition occurs.
      */
     void  arriveAtFloor(Elevator context);
-}
 
+     String getSTATENAME() ;
+}
 
 /**
  * Concrete state class representing when an elevator is stationary and its doors are closed
@@ -42,6 +43,11 @@ class StationaryDoorsClosed implements  ElevatorState{
     }
     public void timerExpired(Elevator context){ /*Timer is not set*/ }
     public void arriveAtFloor(Elevator context){ /*Elevator has not arrived*/ }
+    private final String STATENAME = "StationaryDoorsClosed";
+    public String getSTATENAME() {
+
+        return STATENAME;
+    }
 }
 
 /**
@@ -61,6 +67,12 @@ class StationaryDoorsOpen implements ElevatorState{
     }
     @Override
     public void arriveAtFloor(Elevator context) { /* Elevator is Stationary and doors are open*/ }
+
+    private final String STATENAME = "StationaryDoorsOpen";
+    public String getSTATENAME() {
+
+        return STATENAME;
+    }
 }
 
 /**
@@ -79,6 +91,12 @@ class MovingDoorsClosed implements ElevatorState{
     @Override
     public void arriveAtFloor(Elevator context) {
         context.setState("StationaryDoorsOpen");
+    }
+
+    private final String STATENAME = "MovingDoorsClosed";
+    public String getSTATENAME() {
+
+        return STATENAME;
     }
 
 }
