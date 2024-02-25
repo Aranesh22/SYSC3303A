@@ -29,6 +29,11 @@ public interface SchedulerState {
      * @param context The Scheduler context in which the state transition occurs.
      */
     void endReceived(Scheduler context);
+
+    /**
+     * Get the name of the state
+     */
+    String getStateName();
 }
 
 /**
@@ -36,6 +41,7 @@ public interface SchedulerState {
  * In this state, the Scheduler can transition to the SendingElevatorToStartingFloor state when a valid floor request is received.
  */
 class WaitingForFloorRequest implements SchedulerState {
+    private final String stateName = "WaitingForFloorRequest";
     @Override
     public void receivedFloorRequest(Scheduler context) {
         // Transition to the SendingElevatorToStartingFloor state when a floor request is received.
@@ -51,6 +57,13 @@ class WaitingForFloorRequest implements SchedulerState {
     public void endReceived(Scheduler context) {
         // Final State is reached when an end signal is received in this state.
     }
+
+    /**
+     * @return name of state
+     */
+    public String getStateName() {
+        return stateName;
+    }
 }
 
 /**
@@ -58,6 +71,7 @@ class WaitingForFloorRequest implements SchedulerState {
  * In this state, the Scheduler can transition to the SendingElevatorToDestinationFloor state when the elevator reaches the starting floor.
  */
 class SendingElevatorToStartingFloor implements SchedulerState {
+    private final String stateName = "SendingElevatorToStartingFloor";
     @Override
     public void receivedFloorRequest(Scheduler context) {
         // No state transition is needed when a floor request is received in this state.
@@ -73,6 +87,13 @@ class SendingElevatorToStartingFloor implements SchedulerState {
     public void endReceived(Scheduler context) {
         // No state transition is needed when an end signal is received in this state.
     }
+
+    /**
+     * @return the name of the state.
+     */
+    public String getStateName() {
+        return stateName;
+    }
 }
 
 /**
@@ -80,6 +101,7 @@ class SendingElevatorToStartingFloor implements SchedulerState {
  * In this state, the Scheduler can transition to the WaitingForFloorRequest state when the elevator reaches the destination floor.
  */
 class SendingElevatorToDestinationFloor implements SchedulerState {
+    private final String stateName = "SendingElevatorToDestinationFloor";
     @Override
     public void receivedFloorRequest(Scheduler context) {
         // No state transition is needed when a floor request is received in this state.
@@ -94,5 +116,12 @@ class SendingElevatorToDestinationFloor implements SchedulerState {
     @Override
     public void endReceived(Scheduler context) {
         // No state transition is needed when an end signal is received in this state.
+    }
+
+    /**
+     * @return the name of the state.
+     */
+    public String getStateName() {
+        return stateName;
     }
 }

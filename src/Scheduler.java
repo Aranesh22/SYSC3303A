@@ -161,7 +161,7 @@ public class Scheduler extends Thread {
      * @return the current state of the Scheduler.
      */
     public SchedulerState getCurrentState() {
-        return currentState;
+        return this.currentState;
     }
 
     /**
