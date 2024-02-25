@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SchedulerStateTest {
 
     @Test
-    void testSynchronizerSetState() {
+    void testSchedulerSetState() {
         Synchronizer synchronizer = new Synchronizer();
         Scheduler scheduler = new Scheduler(synchronizer);
 
@@ -21,7 +21,7 @@ public class SchedulerStateTest {
     }
 
     @Test
-    void testSynchronizerInitialState() {
+    void testSchedulerInitialState() {
         Synchronizer synchronizer = new Synchronizer();
         Scheduler scheduler = new Scheduler(synchronizer);
 
@@ -30,10 +30,11 @@ public class SchedulerStateTest {
     }
 
     @Test
-    void testSynchronizerStateTransitions() {
+    void testSchedulerStateTransitions() {
         Synchronizer synchronizer = new Synchronizer();
         Scheduler scheduler = new Scheduler(synchronizer);
 
+        // Test if states transition as expected
         scheduler.receivedFloorRequest(new Request());
         assertEquals(scheduler.getCurrentState().getStateName(), "SendingElevatorToStartingFloor");
 
