@@ -1,9 +1,31 @@
+/**
+ * SchedulerState is an interface that defines the state of the Scheduler.
+ * It has a single method handleState that is implemented by the classes that implement this interface.
+ * @author Harishan Amutheesan, 101154757
+ * @version Iteration2
+ * @date Feb 22, 2024
+ *
+ */
 public interface SchedulerState {
+    /**
+     * This method handles the state of the Scheduler.
+     * @param scheduler The Scheduler whose state is being handled.
+     */
     void handleState(Scheduler scheduler);
-    boolean isValidRequest(Request request);
-    void sendElevatorToFloor(Scheduler scheduler, int floor);
 }
+
+/**
+ * WaitingForFloorRequest is a class that implements the SchedulerState interface.
+ * It represents the state where the Scheduler is waiting for a floor request.
+ */
 class WaitingForFloorRequest implements SchedulerState {
+    /**
+     * This method handles the state of the Scheduler when it is waiting for a floor request.
+     * It gets the request from the Synchronizer and checks if it is valid.
+     * If the request is valid, it sets the current request in the Scheduler and changes its state to SendingElevatorToStartingFloor.
+     * If the request is not valid, it skips the request.
+     * @param scheduler The Scheduler whose state is being handled.
+     */
     @Override
     public void handleState(Scheduler scheduler) {
         Request request = scheduler.getSynchronizer().getRequest();
@@ -14,68 +36,62 @@ class WaitingForFloorRequest implements SchedulerState {
         if (isValidRequest(request)) {
             System.out.println("Scheduler: Processing valid request " + request);
             scheduler.setCurrentRequest(request);
-
             scheduler.setState(new SendingElevatorToStartingFloor());
         } else {
             System.out.println("Scheduler: Invalid request skipped " + request);
         }
     }
 
-    @Override
-    public boolean isValidRequest(Request request) {
+    /**
+     * This method checks if a request is valid.
+     * A request is valid if the start floor and the destination floor are within the default floor range.
+     * @param request The request to be checked.
+     * @return true if the request is valid, false otherwise.
+     */
+    private boolean isValidRequest(Request request) {
         return request.getStartFloor() >= Floor.DEFAULT_MIN_FLOOR &&
                 request.getStartFloor() <= Floor.DEFAULT_MAX_FLOOR &&
                 request.getDestinationFloor() >= Floor.DEFAULT_MIN_FLOOR &&
                 request.getDestinationFloor() <= Floor.DEFAULT_MAX_FLOOR;
     }
-
-    @Override
-    public void sendElevatorToFloor(Scheduler scheduler, int floor) {
-        // This method is implemented to adhere to the interface but not used in this state.
-    }
 }
 
+/**
+ * SendingElevatorToStartingFloor is a class that implements the SchedulerState interface.
+ * It represents the state where the Scheduler is sending the elevator to the starting floor.
+ */
 class SendingElevatorToStartingFloor implements SchedulerState {
+    /**
+     * This method handles the state of the Scheduler when it is sending the elevator to the starting floor.
+     * It gets the current request from the Scheduler, sends the elevator to the start floor, and changes its state to SendingElevatorToDestinationFloor.
+     * @param scheduler The Scheduler whose state is being handled.
+     */
     @Override
     public void handleState(Scheduler scheduler) {
-        sendElevatorToFloor(scheduler, scheduler.getCurrentRequest().getStartFloor());
-    }
-
-    @Override
-    public boolean isValidRequest(Request request) {
-        // Not used in this state, but required by the interface.
-        return true;
-    }
-
-    @Override
-    public void sendElevatorToFloor(Scheduler scheduler, int floor) {
-        System.out.println("Scheduler: Elevator sent to start floor " + floor);
-        scheduler.getSynchronizer().putDestinationFloor(floor);
-        scheduler.handleElevatorStatus(floor);
+        Request currentRequest = scheduler.getCurrentRequest();
+        System.out.println("Scheduler: Elevator sent to start floor " + currentRequest.getStartFloor());
+        scheduler.getSynchronizer().putDestinationFloor(currentRequest.getStartFloor());
+        scheduler.handleElevatorStatus(currentRequest.getStartFloor());
         scheduler.setState(new SendingElevatorToDestinationFloor());
     }
 }
 
+/**
+ * SendingElevatorToDestinationFloor is a class that implements the SchedulerState interface.
+ * It represents the state where the Scheduler is sending the elevator to the destination floor.
+ */
 class SendingElevatorToDestinationFloor implements SchedulerState {
+    /**
+     * This method handles the state of the Scheduler when it is sending the elevator to the destination floor.
+     * It gets the current request from the Scheduler, sends the elevator to the destination floor, and changes its state back to WaitingForFloorRequest.
+     * @param scheduler The Scheduler whose state is being handled.
+     */
     @Override
     public void handleState(Scheduler scheduler) {
-        sendElevatorToFloor(scheduler, scheduler.getCurrentRequest().getDestinationFloor());
-    }
-
-    @Override
-    public boolean isValidRequest(Request request) {
-        // Not used in this state, but required by the interface.
-        return true;
-    }
-
-    @Override
-    public void sendElevatorToFloor(Scheduler scheduler, int floor) {
-        System.out.println("Scheduler: Elevator sent to destination floor " + floor);
-        scheduler.getSynchronizer().putDestinationFloor(floor);
-//        scheduler.handleElevatorStatus(floor);
-        // Transition back to waiting state or handle completion logic.
-        scheduler.setState(new WaitingForFloorRequest());
+        Request currentRequest = scheduler.getCurrentRequest();
+        System.out.println("Scheduler: Elevator sent to destination floor " + currentRequest.getDestinationFloor());
+        scheduler.getSynchronizer().putDestinationFloor(currentRequest.getDestinationFloor());
+        scheduler.handleElevatorStatus(currentRequest.getDestinationFloor());
+        scheduler.setState(new WaitingForFloorRequest()); // Transition back to waiting state or handle completion logic
     }
 }
-
-
