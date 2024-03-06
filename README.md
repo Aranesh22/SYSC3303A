@@ -47,8 +47,8 @@ This project simulates an elevator control system using a real-time multi-thread
   * README file
 
 * Aranesh Athavan
-  * Developed Floor class
-  * Developed JUnit tests for Floor class
+  * Developed FloorRequestSimulator class
+  * Developed JUnit tests for FloorRequestSimulator class
 
 * Lindsay Dickson
   * Developed Main class and FloorRequest class
@@ -68,20 +68,20 @@ In Iteration 0, we focused on recording the systems basic functions for initial 
 
 ## Iteration 1
 
-Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the Floor, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.  
+Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the FloorRequestSimulator, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.  
 [Iteration 1 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%201)
 
-### 🏢 Floor Subsystem
+### 🏢 FloorRequestSimulator Subsystem
 
-* The Floor subsystem is responsible for simulating the floor-level operations of the elevator system. It handles the input from users on each floor, generating requests for elevator service.
+* The FloorRequestSimulator subsystem is responsible for simulating the floor-level operations of the elevator system. It handles the input from users on each floor, generating requests for elevator service.
 
 ### 🛗 Elevator Subsystem
 
-* The Elevator subsystem simulates the behavior of individual elevator cars. It responds to requests from the Floor subsystem, picking up and transporting users to their desired floors.
+* The Elevator subsystem simulates the behavior of individual elevator cars. It responds to requests from the FloorRequestSimulator subsystem, picking up and transporting users to their desired floors.
 
 ### ⏰ Scheduler Subsystem
 
-* The Scheduler subsystem acts as the central decision-making unit. It receives requests from the Floor subsystem, then process and sends them to the appropriate Elevator subsystem.
+* The Scheduler subsystem acts as the central decision-making unit. It receives requests from the FloorRequestSimulator subsystem, then process and sends them to the appropriate Elevator subsystem.
 
 ### ⌛ Synchronizer Class
 

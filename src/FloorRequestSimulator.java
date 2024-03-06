@@ -12,34 +12,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * The floor class is reposnible for creating requests and once it is called upon
+ * The floor class is responsible for creating requests and once it is called upon
  * it then stores the data in the Synchronized object that was created
  *
  *  @author Aranesh Athavan
- *  @version iteration1
+ *  @author Yehan De Silva (101185388)
+ *  @version iteration3
  *  @date Feb 2, 2024
  */
 
 
-public class Floor extends Thread{
+public class FloorRequestSimulator extends Thread {
 
     /**
-     * Initlizating static data to be used through out the program
+     * Initializing static data to be used through out the program
      */
     public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
     public final static int DEFAULT_MAX_FLOOR = 7;
 
     /**
-     * Creating an instance of Synchfronizer and a list to contain the requests
+     * Creating an instance of Synchronizer and a list to contain the requests
      */
-    private Synchronizer syncFloor;
+    private final Synchronizer syncFloor;
     ArrayList<FloorRequest> reqList = new ArrayList<>();
 
     /**
-     * Takes in @param sync to initalize the syncrhonnizer to be used for sending a putrequest
+     * Takes in @param sync to initialize the synchronizer to be used for sending a put request
      */
-    public Floor(Synchronizer sync) {
+    public FloorRequestSimulator(Synchronizer sync) {
         this.syncFloor = sync;
     }
 
@@ -59,9 +60,9 @@ public class Floor extends Thread{
 
         }
         while (syncFloor.isRunning()) {
-            System.out.println("Floor: Elevator at " + syncFloor.getCurrentFloor());
+            System.out.println("FloorRequestSimulator: Elevator at " + syncFloor.getCurrentFloor());
         }
-        System.out.println("Floor: Has exited");
+        System.out.println("FloorRequestSimulator: Has exited");
     }
 
     /**

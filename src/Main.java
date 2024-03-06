@@ -18,7 +18,7 @@ public class Main {
         Thread elevator, scheduler, floor;
 
         scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
-        floor = new Thread(new Floor(synchronizer), "Floor");
+        floor = new Thread(new FloorRequestSimulator(synchronizer), "FloorRequestSimulator");
         elevator = new Thread(new Elevator(synchronizer), "Elevator");
 
         scheduler.start();
