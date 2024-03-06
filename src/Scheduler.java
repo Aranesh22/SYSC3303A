@@ -104,8 +104,8 @@ public class Scheduler extends Thread {
      * @return true if the floor request is within range, false otherwise
      */
     private boolean isValidFloorRequest(FloorRequest floorRequest) {
-        return (floorRequest.getStartFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= Floor.DEFAULT_MAX_FLOOR)
-                && (floorRequest.getDestinationFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= Floor.DEFAULT_MAX_FLOOR);
+        return (floorRequest.getStartFloor() >= FloorRequestSimulator.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= FloorRequestSimulator.DEFAULT_MAX_FLOOR)
+                && (floorRequest.getDestinationFloor() >= FloorRequestSimulator.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= FloorRequestSimulator.DEFAULT_MAX_FLOOR);
     }
 
     /**

@@ -15,7 +15,7 @@ public class UTestElevator {
     @Test
     void test_calculateTimeTravelFloor() {
 
-        assertEquals((long) (elevator.DEFAULT_VELOCITY*Floor.DEFAULT_FLOOR_HEIGHT), elevator.calculateTimeTravelFloor());
+        assertEquals((long) (elevator.DEFAULT_VELOCITY* FloorRequestSimulator.DEFAULT_FLOOR_HEIGHT), elevator.calculateTimeTravelFloor());
     }
 
     @Test

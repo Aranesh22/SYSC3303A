@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 /**
  * The Synchronizer class is a thread-safe class responsible for synchronizing the
- * Floor, Scheduler, and Elevator subsystems.
+ * FloorRequestSimulator, Scheduler, and Elevator subsystems.
  * This includes synchronizing creating/retrieving floorRequests,
  * setting/retrieving destination floor numbers, and setting/retrieving
  * current floor numbers.
@@ -58,7 +58,7 @@ public class Synchronizer {
     }
 
     /**
-     * Invoked by the Floor subsystem to produce a new floorRequest.
+     * Invoked by the FloorRequestSimulator subsystem to produce a new floorRequest.
      */
     public synchronized void putRequest(FloorRequest floorRequest) {
         floorRequests.add(floorRequest);
@@ -160,7 +160,7 @@ public class Synchronizer {
     }
 
     /**
-     * Invoked by the Floor subsystem to get the current floor of the elevator.
+     * Invoked by the FloorRequestSimulator subsystem to get the current floor of the elevator.
      * @return the current floor of the elevator
      */
     public synchronized int getCurrentFloor() {
@@ -186,7 +186,7 @@ public class Synchronizer {
 
     /**
      * Invoked by the Scheduler subsystem to update the current floor that the elevator is on
-     * (for the Floor subsystem to later consume).
+     * (for the FloorRequestSimulator subsystem to later consume).
      * @param floor - the current floor of the elevator
      */
     public synchronized void putCurrentFloor(int floor) {
