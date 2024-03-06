@@ -79,6 +79,14 @@ public class FloorRequest {
     public String getDirection() { return direction; }
 
     /**
+     * Returns udp representation of floor request.
+     * @return udp representation of floor request
+     */
+    public String toUdpString() {
+        return this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction;
+    }
+
+    /**
      * Returns a readable string representation of request.
      * @return String representation of request.
      */
