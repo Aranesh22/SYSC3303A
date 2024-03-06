@@ -15,7 +15,10 @@
 public class Scheduler extends Thread {
     private final Synchronizer synchronizer; // Synchronizer object to interact with the elevator system
     private SchedulerState currentState; // Current state of the Scheduler
-    private Request currentRequest; // Current request being handled by the Scheduler
+    private FloorRequest currentRequest; // Current request being handled by the Scheduler
+
+    public static final int SCHEDULER_PORT = 41; //Current Port
+
 
     /**
      * Constructor for the Scheduler class.
@@ -80,7 +83,7 @@ public class Scheduler extends Thread {
      * Returns the current request being handled by the Scheduler.
      * @return Current request
      */
-    public Request getCurrentRequest() {
+    public FloorRequest getCurrentRequest() {
         return currentRequest;
     }
 
@@ -88,7 +91,7 @@ public class Scheduler extends Thread {
      * Sets the current request to be handled by the Scheduler.
      * @param request New request to be handled
      */
-    public void setCurrentRequest(Request request) {
+    public void setCurrentRequest(FloorRequest request) {
         this.currentRequest = request;
     }
 }
