@@ -28,7 +28,7 @@ class WaitingForFloorRequest implements SchedulerState {
      */
     @Override
     public void handleState(Scheduler scheduler) {
-        FloorRequest request = scheduler.getSynchronizer().getRequest();
+        Request request = scheduler.getSynchronizer().getRequest();
         if (request == null || "END_REQUEST".equals(request.getTime())) {
             scheduler.stopScheduler();
             return;
@@ -48,11 +48,11 @@ class WaitingForFloorRequest implements SchedulerState {
      * @param request The request to be checked.
      * @return true if the request is valid, false otherwise.
      */
-    private boolean isValidRequest(FloorRequest request) {
-        return request.getStartFloor() >= FloorSubsystem.DEFAULT_MIN_FLOOR &&
-                request.getStartFloor() <= FloorSubsystem.DEFAULT_MAX_FLOOR &&
-                request.getDestinationFloor() >= FloorSubsystem.DEFAULT_MIN_FLOOR &&
-                request.getDestinationFloor() <= FloorSubsystem.DEFAULT_MAX_FLOOR;
+    private boolean isValidRequest(Request request) {
+        return request.getStartFloor() >= Floor.DEFAULT_MIN_FLOOR &&
+                request.getStartFloor() <= Floor.DEFAULT_MAX_FLOOR &&
+                request.getDestinationFloor() >= Floor.DEFAULT_MIN_FLOOR &&
+                request.getDestinationFloor() <= Floor.DEFAULT_MAX_FLOOR;
     }
 }
 
@@ -68,7 +68,7 @@ class SendingElevatorToStartingFloor implements SchedulerState {
      */
     @Override
     public void handleState(Scheduler scheduler) {
-        FloorRequest currentRequest = scheduler.getCurrentRequest();
+        Request currentRequest = scheduler.getCurrentRequest();
         System.out.println("Scheduler: Elevator sent to start floor " + currentRequest.getStartFloor());
         scheduler.getSynchronizer().putDestinationFloor(currentRequest.getStartFloor());
         scheduler.handleElevatorStatus(currentRequest.getStartFloor());
@@ -88,7 +88,7 @@ class SendingElevatorToDestinationFloor implements SchedulerState {
      */
     @Override
     public void handleState(Scheduler scheduler) {
-        FloorRequest currentRequest = scheduler.getCurrentRequest();
+        Request currentRequest = scheduler.getCurrentRequest();
         System.out.println("Scheduler: Elevator sent to destination floor " + currentRequest.getDestinationFloor());
         scheduler.getSynchronizer().putDestinationFloor(currentRequest.getDestinationFloor());
         scheduler.handleElevatorStatus(currentRequest.getDestinationFloor());
