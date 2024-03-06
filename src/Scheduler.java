@@ -84,11 +84,7 @@ public class Scheduler extends Thread {
         // Loop until we get a valid floor request
         while (true) {
             floorRequest = synchronizer.getRequest();
-            // Signifies no more requests
-            if (Objects.equals(floorRequest.getTime(), "END_REQUEST")) {
-                return null;
-            }
-            else if (isValidFloorRequest(floorRequest)) {
+            if (isValidFloorRequest(floorRequest)) {
                 break;
             } else {
                 System.out.println("Scheduler: Invalid floor request - " + floorRequest);

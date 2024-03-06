@@ -133,7 +133,7 @@ These design decisions form the initial structure of our elevator control system
 ## How to Run Project
 1. Compile and build the project.
 2. Modify data.csv file if needed. Format must be 
-  ```[time(String)],[source floor(int)],[direction(up/down)],[destination floor(int)]```. data.csv file must end with ```END_REQUEST,-1,END,-1``` to signify end of file.
+  ```[time(String)],[source floor(int)],[direction(up/down)],[destination floor(int)]```.
 3. Run the program from the `Main` class.
 
 ## FAQ
