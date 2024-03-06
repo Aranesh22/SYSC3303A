@@ -9,7 +9,10 @@
 
 import java.io.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * The floor class is responsible for creating requests and once it is called upon
@@ -53,9 +56,7 @@ public class FloorRequestSimulator extends Thread {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        for (FloorRequest floorRequest : reqList) {
-            syncFloor.putRequest(floorRequest);
-        }
+        sendRequests();
         while (syncFloor.isRunning()) {
             System.out.println("FloorRequestSimulator: Elevator at " + syncFloor.getCurrentFloor());
         }
@@ -63,20 +64,42 @@ public class FloorRequestSimulator extends Thread {
     }
 
     /**
+     * Sends all requests and simulates waiting in between requests.
+     */
+    private void sendRequests() {
+        // Time format of the requests
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
+        // Sends each request and waits in between each request.
+        for (int i = 0; i < reqList.size(); i++) {
+            try {
+                Date curReqTime = sdf.parse(reqList.get(i).getTime());
+                Date prevReqTime = sdf.parse(reqList.get(Math.max((i - 1), 0)).getTime());
+                long timeDif = curReqTime.getTime() - prevReqTime.getTime();
+                Thread.sleep(timeDif);
+                System.out.println("FloorRequestSimulator: Sent floor request: " + reqList.get(i));
+                syncFloor.putRequest(reqList.get(i));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
      *
      * This function is reading through the data in csv and storing it in a request file
      */
-    public void parseReqFile() throws FileNotFoundException {
-
+    private void parseReqFile() throws FileNotFoundException {
         String path = "data/data.csv";
         String line;
         try {
-
             BufferedReader readBuff = new BufferedReader(new FileReader(path));
+            // Go through lines in data file to parse floor requests
             while ((line = readBuff.readLine()) != null) {
                 reqList.add(new FloorRequest(line));
             }
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

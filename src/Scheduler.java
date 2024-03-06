@@ -66,7 +66,7 @@ public class Scheduler extends Thread {
             return;
         }
 
-        System.out.println("Scheduler: Received floorRequest: " + floorRequest);
+        System.out.println("Scheduler: Received floor request: " + floorRequest);
         this.receivedFloorRequest(floorRequest); //State transition
 
         this.sendElevatorToFloor(floorRequest.getStartFloor());
