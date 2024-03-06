@@ -16,7 +16,7 @@ public class UTestFloor {
      */
     void testRequest_parseReqFile() {
 
-        Request rTest = new Request("14:05:15.0000",1,7,"down");
+        FloorRequest rTest = new FloorRequest("14:05:15.0000",1,7,"down");
         assertNotNull(rTest);
 
     }

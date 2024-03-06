@@ -34,7 +34,7 @@ public class Floor extends Thread{
      * Creating an instance of Synchfronizer and a list to contain the requests
      */
     private Synchronizer syncFloor;
-    ArrayList<Request> reqList = new ArrayList<>();
+    ArrayList<FloorRequest> reqList = new ArrayList<>();
 
     /**
      * Takes in @param sync to initalize the syncrhonnizer to be used for sending a putrequest
@@ -54,8 +54,8 @@ public class Floor extends Thread{
         }
         for (int i = 0; i < reqList.size(); i++) {
 
-            Request request = reqList.get(i);
-            syncFloor.putRequest(request);
+            FloorRequest floorRequest = reqList.get(i);
+            syncFloor.putRequest(floorRequest);
 
         }
         while (syncFloor.isRunning()) {
@@ -84,7 +84,7 @@ public class Floor extends Thread{
                 int destFloor = Integer.parseInt(data[3]);
                 String direction = data[2];
 
-                reqList.add(new Request(time,floor,destFloor,direction));
+                reqList.add(new FloorRequest(time,floor,destFloor,direction));
 
             }
 

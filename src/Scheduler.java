@@ -54,33 +54,33 @@ public class Scheduler extends Thread {
     }
 
     /**
-     * Processes the floor request by determining which elevator should be dispatched.
+     * Processes the floor floorRequest by determining which elevator should be dispatched.
      * This method is will be more complex in later iterations
      *
-     * @param request The request to be processed
+     * @param floorRequest The floorRequest to be processed
      */
-    private void processRequest(Request request) {
-        if (request == null) {
+    private void processRequest(FloorRequest floorRequest) {
+        if (floorRequest == null) {
             this.synchronizer.stopRunning();
             this.endReceived(); //State transition
             return;
         }
 
-        System.out.println("Scheduler: Received request: " + request);
-        this.receivedFloorRequest(request); //State transition
+        System.out.println("Scheduler: Received floorRequest: " + floorRequest);
+        this.receivedFloorRequest(floorRequest); //State transition
 
-        this.sendElevatorToFloor(request.getStartFloor());
-        this.handleElevatorStatus(request.getStartFloor());
-        this.sendElevatorToFloor(request.getDestinationFloor());
-        this.handleElevatorStatus(request.getDestinationFloor());
+        this.sendElevatorToFloor(floorRequest.getStartFloor());
+        this.handleElevatorStatus(floorRequest.getStartFloor());
+        this.sendElevatorToFloor(floorRequest.getDestinationFloor());
+        this.handleElevatorStatus(floorRequest.getDestinationFloor());
     }
 
     /**
      * Continuously attempts to get a valid request or null if no more requests.
-     * @return Next Request to service or null if no more requests.
+     * @return Next FloorRequest to service or null if no more requests.
      */
-    public Request getValidFloorRequest() {
-        Request floorRequest;
+    public FloorRequest getValidFloorRequest() {
+        FloorRequest floorRequest;
         // Loop until we get a valid floor request
         while (true) {
             floorRequest = synchronizer.getRequest();
@@ -103,7 +103,7 @@ public class Scheduler extends Thread {
      * @param floorRequest The request to be validated
      * @return true if the floor request is within range, false otherwise
      */
-    private boolean isValidFloorRequest(Request floorRequest) {
+    private boolean isValidFloorRequest(FloorRequest floorRequest) {
         return (floorRequest.getStartFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= Floor.DEFAULT_MAX_FLOOR)
                 && (floorRequest.getDestinationFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= Floor.DEFAULT_MAX_FLOOR);
     }
@@ -173,13 +173,13 @@ public class Scheduler extends Thread {
     }
 
     /**
-     * Handles the event of receiving a new floor request from a floor.
+     * Handles the event of receiving a new floor floorRequest from a floor.
      * This method is used to delegate the handling of the receivedFloorRequest event to the current state.
      *
-     * @param request Request received
+     * @param floorRequest FloorRequest received
      */
-    public void receivedFloorRequest(Request request) {
-        if (request != null) {
+    public void receivedFloorRequest(FloorRequest floorRequest) {
+        if (floorRequest != null) {
             currentState.receivedFloorRequest(this);
         }
     }

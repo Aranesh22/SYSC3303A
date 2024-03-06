@@ -1,6 +1,6 @@
 
 /**
- * Request class is responsible for providing the message structure and information of requests
+ * FloorRequest class is responsible for providing the message structure and information of requests
  * utilized by the synchronizer class
  *
  * @author Lindsay Dickson, 101160876
@@ -8,7 +8,7 @@
  * @date February 2nd, 2024
  */
 
-public class Request {
+public class FloorRequest {
 
     //Fields
     private final String time;
@@ -19,7 +19,7 @@ public class Request {
     /*
     Default constructor.
      */
-    public Request(){
+    public FloorRequest(){
         time = null;
         startFloor = -1;
         destinationFloor = -1;
@@ -34,7 +34,7 @@ public class Request {
      * @param direction will be either up/down
      *
      */
-    public Request(String time, int startFloor, int destinationFloor, String direction) {
+    public FloorRequest(String time, int startFloor, int destinationFloor, String direction) {
         this.time = time;
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
@@ -71,6 +71,6 @@ public class Request {
      */
     @Override
     public String toString() {
-        return "Time:" + this.time + " | Request:" + this.startFloor + "->" + this.destinationFloor;
+        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor;
     }
 }

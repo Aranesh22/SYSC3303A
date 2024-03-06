@@ -51,8 +51,8 @@ This project simulates an elevator control system using a real-time multi-thread
   * Developed JUnit tests for Floor class
 
 * Lindsay Dickson
-  * Developed Main class and Request class
-  * Developed JUnit tests for Request class, Elevator class
+  * Developed Main class and FloorRequest class
+  * Developed JUnit tests for FloorRequest class, Elevator class
   * UML Sequence diagram
  
 * Harishan Amutheesan
@@ -87,9 +87,9 @@ Iteration 1 implements Iteration 0 calculations by introducing the subsystems th
 
 * The Synchronizer class is crucial for the correct operation of the system by ensuring thread-safe communication between the subsystems. It manages the flow of information throughout the system.
 
-### 📢 Request Class
+### 📢 FloorRequest Class
 
-* The Request class encapsulates the data related to a user's request for elevator service, including the starting floor, destination floor, and direction.
+* The FloorRequest class encapsulates the data related to a user's floorRequest for elevator service, including the starting floor, destination floor, and direction.
 
 ## Iteration 2
 
