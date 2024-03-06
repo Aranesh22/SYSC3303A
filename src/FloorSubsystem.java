@@ -59,6 +59,9 @@ public class FloorSubsystem extends Thread {
         System.exit(1);
     }
 
+    /**
+     * Get a UDP packet from socket.
+     */
     private void getMsg() {
         byte[] data = new byte[100];
         this.receivePacket = new DatagramPacket(data, data.length);
@@ -70,6 +73,10 @@ public class FloorSubsystem extends Thread {
         }
     }
 
+    /**
+     * Process the received packet.
+     * Packet could be a floor request or an elevator status.
+     */
     private void processMsg() {
         // TODO This method should differentiate between floor requests and elevator status before deciding on appropriate method to service method
         FloorRequest floorRequest = new FloorRequest(new String(this.receivePacket.getData(), 0, this.receivePacket.getLength()));
@@ -78,6 +85,9 @@ public class FloorSubsystem extends Thread {
         this.synchronizer.putRequest(floorRequest);
     }
 
+    /**
+     * Relay floor request to scheduler.
+     */
     private void sendMsgToScheduler() {
         try {
             this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
