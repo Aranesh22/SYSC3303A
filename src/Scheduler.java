@@ -1,4 +1,3 @@
-import java.util.Objects;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,8 +99,8 @@ public class Scheduler extends Thread {
      * @return true if the floor request is within range, false otherwise
      */
     private boolean isValidFloorRequest(FloorRequest floorRequest) {
-        return (floorRequest.getStartFloor() >= FloorRequestSimulator.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= FloorRequestSimulator.DEFAULT_MAX_FLOOR)
-                && (floorRequest.getDestinationFloor() >= FloorRequestSimulator.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= FloorRequestSimulator.DEFAULT_MAX_FLOOR);
+        return (floorRequest.getStartFloor() >= FloorSubsystem.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= FloorSubsystem.DEFAULT_MAX_FLOOR)
+                && (floorRequest.getDestinationFloor() >= FloorSubsystem.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= FloorSubsystem.DEFAULT_MAX_FLOOR);
     }
 
     /**

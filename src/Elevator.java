@@ -34,7 +34,7 @@ public class Elevator extends Thread {
      * @param synchronizer Synchronizer that elevator will be using.
      */
     public Elevator(Synchronizer synchronizer) {
-        this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, FloorRequestSimulator.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
+        this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
     }
 
     /**

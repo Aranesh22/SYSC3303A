@@ -82,8 +82,8 @@ public class FloorRequest {
      * Returns udp representation of floor request.
      * @return udp representation of floor request
      */
-    public String toUdpString() {
-        return this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction;
+    public byte[] toUdpStringBytes() {
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction).getBytes();
     }
 
     /**
