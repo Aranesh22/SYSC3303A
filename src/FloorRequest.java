@@ -4,8 +4,9 @@
  * utilized by the synchronizer class
  *
  * @author Lindsay Dickson, 101160876
- * @version Iteration1
- * @date February 2nd, 2024
+ * @author Yehan De Silva (101185388)
+ * @version Iteration3
+ * @date March 6th, 2024
  */
 
 public class FloorRequest {
@@ -39,6 +40,18 @@ public class FloorRequest {
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
         this.direction = direction;
+    }
+
+    /**
+     * Constructor which takes in a UDP string to construct a floor request
+     * @param udpString UDP string to be used to make request
+     */
+    public FloorRequest(String udpString) {
+        String[] data = udpString.split(",");
+        this.time = data[0];
+        this.startFloor = Integer.parseInt(data[1]);
+        this.destinationFloor = Integer.parseInt(data[3]);
+        this.direction = data[2];
     }
 
     /**

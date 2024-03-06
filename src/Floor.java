@@ -76,16 +76,7 @@ public class Floor extends Thread{
 
             BufferedReader readBuff = new BufferedReader(new FileReader(path));
             while ((line = readBuff.readLine()) != null) {
-
-                String[] data = line.split(",");
-
-                String time = data[0];
-                int floor = Integer.parseInt(data[1]);
-                int destFloor = Integer.parseInt(data[3]);
-                String direction = data[2];
-
-                reqList.add(new FloorRequest(time,floor,destFloor,direction));
-
+                reqList.add(new FloorRequest(line));
             }
 
         } catch (FileNotFoundException e) {
