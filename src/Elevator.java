@@ -1,6 +1,3 @@
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * The Elevator thread class models a traction elevator used to move people around in a building.
  * It realistically models an elevator by replicating the various timing aspects of an elevator that were measured in
@@ -15,7 +12,7 @@ import java.util.Map;
  */
 
 public class Elevator extends Thread {
-    private Map<String, ElevatorState> states;
+//    private Map<String, ElevatorState> states;
     private ElevatorState currentState;
     // Fields
     private final Synchronizer synchronizer;
@@ -24,10 +21,12 @@ public class Elevator extends Thread {
     private final float velocity;
     private final float floorHeight;
     private final float loadUnloadTime;
-
     // Constants
     public final static float DEFAULT_VELOCITY = 1.75f * 1000;
     public final static float DEFAULT_LOAD_UNLOAD_TIME = 7.85f * 1000;
+
+    private int destFloor;
+    // --- added vars for state machine
 
     /**
      * Default constructor.
@@ -53,19 +52,12 @@ public class Elevator extends Thread {
         this.velocity = velocity;
         this.floorHeight = floorHeight;
         this.loadUnloadTime = loadUnloadTime;
-        this.states = new HashMap<>();
-        this.initializeStates();
+        this.destFloor = -1;
+        //set inital state
+        this.setState(new StationaryDoorsClosed(this));
+
     }
 
-    /**
-     * Initializes the states for the Elevator.
-     */
-    private void initializeStates() {
-        addState("StationaryDoorsClosed", new StationaryDoorsClosed());
-        addState("StationaryDoorsOpen", new StationaryDoorsOpen());
-        addState("MovingDoorsClosed", new MovingDoorsClosed());
-        this.setState("StationaryDoorsClosed");
-    }
 
     /**
      * Main task of elevator. Keep getting and going to floors.
@@ -74,30 +66,26 @@ public class Elevator extends Thread {
     public void run() {
         // Start off by notifying of starting floor.
         this.synchronizer.putElevatorStatus(this.curFloor);
-
         // While synchronizer is running, go to the floor we get from synchronizer.
         while (this.synchronizer.isRunning()) {
-            this.goToDestinationFloor(this.synchronizer.getDestinationFloor());
+            this.currentState.handleState();
+//            this.goToDestinationFloor(this.synchronizer.getDestinationFloor());
+
         }
         System.out.println(this + ": Has exited");
     }
 
-    /**
+    /** DECOMMED
      * Moves elevator to the specified destination floor, passing through all floors in between.
      * @param destinationFloor Integer specifying the target floor we need to end up at.
      */
     public void goToDestinationFloor(int destinationFloor) {
         // Determine if elevator is going up or down and go to each floor in between.
         boolean movingUp = destinationFloor >= this.curFloor;
-        //update state
-        receiveRequest();
         while (this.curFloor != destinationFloor) {
             this.goToFloor(((movingUp)? (this.curFloor + 1 ): (this.curFloor - 1)));
         }
-        //Update the state
 
-        // Once we arrive at destination, load/unload the elevator.
-        arriveAtFloor();
         this.loadUnloadElevator();
 
     }
@@ -125,16 +113,12 @@ public class Elevator extends Thread {
      * Implementation of the tExp timer for StationaryDoorsOpen state
      */
     public void loadUnloadElevator() {
-        System.out.println(this + ": Opening doors");
         // Sleep for the time it takes to load/unload elevator.
         try {
             Thread.sleep((long) this.loadUnloadTime);
-            timerExpired();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        System.out.println(this + ": Closing doors");
     }
 
     /**
@@ -156,28 +140,23 @@ public class Elevator extends Thread {
 
 
 
-//---------Iteration 2 Code
-    /**
-     * Adds a state to the state machine.
-     *
-     * @param stateName The name of the state.
-     * @param state     The state to be added.
-     */
-    public void addState(String stateName, ElevatorState state) {
-        states.put(stateName, state);
-    }
+//---------Iteration 2/3 Code
+
+    public Synchronizer getSynchronizer(){ return this.synchronizer;}
+    public int getCurFloor(){ return this.curFloor; }
+    public int getDestFloor(){ return this.destFloor; }
+    //Updates the destFloor so that it is not overwritten or put to (-1) by new requests until the request has been fulfilled
+    public void updateDestFloor(int newFloor){ this.destFloor = newFloor;}
 
     /**
      * Sets the current state of the state machine
-     * @param stateName - Name of the state to set
      */
-    public void setState(String stateName){
-        System.out.println("[Elevator-STATE] "+stateName);
-        this.currentState = states.get(stateName);
+
+    public void setState(ElevatorState newState) {
+        this.currentState = newState;
     }
 
     public ElevatorState getCurrentState() {
-
         return this.currentState;
     }
 
@@ -186,24 +165,50 @@ public class Elevator extends Thread {
      * simulates the event of the Elevator door timer expiring - signalling the doors will close
      */
     public void timerExpired(){
-        currentState.timerExpired(this);
+//        currentState.timerExpired();
     }
 
     /**
      * simulates the event of the Elevator recieving a request from the scheduler
      */
     public void receiveRequest(){
-        currentState.receiveRequest(this);
+//        currentState.receiveRequest();
     }
 
     /**
      * simulates the event of the elevator arriving at the requested floor
      */
     public void arriveAtFloor(){
-        currentState.arriveAtFloor(this);
+//        currentState.arriveAtFloor();
     }
 
 
+    // ---------- DECOMMED functions
+    /**
+     * Initializes the states for the Elevator.
+     * Decommed as this only points to 1 state obj ?
+     */
+//    private void initializeStates() {
+//        addState("StationaryDoorsClosed", new StationaryDoorsClosed(this));
+//        addState("StationaryDoorsOpen", new StationaryDoorsOpen(this));
+//        addState("MovingDoorsClosed", new MovingDoorsClosed(this));
+////        this.setState("StationaryDoorsClosed");
+//        this.setState(new StationaryDoorsClosed(this));
+//    }
 
+    /**
+     * Adds a state to the state machine.
+     *
+     * @param stateName The name of the state.
+     * @param state     The state to be added.
+     */
+//    public void addState(String stateName, ElevatorState state) {
+//        states.put(stateName, state);
+//    }
+    //----
+//    public void setState(String stateName){
+//        System.out.println("[Elevator-STATE] "+stateName);
+//        this.currentState = states.get(stateName);
+//    }
 
 }//end class
