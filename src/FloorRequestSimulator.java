@@ -50,8 +50,10 @@ public class FloorRequestSimulator extends Thread {
      * Simulator exits with error. Closes the DataSocket before exiting.
      * @param e Error received during runtime.
      */
-    public void close(Exception e) {
-        this.sendSocket.close();
+    private void close(Exception e) {
+        if (this.sendSocket != null) {
+            this.sendSocket.close();
+        }
         e.printStackTrace();
         System.exit(1);
     }

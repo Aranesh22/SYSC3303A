@@ -19,6 +19,8 @@ public class Scheduler extends Thread {
     private Map<String, SchedulerState> states;
     private SchedulerState currentState;
 
+    public static final int SCHEDULER_PORT = 25;
+
     /**
      * Constructor for Scheduler
      *
@@ -122,7 +124,8 @@ public class Scheduler extends Thread {
         int elevatorStatus;
         do {
             elevatorStatus = synchronizer.getElevatorStatus();
-            synchronizer.putCurrentFloor(elevatorStatus);
+            // TODO Had to comment this out for UDP to work (Remove with synchronizer)
+            // synchronizer.putCurrentFloor(elevatorStatus);
         } while (elevatorStatus != targetFloor);
 
         System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);

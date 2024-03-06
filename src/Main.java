@@ -15,14 +15,16 @@ public class Main {
     public static void main(String[] args) {
 
         Synchronizer synchronizer = new Synchronizer();
-        Thread elevator, scheduler, floor;
+        Thread elevator, scheduler, floorSubsystem, floorRequestSimulator;
 
         scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
-        floor = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
+        floorSubsystem = new Thread(new FloorSubsystem(synchronizer), "FloorSubsystem");
         elevator = new Thread(new Elevator(synchronizer), "Elevator");
+        floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
 
         scheduler.start();
-        floor.start();
+        floorSubsystem.start();
         elevator.start();
+        floorRequestSimulator.start();
     }
 }
