@@ -1,5 +1,5 @@
 /**
- * Request Class Unit Tests
+ * FloorRequest Class Unit Tests
  * @author Lindsay Dickson, 101160876
  * @version Iteration1
  * @date February 2, 2024
@@ -13,25 +13,25 @@ public class UTestRequest {
 
     @Test
     void test_getTime() {
-        Request r = new Request("06:10:04:00", 1, 5, "up");
+        FloorRequest r = new FloorRequest("06:10:04:00", 1, 5, "up");
         assertEquals("06:10:04:00", r.getTime());
     }
 
     @Test
     void test_getStartFloor() {
-        Request r = new Request("06:10:04:00", 1, 5, "up");
+        FloorRequest r = new FloorRequest("06:10:04:00", 1, 5, "up");
         assertEquals(1, r.getStartFloor());
     }
 
     @Test
     void test_getDestinationFloor() {
-        Request r = new Request("06:10:04:00", 1, 5, "up");
+        FloorRequest r = new FloorRequest("06:10:04:00", 1, 5, "up");
         assertEquals(5, r.getDestinationFloor());
     }
 
     @Test
     void test_getDirection() {
-        Request r = new Request("06:10:04:00", 1, 5, "up");
+        FloorRequest r = new FloorRequest("06:10:04:00", 1, 5, "up");
         assertEquals("up", r.getDirection());
     }
 

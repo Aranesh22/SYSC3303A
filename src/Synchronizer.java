@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 /**
  * The Synchronizer class is a thread-safe class responsible for synchronizing the
- * Floor, Scheduler, and Elevator subsystems.
- * This includes synchronizing creating/retrieving requests,
+ * FloorRequestSimulator, Scheduler, and Elevator subsystems.
+ * This includes synchronizing creating/retrieving floorRequests,
  * setting/retrieving destination floor numbers, and setting/retrieving
  * current floor numbers.
  *
@@ -18,7 +18,7 @@ public class Synchronizer {
     private int destinationFloor;
     private int elevatorStatus;
     private int currentFloor;
-    private ArrayList<Request> requests;
+    private ArrayList<FloorRequest> floorRequests;
 
     /**
      * Constructor
@@ -29,16 +29,16 @@ public class Synchronizer {
         elevatorStatus = -1;
         destinationFloor = -1;
         currentFloor = -1;
-        requests = new ArrayList<>();
+        floorRequests = new ArrayList<>();
     }
 
     /**
-     * Invoked by the Scheduler subsystem to consume requests.
-     * @return a request from the list of requests
+     * Invoked by the Scheduler subsystem to consume floorRequests.
+     * @return a request from the list of floorRequests
      */
-    public synchronized Request getRequest() {
+    public synchronized FloorRequest getRequest() {
         // Condition synchronization (wait until request is added)
-        while(requests.isEmpty() && running) {
+        while(floorRequests.isEmpty() && running) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -47,21 +47,21 @@ public class Synchronizer {
         }
         // Check if running (again)
         if (running) {
-            // Check if last request
-            Request request = requests.removeFirst();
+            // Check if last floorRequest
+            FloorRequest floorRequest = floorRequests.removeFirst();
             // Notify threads in wait set
             notifyAll();
-            return request;
+            return floorRequest;
         }
         notifyAll();
         return null;
     }
 
     /**
-     * Invoked by the Floor subsystem to produce a new request.
+     * Invoked by the FloorRequestSimulator subsystem to produce a new floorRequest.
      */
-    public synchronized void putRequest(Request request) {
-        requests.add(request);
+    public synchronized void putRequest(FloorRequest floorRequest) {
+        floorRequests.add(floorRequest);
         // Notify threads in wait set
         notifyAll();
     }
@@ -114,7 +114,7 @@ public class Synchronizer {
 
     /**
      * Invoked by the Scheduler subsystem to get the current status
-     * of the elevator, so that it knows when to send the next requests.
+     * of the elevator, so that it knows when to send the next floorRequests.
      * @return the current status of the elevator (floor number)
      */
     public synchronized int getElevatorStatus() {
@@ -160,7 +160,7 @@ public class Synchronizer {
     }
 
     /**
-     * Invoked by the Floor subsystem to get the current floor of the elevator.
+     * Invoked by the FloorRequestSimulator subsystem to get the current floor of the elevator.
      * @return the current floor of the elevator
      */
     public synchronized int getCurrentFloor() {
@@ -186,7 +186,7 @@ public class Synchronizer {
 
     /**
      * Invoked by the Scheduler subsystem to update the current floor that the elevator is on
-     * (for the Floor subsystem to later consume).
+     * (for the FloorRequestSimulator subsystem to later consume).
      * @param floor - the current floor of the elevator
      */
     public synchronized void putCurrentFloor(int floor) {
@@ -243,9 +243,9 @@ public class Synchronizer {
     }
 
     /**
-     * @return the list of requests (for testing).
+     * @return the list of floorRequests (for testing).
      */
-    public ArrayList<Request> testGetRequests() {
-        return requests;
+    public ArrayList<FloorRequest> testGetRequests() {
+        return floorRequests;
     }
 }
