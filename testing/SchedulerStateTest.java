@@ -35,7 +35,7 @@ public class SchedulerStateTest {
         Scheduler scheduler = new Scheduler(synchronizer);
 
         // Test if states transition as expected
-        scheduler.receivedFloorRequest(new Request());
+        scheduler.receivedFloorRequest(new FloorRequest());
         assertEquals(scheduler.getCurrentState().getStateName(), "SendingElevatorToStartingFloor");
 
         scheduler.receivedElevatorStatus();

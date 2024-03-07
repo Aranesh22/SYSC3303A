@@ -43,9 +43,9 @@ class SchedulerTest {
         private boolean isDestinationFloorProcessed = false;
 
         @Override
-        public Request getRequest() {
+        public FloorRequest getRequest() {
             // Return null to simulate no more requests available
-            return isRunning ? new Request("time", 1, 2, "up") : null;
+            return isRunning ? new FloorRequest("time", 1, 2, "up") : null;
         }
 
         @Override
@@ -66,8 +66,8 @@ class SchedulerTest {
             return isDestinationFloorProcessed;
         }
 
-        void addRequest(Request request) {
-            // For this subclass, we simulate that a request is always available
+        void addRequest(FloorRequest floorRequest) {
+            // For this subclass, we simulate that a floorRequest is always available
         }
 
 

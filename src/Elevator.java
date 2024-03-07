@@ -33,14 +33,14 @@ public class Elevator extends Thread {
      * @param synchronizer Synchronizer that elevator will be using.
      */
     public Elevator(Synchronizer synchronizer) {
-        this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, Floor.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
+        this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
     }
 
     /**
      * Overloaded constructor.
      * @param synchronizer Synchronizer that elevator will be using.
      * @param id Id of elevator.
-     * @param curFloor Floor elevator is starting at.
+     * @param curFloor FloorRequestSimulator elevator is starting at.
      * @param velocity Speed of the elevator.
      * @param floorHeight Height of a floor in a building.
      * @param loadUnloadTime Total time to load and unload elevator (Doors opening -> Doors closing).
