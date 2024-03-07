@@ -16,9 +16,7 @@ public class Scheduler extends Thread {
     private final Synchronizer synchronizer; // Synchronizer object to interact with the elevator system
     private SchedulerState currentState; // Current state of the Scheduler
     private FloorRequest currentRequest; // Current request being handled by the Scheduler
-
     public static final int SCHEDULER_PORT = 41; //Current Port
-
 
     /**
      * Constructor for the Scheduler class.
