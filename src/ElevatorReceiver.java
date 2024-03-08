@@ -17,6 +17,8 @@ public class ElevatorReceiver extends Thread {
     private DatagramPacket receivePacket;
     private ElevatorRequestBox requestBox;
     private boolean stopReceiving;
+    // Port number
+    public static final int ELEVATOR_RECEIVER_PORT=35;
 
     /**
      * Constructor
@@ -25,8 +27,8 @@ public class ElevatorReceiver extends Thread {
         this.requestBox = requestBox;
         stopReceiving = false;
         try {
-            // Bind socket to any port that is available
-            receiveSocket = new DatagramSocket();
+            // Bind socket to specific port
+            receiveSocket = new DatagramSocket(ELEVATOR_RECEIVER_PORT);
         } catch(SocketException e) {
             System.exit(1);
         }
