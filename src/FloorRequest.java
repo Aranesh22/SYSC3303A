@@ -27,6 +27,7 @@ public class FloorRequest {
         direction = null;
     }
 
+
     /**
      * Overloaded constructor
      * @param time time the request was made
