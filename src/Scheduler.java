@@ -1,3 +1,9 @@
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  *
  * The Scheduler class manages elevator requests and coordinates
@@ -17,9 +23,10 @@ public class Scheduler extends Thread {
     private SchedulerState currentState; // Current state of the Scheduler
     private FloorRequest currentRequest; // Current request being handled by the Scheduler
 
-    public static final int SCHEDULER_PORT = 41; //Current Port
+    public static final int SCHEDULER_PORT = 25;
 
-
+    private DatagramSocket sendSocket,receiveSocket;
+    private DatagramPacket sendPacket,receivePacket;
     /**
      * Constructor for the Scheduler class.
      * @param synchronizer Synchronizer object to interact with the elevator system
@@ -29,6 +36,58 @@ public class Scheduler extends Thread {
         setState(new WaitingForFloorRequest()); // Set initial state
     }
 
+    private void getMsgElvStatus() {
+        byte[] data = new byte[100];
+        this.receivePacket = new DatagramPacket(data, data.length);
+
+        try {
+            receiveSocket.receive(this.receivePacket);
+        } catch (IOException e) {
+
+        }
+
+        try {
+            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(), InetAddress.getLocalHost(),
+                    FloorSubsystem.FLOOR_SUBSYSTEM_PORT);
+        } catch (UnknownHostException e) {
+
+        }
+
+        try {
+            DatagramSocket sendSocket = new DatagramSocket();
+            sendSocket.setSoTimeout(1000);
+            sendSocket.send(this.sendPacket);
+            sendSocket.close();
+        } catch (IOException e) {
+        }
+
+    }
+    private void getMsgFloorReq() {
+        byte[] data = new byte[100];
+        this.receivePacket = new DatagramPacket(data, data.length);
+
+        try {
+            receiveSocket.receive(this.receivePacket);
+        } catch(IOException e) {
+        }
+
+
+    }
+
+    private void sendReqtoRecieve() {
+        try {
+            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
+                    InetAddress.getLocalHost(), ElevatorReceiver.ELEVATOR_RECEIVER_PORT);
+        } catch (UnknownHostException e) {
+        }
+        try {
+            DatagramSocket sendSocket = new DatagramSocket();
+            sendSocket.setSoTimeout(1000);
+            sendSocket.send(this.sendPacket);
+            sendSocket.close();
+        } catch (IOException e) {
+        }
+    }
     /**
      * Overridden run method from Thread class.
      * Continuously handles the current state of the Scheduler as long as the Synchronizer is running.
@@ -66,7 +125,8 @@ public class Scheduler extends Thread {
         int elevatorStatus;
         do {
             elevatorStatus = synchronizer.getElevatorStatus();
-            synchronizer.putCurrentFloor(elevatorStatus);
+            // TODO had to remove this to prevent the scheduler from getting stuck. Remove when removing synchronizer.
+            // synchronizer.putCurrentFloor(elevatorStatus);
         } while (elevatorStatus != targetFloor);
         System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
     }
