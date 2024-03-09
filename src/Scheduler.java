@@ -45,7 +45,7 @@ public class Scheduler extends Thread {
         setState(new WaitingForFloorRequest()); // Set initial state
     }
 
-    private void getMsgElvStatus() {
+    private void getMsg() {
         byte[] data = new byte[100];
         this.receivePacket = new DatagramPacket(data, data.length);
 
@@ -54,6 +54,17 @@ public class Scheduler extends Thread {
         } catch (IOException e) {
 
         }
+
+        //Case to check what function to switch
+
+        //if message is for Elevator call elevator
+        getMsgElvStatus();
+        //else call Floor Request
+        getMsgFloorReq();
+
+    }
+
+    private void getMsgElvStatus() {
 
         try {
             this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(), InetAddress.getLocalHost(),
@@ -72,13 +83,6 @@ public class Scheduler extends Thread {
 
     }
     private void getMsgFloorReq() {
-        byte[] data = new byte[100];
-        this.receivePacket = new DatagramPacket(data, data.length);
-
-        try {
-            receiveSocket.receive(this.receivePacket);
-        } catch(IOException e) {
-        }
 
 
     }
