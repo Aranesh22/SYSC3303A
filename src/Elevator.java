@@ -1,3 +1,7 @@
+import javax.xml.crypto.Data;
+import java.io.IOException;
+import java.net.*;
+
 /**
  * The Elevator thread class models a traction elevator used to move people around in a building.
  * It realistically models an elevator by replicating the various timing aspects of an elevator that were measured in
@@ -16,11 +20,17 @@ public class Elevator extends Thread {
     private ElevatorState currentState;
     // Fields
     private final Synchronizer synchronizer;
+    private ElevatorRequestBox requestBox;
+    private DatagramSocket sendSocket;
+    private DatagramPacket sendPacket;
+    private int elevatorReceiverPortNum;
     private final int id;
     private int curFloor;
+    private String direction;
     private final float velocity;
     private final float floorHeight;
     private final float loadUnloadTime;
+
     // Constants
     public final static float DEFAULT_VELOCITY = 1.75f * 1000;
     public final static float DEFAULT_LOAD_UNLOAD_TIME = 7.85f * 1000;
@@ -32,8 +42,8 @@ public class Elevator extends Thread {
      * Default constructor.
      * @param synchronizer Synchronizer that elevator will be using.
      */
-    public Elevator(Synchronizer synchronizer) {
-        this(synchronizer, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
+    public Elevator(Synchronizer synchronizer, ElevatorRequestBox requestBox) {
+        this(synchronizer, requestBox, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
     }
 
     /**
@@ -45,15 +55,25 @@ public class Elevator extends Thread {
      * @param floorHeight Height of a floor in a building.
      * @param loadUnloadTime Total time to load and unload elevator (Doors opening -> Doors closing).
      */
-    public Elevator(Synchronizer synchronizer, int id, int curFloor, float velocity, float floorHeight, float loadUnloadTime) {
+    public Elevator(Synchronizer synchronizer, ElevatorRequestBox requestBox, int id, int curFloor, float velocity, float floorHeight, float loadUnloadTime) {
         this.synchronizer = synchronizer;
+        this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
+        this.direction = "N/A";
         this.velocity = velocity;
         this.floorHeight = floorHeight;
         this.loadUnloadTime = loadUnloadTime;
         this.destFloor = -1;
-        //set inital state
+        elevatorReceiverPortNum = -1;
+
+        // Set up socket for sending (bind to any available port)
+        try {
+            sendSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            System.exit(1);
+        }
+        //Set inital state
         this.setState(new StationaryDoorsClosed(this));
 
     }
@@ -66,6 +86,7 @@ public class Elevator extends Thread {
     public void run() {
         // Start off by notifying of starting floor.
         this.synchronizer.putElevatorStatus(this.curFloor);
+
         // While synchronizer is running, go to the floor we get from synchronizer.
         while (this.synchronizer.isRunning()) {
             this.currentState.handleState();
@@ -73,6 +94,56 @@ public class Elevator extends Thread {
 
         }
         System.out.println(this + ": Has exited");
+    }
+
+    /**
+     * Gets an ElevatorMessage from the request box,
+     * and stores the elevator receiver's port number and the destination floor
+     *
+     */
+    public void getElevatorMessage() {
+        ElevatorMessage request = requestBox.getRequest();
+        this.elevatorReceiverPortNum = request.getElevatorReceiverPortNum();
+        this.destFloor = request.getTargetFloor();
+    }
+
+    /**
+     * @return true if the request box is empty, and false otherwise
+     */
+    public boolean requestBoxIsEmpty() {
+        return requestBox.isEmpty();
+    }
+
+    /**
+     * Creates an ElevatorStatus message to send to the scheduler,
+     * which notifies the Scheduler (and in turn the floor subsystem).
+     */
+    public void sendElevatorStatus() {
+        // Create ElevatorStatus message
+        ElevatorStatus status = new ElevatorStatus(curFloor, destFloor, elevatorReceiverPortNum, true, direction);
+        // Send message to Scheduler
+        try {
+            // Get IP address of Scheduler
+            byte[] data = status.toUdpStringBytes();
+            sendPacket = new DatagramPacket(data, data.length, Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
+            // Send packet
+            sendSocket.send(sendPacket);
+        } catch (IOException e) {
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sets the direction of the elevator
+     * @param isMovingUp - whether the elevator is moving up or not
+     */
+    public void setDirection (boolean isMovingUp) {
+        if (isMovingUp) {
+            direction = "up";
+        }
+        else {
+            direction = "down";
+        }
     }
 
     /** DECOMMED

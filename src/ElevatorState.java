@@ -51,7 +51,11 @@ class StationaryDoorsClosed implements  ElevatorState{
     @Override
     public void handleState(){
         int desFloor = context.getSynchronizer().getDestinationFloor();
-        context.updateDestFloor(desFloor);
+        //context.updateDestFloor(desFloor);
+
+        // Wait to receive elevator message (with destination floor) since elevator is stationary
+        context.getElevatorMessage();
+
         //conditional as to whether the current floor == desFLoor
         if(context.getCurFloor() == desFloor){
             arriveAtFloor();
@@ -157,6 +161,8 @@ class MovingDoorsClosed implements ElevatorState{
     @Override
     public void handleState(){
         boolean movingUp = destination >= this.context.getCurFloor();
+        // Update the context with the current direction of the elevator
+        context.setDirection(movingUp);
         this.context.goToFloor(((movingUp)? (this.context.getCurFloor() + 1 ): (this.context.getCurFloor() - 1)));
         if(this.context.getCurFloor()==destination){
             arriveAtFloor();
@@ -180,6 +186,13 @@ class MovingDoorsClosed implements ElevatorState{
 
     public void onExit(){
         this.context.getSynchronizer().putElevatorStatus(this.context.getCurFloor());
+        // Send ElevatorStatus to Scheduler
+        context.sendElevatorStatus();
+        // Check if new elevator message came while elevator was moving
+        if (!context.requestBoxIsEmpty()) {
+            // Update destination floor
+            context.getElevatorMessage();
+        }
     }
 
     private final String STATENAME = "MovingDoorsClosed";

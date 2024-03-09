@@ -23,7 +23,16 @@ public class Scheduler extends Thread {
     private SchedulerState currentState; // Current state of the Scheduler
     private FloorRequest currentRequest; // Current request being handled by the Scheduler
 
-    public static final int SCHEDULER_PORT = 25;
+    public static final InetAddress SCHEDULER_IP;   // IP address of Scheduler
+    static {
+        try {
+            SCHEDULER_IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static final int SCHEDULER_PORT = 25; //Current Port
 
     private DatagramSocket sendSocket,receiveSocket;
     private DatagramPacket sendPacket,receivePacket;
