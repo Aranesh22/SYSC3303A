@@ -12,9 +12,8 @@ import java.net.*;
 public class FloorSubsystem extends Thread {
 
     // Fields
-    private final Synchronizer synchronizer;
     private DatagramSocket receiveSocket;
-    private DatagramPacket receivePacket, sendPacket;
+    private DatagramPacket receivePacket;
 
     /**
      * Initializing static data to be used throughout the program
@@ -35,10 +34,8 @@ public class FloorSubsystem extends Thread {
 
     /**
      * Floor Subsystem constructor.
-     * @param synchronizer
      */
-    public FloorSubsystem(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
+    public FloorSubsystem() {
         try {
             this.receiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
         } catch (SocketException se) {
@@ -96,24 +93,17 @@ public class FloorSubsystem extends Thread {
         FloorRequest floorRequest = new FloorRequest(new String(this.receivePacket.getData(), 0, this.receivePacket.getLength()));
         System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
         this.sendMsgToScheduler();
-        this.synchronizer.putRequest(floorRequest);
     }
 
     /**
      * Relay floor request to scheduler.
      */
     private void sendMsgToScheduler() {
-        try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
-                    InetAddress.getLocalHost(), Scheduler.SCHEDULER_PORT);
-        } catch (UnknownHostException e) {
-            this.close(e);
-        }
+        DatagramPacket sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
+                Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
         try {
             DatagramSocket sendSocket = new DatagramSocket();
-            // TODO Remove timeout one synchronizer is removed
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
+            sendSocket.send(sendPacket);
             sendSocket.close();
         } catch (IOException e) {
             this.close(e);

@@ -20,7 +20,7 @@ public class Main {
 
 
         scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
-        floorSubsystem = new Thread(new FloorSubsystem(synchronizer), "FloorSubsystem");
+        floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
         elevatorRequestBox = new ElevatorRequestBox();
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
         elevator = new Thread(new Elevator(synchronizer, elevatorRequestBox), "Elevator");
