@@ -14,8 +14,6 @@ import java.util.Date;
  *  @version iteration3
  *  @date Mar 6, 2024
  */
-
-
 public class FloorRequestSimulator extends Thread {
 
     // Fields

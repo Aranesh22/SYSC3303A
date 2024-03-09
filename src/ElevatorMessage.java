@@ -11,8 +11,8 @@
 public class ElevatorMessage {
 
     // Fields
-    private int elevatorReceiverPortNum;
-    private int targetFloor;
+    private final int elevatorReceiverPortNum;
+    private final int targetFloor;
 
     /**
      * Constructor

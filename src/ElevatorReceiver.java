@@ -15,8 +15,8 @@ public class ElevatorReceiver extends Thread {
     // Fields
     private DatagramSocket receiveSocket;
     private DatagramPacket receivePacket;
-    private ElevatorRequestBox requestBox;
-    private boolean stopReceiving;
+    private final ElevatorRequestBox requestBox;
+
     // Port number
     public static final int ELEVATOR_RECEIVER_PORT=35;
 
@@ -25,7 +25,6 @@ public class ElevatorReceiver extends Thread {
      */
     public ElevatorReceiver (ElevatorRequestBox requestBox) {
         this.requestBox = requestBox;
-        stopReceiving = false;
         try {
             // Bind socket to specific port
             receiveSocket = new DatagramSocket(ELEVATOR_RECEIVER_PORT);
@@ -38,22 +37,35 @@ public class ElevatorReceiver extends Thread {
      * Run method
      */
     public void run() {
-        while (!stopReceiving) {
-            // Wait to receive floor request from Scheduler
-            byte[] data = new byte[100];
-            receivePacket = new DatagramPacket(data, data.length);
-            try {
-                receiveSocket.receive(receivePacket);
-            } catch (IOException e) {
-                System.exit(1);
-            }
+        while (true) {
+            getMsg();
+            putElevatorMsg();
+        }
+    }
 
-            // Create ElevatorMessage: Port number of this Elevator Receiver and target floor
-            FloorRequest floorRequest = new FloorRequest(new String(receivePacket.getData(), 0, receivePacket.getLength()));
-            ElevatorMessage request = new ElevatorMessage(receiveSocket.getPort(), floorRequest.getDestinationFloor());
+    /**
+     * Put elevator msg in shared box for elevator to access.
+     */
+    private void putElevatorMsg() {
+        // Create ElevatorMessage: Port number of this Elevator Receiver and target floor
+        ElevatorMessage request = new ElevatorMessage(receiveSocket.getPort(),
+                Integer.parseInt(new String(receivePacket.getData(), 0, receivePacket.getLength())));
 
-            // Put ElevatorMessage in request box for elevator
-            requestBox.putRequest(request);
+        // Put ElevatorMessage in request box for elevator
+        requestBox.putRequest(request);
+    }
+
+    /**
+     * Get message from scheduler.
+     */
+    private void getMsg() {
+        // Wait to receive floor request from Scheduler
+        byte[] data = new byte[100];
+        receivePacket = new DatagramPacket(data, data.length);
+        try {
+            receiveSocket.receive(receivePacket);
+        } catch (IOException e) {
+            System.exit(1);
         }
     }
 }
