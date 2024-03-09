@@ -90,7 +90,7 @@ public class FloorSubsystem extends Thread {
      */
     private void processMsg() {
         // TODO This method should differentiate between floor requests and elevator status before deciding on appropriate method to service method
-        FloorRequest floorRequest = new FloorRequest(new String(this.receivePacket.getData(), 0, this.receivePacket.getLength()));
+        FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
         System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
         this.sendMsgToScheduler();
     }

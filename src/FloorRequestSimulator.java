@@ -21,7 +21,6 @@ public class FloorRequestSimulator extends Thread {
     // Fields
     ArrayList<FloorRequest> reqList;
     private DatagramSocket sendSocket;
-    private DatagramPacket sendPacket;
 
     public static final int FLOOR_REQUEST_SIMULATOR_PORT = 23;
 
@@ -71,8 +70,6 @@ public class FloorRequestSimulator extends Thread {
             while ((line = readBuff.readLine()) != null) {
                 reqList.add(new FloorRequest(line));
             }
-        } catch (FileNotFoundException e) {
-            this.close(e);
         } catch (IOException e) {
             this.close(e);
         }
@@ -109,12 +106,12 @@ public class FloorRequestSimulator extends Thread {
     private void sendUdpRequest(FloorRequest floorRequest) {
         // Creates a new message to send
         byte[] sendReqMsg = floorRequest.toUdpStringBytes();
-        this.sendPacket = new DatagramPacket(sendReqMsg, sendReqMsg.length,
+        DatagramPacket sendPacket = new DatagramPacket(sendReqMsg, sendReqMsg.length,
                 FloorSubsystem.FLOOR_SUBSYSTEM_IP, FloorSubsystem.FLOOR_SUBSYSTEM_PORT);
 
         // Sends the message
         try {
-            sendSocket.send(this.sendPacket);
+            sendSocket.send(sendPacket);
         } catch (IOException e) {
             this.close(e);
         }
