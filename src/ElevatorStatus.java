@@ -1,79 +1,107 @@
+/**
+ * Class models the status containing all pertinent fields for an elevator car.
+ * @author YehanDeSilva 101185388
+ * @version iteration3
+ */
 public class ElevatorStatus {
 
     //Fields
     private final int currentFloor;
-
     private final int targetFloor;
-
-    private final int recievePortNum;
+    private final int receiverPortNum;
     private final boolean moving;
     private final String direction;
 
-    public ElevatorStatus() {
 
-        currentFloor = -1;
-        targetFloor = -1;
-        recievePortNum = -1;
-        moving = false;
-        direction = null;
-
-    }
-    public ElevatorStatus (int currentFloor, int targetFloor, int recievePortNum, boolean moving, String direction) {
-
+    /**
+     * Overloaded constructor
+     * @param currentFloor Current floor of elevator.
+     * @param targetFloor Target floor of elevator.
+     * @param receivePortNum Elevator receiver port number.
+     * @param moving If the elevator is moving or is stationary.
+     * @param direction Direction elevator is moving in.
+     */
+    public ElevatorStatus (int currentFloor, int targetFloor, int receivePortNum, boolean moving, String direction) {
         this.currentFloor = currentFloor;
         this.targetFloor = targetFloor;
-        this.recievePortNum = recievePortNum;
+        this.receiverPortNum = receivePortNum;
         this.moving = moving;
         this.direction = direction;
     }
 
+    /**
+     * Constructor which takes in a UDP string to construct an elevator status object.
+     * @param udpString UDP string to be used to make request
+     */
     public ElevatorStatus(String udpString)  {
-
-        String[] data = udpString.split(",");
-        this.currentFloor = Integer.parseInt(data[0]);
-        this.targetFloor = Integer.parseInt(data[1]);
-        this.recievePortNum = Integer.parseInt(data[2]);
-        this.moving = Boolean.parseBoolean(data[3]);
-        this.direction = data[4];
-
+        this(Integer.parseInt(udpString.split(",")[0]), Integer.parseInt(udpString.split(",")[1]),
+                Integer.parseInt(udpString.split(",")[2]), Boolean.parseBoolean(udpString.split(",")[3]),
+                udpString.split(",")[4]);
     }
 
-    public int getCurrentFloor() {
+    /**
+     * Constructor which takes in a byte array and length to create an elevator status.
+     * @param msg Entire elevator status message.
+     * @param length Length of message.
+     */
+    public ElevatorStatus(byte[] msg, int length) {
+        this(new String(msg, 0, length));
+    }
 
+    /**
+     * Returns current floor.
+     * @return Elevator current floor.
+     */
+    public int getCurrentFloor() {
         return currentFloor;
     }
 
+    /**
+     * Returns target floor.
+     * @return Elevator target floor.
+     */
     public int getTargetFloor() {
-
         return targetFloor;
     }
 
-    public int getRecievePortNum() {
-
-        return recievePortNum;
+    /**
+     * Returns elevator receiver port number.
+     * @return Elevator receiver port number.
+     */
+    public int getReceiverPortNum() {
+        return receiverPortNum;
     }
 
+    /**
+     * Returns whether elevator is moving.
+     * @return True if elevator is moving
+     */
     public boolean getMoving() {
-
         return moving;
     }
 
+    /**
+     * Returns direction elevator is moving in.
+     * @return direction elevator is moving in.
+     */
     public String getDirection() {
-
         return direction;
     }
 
+    /**
+     * Returns udp representation of elevator status.
+     * @return udp representation of elevator status
+     */
     public byte[] toUdpStringBytes() {
-
-        return (this.currentFloor + "," + this.targetFloor + "," + this.recievePortNum + "," + this.moving + "," +this.direction).getBytes();
+        return (this.currentFloor + "," + this.targetFloor + "," + this.receiverPortNum + "," + this.moving + "," +this.direction).getBytes();
     }
 
+    /**
+     * String representation of elevator status.
+     * @return string representation of elevator status.
+     */
     @Override
     public String toString() {
-
-        return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + "| PortNum" + this.recievePortNum + "| Moving" + this.moving + "Direction of Cart -->" + this.direction;
+        return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + "| PortNum" + this.receiverPortNum + "| Moving" + this.moving + "Direction of Car -->" + this.direction;
     }
-
-
-
 }
