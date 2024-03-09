@@ -52,10 +52,6 @@ public class FloorSubsystem extends Thread {
             this.getMsg();
             this.processMsg();
         }
-        // TODO This should be moved to processMsg() when we determine that we received an elevator status message
-        /*while (synchronizer.isRunning()) {
-            System.out.println("FloorRequestSimulator: Elevator at " + synchronizer.getCurrentFloor());
-        }*/
     }
 
     /**
@@ -89,10 +85,21 @@ public class FloorSubsystem extends Thread {
      * Packet could be a floor request or an elevator status.
      */
     private void processMsg() {
-        // TODO This method should differentiate between floor requests and elevator status before deciding on appropriate method to service method
-        FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
-        System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
-        this.sendMsgToScheduler();
+        // Try creating an elevator status object.
+        try {
+            ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
+            System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                    " at floor " + elevatorStatus.getCurrentFloor());
+        } catch (Exception e) {
+            // If it throws an exception, try creating a floor request object.
+            try {
+                FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
+                System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
+                this.sendMsgToScheduler();
+            } catch (Exception e2) {
+                this.close(e2);
+            }
+        }
     }
 
     /**
