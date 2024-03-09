@@ -6,6 +6,7 @@
 public class ElevatorStatus {
 
     //Fields
+    private final int elevatorId;
     private final int currentFloor;
     private final int targetFloor;
     private final int receiverPortNum;
@@ -21,7 +22,8 @@ public class ElevatorStatus {
      * @param moving If the elevator is moving or is stationary.
      * @param direction Direction elevator is moving in.
      */
-    public ElevatorStatus (int currentFloor, int targetFloor, int receivePortNum, boolean moving, String direction) {
+    public ElevatorStatus (int elevatorId, int currentFloor, int targetFloor, int receivePortNum, boolean moving, String direction) {
+        this.elevatorId = elevatorId;
         this.currentFloor = currentFloor;
         this.targetFloor = targetFloor;
         this.receiverPortNum = receivePortNum;
@@ -35,8 +37,8 @@ public class ElevatorStatus {
      */
     public ElevatorStatus(String udpString)  {
         this(Integer.parseInt(udpString.split(",")[0]), Integer.parseInt(udpString.split(",")[1]),
-                Integer.parseInt(udpString.split(",")[2]), Boolean.parseBoolean(udpString.split(",")[3]),
-                udpString.split(",")[4]);
+                Integer.parseInt(udpString.split(",")[2]), Integer.parseInt(udpString.split(",")[3]),
+                Boolean.parseBoolean(udpString.split(",")[4]), udpString.split(",")[5]);
     }
 
     /**
@@ -48,6 +50,13 @@ public class ElevatorStatus {
         this(new String(msg, 0, length));
     }
 
+    /**
+     * Returns elevator id.
+     * @return elevator id.
+     */
+    public int getElevatorId() {
+        return this.elevatorId;
+    }
     /**
      * Returns current floor.
      * @return Elevator current floor.
