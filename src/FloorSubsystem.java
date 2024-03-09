@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
 
 /**
  * The FloorSubsystem class is responsible for sending floor requests to the scheduler as well as receiving elevator
@@ -23,9 +22,21 @@ public class FloorSubsystem extends Thread {
     public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
     public final static int DEFAULT_MAX_FLOOR = 7;
+
+    public static final InetAddress FLOOR_SUBSYSTEM_IP;   // IP address of Scheduler
+    static {
+        try {
+            FLOOR_SUBSYSTEM_IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static final int FLOOR_SUBSYSTEM_PORT = 24;
 
-
+    /**
+     * Floor Subsystem constructor.
+     * @param synchronizer
+     */
     public FloorSubsystem(Synchronizer synchronizer) {
         this.synchronizer = synchronizer;
         try {
@@ -35,6 +46,9 @@ public class FloorSubsystem extends Thread {
         }
     }
 
+    /**
+     * Main method of floor subsystem thread. Get message, process it and loop.
+     */
     @Override
     public void run() {
         while (true) {
