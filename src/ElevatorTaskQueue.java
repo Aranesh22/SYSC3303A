@@ -4,7 +4,7 @@ import java.util.Objects;
 /**
  * ElevatorTaskQueue is the data structure holding queue information for each elevator that is stored within the
  * scheduler to be used in the scheduler algorithm.
- * 
+ *
  * @author Yehan De Silva (101185388)
  * @version iteration3
  */

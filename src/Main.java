@@ -13,13 +13,12 @@ public class Main {
      * Creates and starts the scheduler,floor and elevator threads.
      */
     public static void main(String[] args) {
-
-        Synchronizer synchronizer = new Synchronizer();
+        
         Thread elevator, elevatorReceiver, scheduler, floorSubsystem, floorRequestSimulator;
         ElevatorRequestBox elevatorRequestBox;
 
 
-        scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
+        scheduler = new Thread(new Scheduler(), "Scheduler");
         floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
         elevatorRequestBox = new ElevatorRequestBox();
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
