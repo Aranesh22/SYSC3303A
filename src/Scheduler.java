@@ -20,10 +20,6 @@ import java.util.HashMap;
  * @version iteration1, iteration2
  */
 public class Scheduler extends Thread {
-    private final Synchronizer synchronizer; // Synchronizer object to interact with the elevator system
-    private SchedulerState currentState; // Current state of the Scheduler
-    private FloorRequest currentRequest; // Current request being handled by the Scheduler
-
     public static final InetAddress SCHEDULER_IP;   // IP address of Scheduler
     static {
         try {
@@ -32,140 +28,106 @@ public class Scheduler extends Thread {
             throw new RuntimeException(e);
         }
     }
-
     public static final int SCHEDULER_PORT = 25; //Current Port
+    private DatagramSocket sendSocket, receiveSocket;
+    private DatagramPacket receivePacket;
+    private SchedulerState currentState;
+    private HashMap<String, SchedulerState> states;
 
-    private DatagramSocket sendSocket,receiveSocket;
-    private DatagramPacket sendPacket,receivePacket;
     /**
-     * Constructor for the Scheduler class.
-     * @param synchronizer Synchronizer object to interact with the elevator system
+     * Constructor for the Scheduler class
      */
-    public Scheduler(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
-        setState(new WaitingForFloorRequest()); // Set initial state
-    }
-
-    private void getMsg() {
-        byte[] data = new byte[100];
-        this.receivePacket = new DatagramPacket(data, data.length);
-
+    public Scheduler() {
+        // Initialize sockets
         try {
-            receiveSocket.receive(this.receivePacket);
-        } catch (IOException e) {
-
+            // For receiving FloorRequests and ElevatorStatus (bind to dedicated port)
+            receiveSocket = new DatagramSocket(SCHEDULER_PORT);
+            // For sending FloorRequests and ElevatorStatus (bind to any available port)
+            sendSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
         }
 
-        //Case to check what function to switch
-
-        //if message is for Elevator call elevator
-        getMsgElvStatus();
-        //else call Floor Request
-        getMsgFloorReq();
-
+        // Add all states
+        states = new HashMap<>();
+        states.put("WaitingForPacket", new WaitingForPacket(this));
+        states.put("CheckingPacketType", new CheckingPacketType(this));
+        states.put("ProcessingElevatorStatus", new ProcessingElevatorStatus(this));
+        states.put("ProcessingFloorRequest", new ProcessingFloorRequest(this));
+        // Set the initial state
+        setState(new WaitingForPacket(this));
     }
 
-    private void getMsgElvStatus() {
-
-        try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(), InetAddress.getLocalHost(),
-                    FloorSubsystem.FLOOR_SUBSYSTEM_PORT);
-        } catch (UnknownHostException e) {
-
-        }
-
-        try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
-            sendSocket.close();
-        } catch (IOException e) {
-        }
-
-    }
-    private void getMsgFloorReq() {
-
-
-    }
-
-    private void sendReqtoRecieve() {
-        try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
-                    InetAddress.getLocalHost(), ElevatorReceiver.ELEVATOR_RECEIVER_PORT);
-        } catch (UnknownHostException e) {
-        }
-        try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
-            sendSocket.close();
-        } catch (IOException e) {
-        }
-    }
     /**
-     * Overridden run method from Thread class.
-     * Continuously handles the current state of the Scheduler as long as the Synchronizer is running.
+     * Run method
      */
-    @Override
     public void run() {
-        while (synchronizer.isRunning()) {
-            currentState.handleState(this);
+        while(true) {
+            // Start the current state
+            currentState.start();
         }
     }
 
     /**
-     * Stops the Scheduler and the Synchronizer.
+     * Handles event where packet is received
      */
-    public void stopScheduler() {
-        System.out.println("Scheduler: Stopping scheduler and exiting.");
-        synchronizer.stopRunning();
+    public void packetReceived() {
+        setState(currentState.packetReceived());
     }
 
     /**
-     * Sets the current state of the Scheduler.
-     * @param newState New state to be set
+     * Handles event where ElevatorStatus is received
      */
-    public void setState(SchedulerState newState) {
-        this.currentState = newState;
-        System.out.println("[Scheduler-STATE]: State changed to " + newState.getClass().getSimpleName());
+    public void elevatorStatusReceived() {
+        setState(currentState.elevatorStatusReceived());
     }
 
     /**
-     * Handles the status of the elevator.
-     * Continuously gets the status of the elevator from the Synchronizer until the elevator reaches the target floor.
-     * @param targetFloor The floor that the elevator is supposed to reach
+     * Handles event where FloorRequest is received
      */
-    public void handleElevatorStatus(int targetFloor) {
-        int elevatorStatus;
-        do {
-            elevatorStatus = synchronizer.getElevatorStatus();
-            // TODO had to remove this to prevent the scheduler from getting stuck. Remove when removing synchronizer.
-            // synchronizer.putCurrentFloor(elevatorStatus);
-        } while (elevatorStatus != targetFloor);
-        System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
+    public void floorRequestReceived() {
+        setState(currentState.floorRequestReceived());
     }
 
     /**
-     * Returns the Synchronizer object.
-     * @return Synchronizer object
+     * Handles the event where a packet is sent by the Scheduler
      */
-    public Synchronizer getSynchronizer() {
-        return synchronizer;
+    public void packetSent() {
+        setState(currentState.packetSent());
     }
 
     /**
-     * Returns the current request being handled by the Scheduler.
-     * @return Current request
+     * Sets the current state of the Scheduler
      */
-    public FloorRequest getCurrentRequest() {
-        return currentRequest;
+    private void setState(SchedulerState nextState) {
+        // Set the current state
+        currentState = nextState;
+        // Display current state info
+        currentState.displayState();
     }
 
     /**
-     * Sets the current request to be handled by the Scheduler.
-     * @param request New request to be handled
+     * Returns the state object according to the specified state name
+     * @param stateName - name of the state to be returned
+     * @return a state
      */
-    public void setCurrentRequest(FloorRequest request) {
-        this.currentRequest = request;
+    public SchedulerState getState(String stateName) {
+        return states.get(stateName);
+    }
+
+    public DatagramSocket getSendSocket() {
+        return sendSocket;
+    }
+
+    public DatagramSocket getReceiveSocket() {
+        return receiveSocket;
+    }
+
+    public void saveReceivedPacket(DatagramPacket packet) {
+        receivePacket = packet;
+    }
+
+    public DatagramPacket getReceivedPacket() {
+        return receivePacket;
     }
 }
