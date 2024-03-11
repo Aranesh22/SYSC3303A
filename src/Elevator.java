@@ -1,6 +1,7 @@
 import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
+import java.util.Objects;
 
 /**
  * The Elevator thread class models a traction elevator used to move people around in a building.
@@ -16,54 +17,47 @@ import java.net.*;
  */
 
 public class Elevator extends Thread {
-//    private Map<String, ElevatorState> states;
+
     private ElevatorState currentState;
     // Fields
-    private final Synchronizer synchronizer;
-    private ElevatorRequestBox requestBox;
+    private final ElevatorRequestBox requestBox;
     private DatagramSocket sendSocket;
-    private DatagramPacket sendPacket;
     private int elevatorReceiverPortNum;
     private final int id;
     private int curFloor;
+    private int destFloor;
+    private boolean moving;
     private String direction;
     private final float velocity;
     private final float floorHeight;
-    private final float loadUnloadTime;
 
     // Constants
     public final static float DEFAULT_VELOCITY = 1.75f * 1000;
-    public final static float DEFAULT_LOAD_UNLOAD_TIME = 7.85f * 1000;
-
-    private int destFloor;
-    // --- added vars for state machine
+    public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
 
     /**
      * Default constructor.
-     * @param synchronizer Synchronizer that elevator will be using.
+     * @param requestBox Request box elevator shares with Elevator Receiver
      */
-    public Elevator(Synchronizer synchronizer, ElevatorRequestBox requestBox) {
-        this(synchronizer, requestBox, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT, Elevator.DEFAULT_LOAD_UNLOAD_TIME);
+    public Elevator(ElevatorRequestBox requestBox) {
+        this(requestBox, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT);
     }
 
     /**
      * Overloaded constructor.
-     * @param synchronizer Synchronizer that elevator will be using.
      * @param id Id of elevator.
      * @param curFloor FloorRequestSimulator elevator is starting at.
      * @param velocity Speed of the elevator.
      * @param floorHeight Height of a floor in a building.
-     * @param loadUnloadTime Total time to load and unload elevator (Doors opening -> Doors closing).
      */
-    public Elevator(Synchronizer synchronizer, ElevatorRequestBox requestBox, int id, int curFloor, float velocity, float floorHeight, float loadUnloadTime) {
-        this.synchronizer = synchronizer;
+    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, float velocity, float floorHeight) {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
+        this.moving = false;
         this.direction = "N/A";
         this.velocity = velocity;
         this.floorHeight = floorHeight;
-        this.loadUnloadTime = loadUnloadTime;
         this.destFloor = -1;
         elevatorReceiverPortNum = -1;
 
@@ -73,8 +67,8 @@ public class Elevator extends Thread {
         } catch (SocketException e) {
             System.exit(1);
         }
-        //Set inital state
-        this.setState(new StationaryDoorsClosed(this));
+        //Set initial state
+        this.setState(new StationaryDoorsClosed());
 
     }
 
@@ -84,16 +78,10 @@ public class Elevator extends Thread {
      */
     @Override
     public void run() {
-        // Start off by notifying of starting floor.
-        this.synchronizer.putElevatorStatus(this.curFloor);
-
         // While synchronizer is running, go to the floor we get from synchronizer.
-        while (this.synchronizer.isRunning()) {
-            this.currentState.handleState();
-//            this.goToDestinationFloor(this.synchronizer.getDestinationFloor());
-
+        while (true) {
+            this.currentState.handleState(this);
         }
-        System.out.println(this + ": Has exited");
     }
 
     /**
@@ -105,6 +93,8 @@ public class Elevator extends Thread {
         ElevatorMessage request = requestBox.getRequest();
         this.elevatorReceiverPortNum = request.getElevatorReceiverPortNum();
         this.destFloor = request.getTargetFloor();
+        // Request received event
+        this.requestReceived();
     }
 
     /**
@@ -120,12 +110,12 @@ public class Elevator extends Thread {
      */
     public void sendElevatorStatus() {
         // Create ElevatorStatus message
-        ElevatorStatus status = new ElevatorStatus(curFloor, destFloor, elevatorReceiverPortNum, true, direction);
+        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, true, direction);
         // Send message to Scheduler
         try {
             // Get IP address of Scheduler
             byte[] data = status.toUdpStringBytes();
-            sendPacket = new DatagramPacket(data, data.length, Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
+            DatagramPacket sendPacket = new DatagramPacket(data, data.length, Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
             // Send packet
             sendSocket.send(sendPacket);
         } catch (IOException e) {
@@ -134,70 +124,45 @@ public class Elevator extends Thread {
     }
 
     /**
-     * Sets the direction of the elevator
-     * @param isMovingUp - whether the elevator is moving up or not
+     * Update moving field.
+     * @param moving if the elevator is moving or is stationary.
      */
-    public void setDirection (boolean isMovingUp) {
-        if (isMovingUp) {
-            direction = "up";
-        }
-        else {
-            direction = "down";
-        }
+    public void setMoving(boolean moving) {
+        this.moving = moving;
+        this.updateDirection();
     }
 
-    /** DECOMMED
-     * Moves elevator to the specified destination floor, passing through all floors in between.
-     * @param destinationFloor Integer specifying the target floor we need to end up at.
+    /**
+     * Sets the direction of the elevator
      */
-    public void goToDestinationFloor(int destinationFloor) {
-        // Determine if elevator is going up or down and go to each floor in between.
-        boolean movingUp = destinationFloor >= this.curFloor;
-        while (this.curFloor != destinationFloor) {
-            this.goToFloor(((movingUp)? (this.curFloor + 1 ): (this.curFloor - 1)));
+    private void updateDirection () {
+        if (this.moving) {
+            if (this.destFloor > this.curFloor) {
+                direction = "up";
+            } else {
+                direction = "down";
+            }
         }
-
-        this.loadUnloadElevator();
-
+        else {
+            direction = "N/A";
+        }
     }
 
     /**
      * Moves elevator to the specified floor.
-     * @param floor Integer specifying the target floor we get to.
      */
-    public void goToFloor(int floor) {
-        // Sleep for the time it takes to go to specified floor.
-        try {
-            Thread.sleep(this.calculateTimeTravelFloor() * Math.abs(floor - this.curFloor));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void goToFloor() {
         // Update current floor and notify we have arrived at this floor.
-        this.curFloor = floor;
-        System.out.println(this + ": Currently at floor " + this.curFloor);
-        this.synchronizer.putElevatorStatus(this.curFloor);
-    }
-
-    /**
-     * Simulates an elevator loading/unloading.
-     * (Doors opening -> Doors closing).
-     * Implementation of the tExp timer for StationaryDoorsOpen state
-     */
-    public void loadUnloadElevator() {
-        // Sleep for the time it takes to load/unload elevator.
-        try {
-            Thread.sleep((long) this.loadUnloadTime);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if (Objects.equals(this.direction, "up")) {
+            this.curFloor++;
+        } else {
+            this.curFloor--;
         }
-    }
-
-    /**
-     * Calculates the time it takes to travel one floor.
-     * @return Long specifying the time it takes to travel one floor.
-     */
-    public long calculateTimeTravelFloor() {
-        return (long) (this.velocity * this.floorHeight);
+        this.setMoving(this.curFloor == this.destFloor);
+        System.out.println(this + ": Currently at floor " + this.curFloor);
+        if (!this.requestBoxIsEmpty()) {
+            this.getElevatorMessage();
+        }
     }
 
     /**
@@ -213,73 +178,29 @@ public class Elevator extends Thread {
 
 //---------Iteration 2/3 Code
 
-    public Synchronizer getSynchronizer(){ return this.synchronizer;}
     public int getCurFloor(){ return this.curFloor; }
     public int getDestFloor(){ return this.destFloor; }
-    //Updates the destFloor so that it is not overwritten or put to (-1) by new requests until the request has been fulfilled
-    public void updateDestFloor(int newFloor){ this.destFloor = newFloor;}
 
     /**
      * Sets the current state of the state machine
      */
-
     public void setState(ElevatorState newState) {
         this.currentState = newState;
-    }
-
-    public ElevatorState getCurrentState() {
-        return this.currentState;
-    }
-
-
-    /**
-     * simulates the event of the Elevator door timer expiring - signalling the doors will close
-     */
-    public void timerExpired(){
-//        currentState.timerExpired();
+        this.currentState.handleState(this);
     }
 
     /**
-     * simulates the event of the Elevator recieving a request from the scheduler
+     * Event of a timer expiring.
      */
-    public void receiveRequest(){
-//        currentState.receiveRequest();
+    public void timerExpired() {
+        this.currentState.timerExpired(this);
     }
 
     /**
-     * simulates the event of the elevator arriving at the requested floor
+     * Event of the Elevator receiving a request.
      */
-    public void arriveAtFloor(){
-//        currentState.arriveAtFloor();
+    public void requestReceived() {
+       this.currentState.requestReceived(this);
     }
 
-
-    // ---------- DECOMMED functions
-    /**
-     * Initializes the states for the Elevator.
-     * Decommed as this only points to 1 state obj ?
-     */
-//    private void initializeStates() {
-//        addState("StationaryDoorsClosed", new StationaryDoorsClosed(this));
-//        addState("StationaryDoorsOpen", new StationaryDoorsOpen(this));
-//        addState("MovingDoorsClosed", new MovingDoorsClosed(this));
-////        this.setState("StationaryDoorsClosed");
-//        this.setState(new StationaryDoorsClosed(this));
-//    }
-
-    /**
-     * Adds a state to the state machine.
-     *
-     * @param stateName The name of the state.
-     * @param state     The state to be added.
-     */
-//    public void addState(String stateName, ElevatorState state) {
-//        states.put(stateName, state);
-//    }
-    //----
-//    public void setState(String stateName){
-//        System.out.println("[Elevator-STATE] "+stateName);
-//        this.currentState = states.get(stateName);
-//    }
-
-}//end class
+}

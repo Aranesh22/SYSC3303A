@@ -23,7 +23,7 @@ public class Main {
         floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
         elevatorRequestBox = new ElevatorRequestBox();
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
-        elevator = new Thread(new Elevator(synchronizer, elevatorRequestBox), "Elevator");
+        elevator = new Thread(new Elevator(elevatorRequestBox), "Elevator");
         floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
 
         scheduler.start();
