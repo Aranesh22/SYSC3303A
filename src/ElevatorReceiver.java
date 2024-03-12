@@ -48,7 +48,7 @@ public class ElevatorReceiver extends Thread {
      */
     private void putElevatorMsg() {
         // Create ElevatorMessage: Port number of this Elevator Receiver and target floor
-        ElevatorMessage request = new ElevatorMessage(receiveSocket.getPort(),
+        ElevatorMessage request = new ElevatorMessage(receiveSocket.getLocalPort(),
                 Integer.parseInt(new String(receivePacket.getData(), 0, receivePacket.getLength())));
 
         // Put ElevatorMessage in request box for elevator

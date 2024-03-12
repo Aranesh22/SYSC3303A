@@ -27,6 +27,7 @@ public class ProcessingFloorRequest extends SchedulerState {
      */
     public void start() {
         doActivities();
+        exit();
     }
 
     /**
@@ -35,6 +36,13 @@ public class ProcessingFloorRequest extends SchedulerState {
     private void doActivities() {
         int suitableElevator = chooseElevatorForRequest();
         sendTargetFloor(suitableElevator);
+    }
+
+    /**
+     * Exit actions
+     */
+    private void exit() {
+        schedulerContext.packetSent();
     }
 
     private int chooseElevatorForRequest() {
