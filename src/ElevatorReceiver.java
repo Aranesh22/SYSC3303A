@@ -18,7 +18,6 @@ public class ElevatorReceiver extends Thread {
     private final ElevatorRequestBox requestBox;
 
     // Port number
-    public static final int ELEVATOR_RECEIVER_PORT=35;
 
     /**
      * Constructor
@@ -27,7 +26,7 @@ public class ElevatorReceiver extends Thread {
         this.requestBox = requestBox;
         try {
             // Bind socket to specific port
-            receiveSocket = new DatagramSocket(ELEVATOR_RECEIVER_PORT);
+            receiveSocket = new DatagramSocket();
         } catch(SocketException e) {
             System.exit(1);
         }
@@ -60,7 +59,7 @@ public class ElevatorReceiver extends Thread {
      * Puts initial message into request box.
      */
     private void putInitialElevatorMsg() {
-        ElevatorMessage msg = new ElevatorMessage(receiveSocket.getPort());
+        ElevatorMessage msg = new ElevatorMessage(receiveSocket.getLocalPort());
         requestBox.putRequest(msg);
     }
 

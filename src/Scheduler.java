@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
 
@@ -30,6 +29,7 @@ public class Scheduler extends Thread {
     private DatagramPacket receivePacket;
     private SchedulerState currentState;
     private HashMap<String, SchedulerState> states;
+    private HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap;
 
     /**
      * Constructor for the Scheduler class
@@ -44,6 +44,9 @@ public class Scheduler extends Thread {
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
+
+        // Initialize elevator task queue hashmap
+        elevatorTaskQueueHashMap =  new HashMap<>();
 
         // Add all states
         states = new HashMap<>();
@@ -126,5 +129,29 @@ public class Scheduler extends Thread {
 
     public DatagramPacket getReceivedPacket() {
         return receivePacket;
+    }
+
+    public boolean containsElevatorId(int elevatorId) {
+        return elevatorTaskQueueHashMap.containsKey(elevatorId);
+    }
+
+    public void addElevator(int elevatorId, ElevatorStatus elevatorStatus, InetAddress elevatorIP) {
+        elevatorTaskQueueHashMap.put(elevatorId, new ElevatorTaskQueue(elevatorStatus, elevatorIP));
+    }
+
+    public void updateElevatorStatus(int elevatorId, ElevatorStatus elevatorStatus) {
+        elevatorTaskQueueHashMap.get(elevatorId).setElevatorStatus(elevatorStatus);
+    }
+
+    public ElevatorStatus getElevatorStatus(int elevatorId) {
+        return elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
+    }
+
+    public void addFloorRequestToTaskQueue(int elevatorId, FloorRequest floorRequest) {
+        elevatorTaskQueueHashMap.get(elevatorId).addFloorRequest(floorRequest);
+    }
+
+    public HashMap<Integer, ElevatorTaskQueue> getElevatorTaskQueueHashMap() {
+        return elevatorTaskQueueHashMap;
     }
 }

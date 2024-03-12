@@ -102,7 +102,7 @@ public class ElevatorStatus {
      * @return udp representation of elevator status
      */
     public byte[] toUdpStringBytes() {
-        return (this.currentFloor + "," + this.targetFloor + "," + this.receiverPortNum + "," + this.moving + "," +this.direction).getBytes();
+        return (this.elevatorId + "," + this.currentFloor + "," + this.targetFloor + "," + this.receiverPortNum + "," + this.moving + "," + this.direction).getBytes();
     }
 
     /**

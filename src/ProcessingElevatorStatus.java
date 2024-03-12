@@ -49,7 +49,6 @@ public class ProcessingElevatorStatus extends SchedulerState {
      * Exit actions
      */
     private void exit() {
-        updateElevatorInfo();
         schedulerContext.packetSent();
     }
 
@@ -59,7 +58,19 @@ public class ProcessingElevatorStatus extends SchedulerState {
      * actions
      */
     private void checkedReceivedPriorMessage() {
-        //TODO
+        // Construct ElevatorStatus from received packet
+        byte[] statusData = schedulerContext.getReceivedPacket().getData();
+        ElevatorStatus elevatorStatus = new ElevatorStatus(statusData, statusData.length);
+
+        // Check if there's already an elevator task queue for the elevator
+        if (!schedulerContext.containsElevatorId(elevatorStatus.getElevatorId())) {
+            // If not, create elevator task queue for the elevator
+            schedulerContext.addElevator(elevatorStatus.getElevatorId(), elevatorStatus, schedulerContext.getReceivedPacket().getAddress());
+        }
+        else {
+            // Update the elevator's elevator status
+            schedulerContext.updateElevatorStatus(elevatorStatus.getElevatorId(), elevatorStatus);
+        }
     }
 
     /**
@@ -75,13 +86,6 @@ public class ProcessingElevatorStatus extends SchedulerState {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Updates the scheduler's queue of elevator data.
-     */
-    private void updateElevatorInfo() {
-        //TODO
     }
 
     /**

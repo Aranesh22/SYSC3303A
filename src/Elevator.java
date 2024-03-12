@@ -52,7 +52,7 @@ public class Elevator extends Thread {
         this.curFloor = curFloor;
         this.moving = false;
         this.direction = "N/A";
-        this.destFloor = -1;
+        this.destFloor = 1;
         elevatorReceiverPortNum = -1;
 
         // Set up socket for sending (bind to any available port)
