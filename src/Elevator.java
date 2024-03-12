@@ -195,9 +195,6 @@ public class Elevator extends Thread {
             }
             this.setMoving(this.curFloor != this.destFloor);
             System.out.println(this + ": Currently at floor " + this.curFloor);
-            if (!this.requestBoxIsEmpty()) {
-                this.getElevatorMessage();
-            }
         }
     }
 

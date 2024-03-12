@@ -152,6 +152,15 @@ class StationaryDoorsOpen extends ElevatorState {
 class MovingDoorsClosed extends ElevatorState {
 
     /**
+     * How to handle current state.
+     * @param context Current context of the state machine.
+     */
+    @Override
+    public void handleState(Elevator context) {
+        this.onEntry(context);
+    }
+
+    /**
      * Actions to do on entry of state
      * @param context Current context of the state machine.
      */
@@ -161,27 +170,24 @@ class MovingDoorsClosed extends ElevatorState {
     }
 
     /**
+     * Actions to do on exit of state
+     * @param context Current context of the state machine.
+     */
+    public void onExit(Elevator context) {
+        context.goToFloor();
+        context.sendElevatorStatus();
+    }
+
+    /**
      * Handles the event of when the elevator door timer expires
      * @param context The Elevator context in which the state transition occurs.
      */
     @Override
     public void timerExpired(Elevator context) {
-        context.goToFloor();
-        context.sendElevatorStatus();
-        if (context.getCurFloor() == context.getDestFloor()) {
-            context.setState("StationaryDoorsOpen");
-        } else {
-            context.setState("MovingDoorsClosed");
-        }
-    }
-
-    /**
-     * Handles the event of receiving a new request from Scheduler
-     * @param context Elevator context in which the state transition occurs.
-     */
-    @Override
-    public void requestReceived(Elevator context) {
-        if (context.getCurFloor() == context.getDestFloor()) {
+        this.onExit(context);
+        if (!context.requestBoxIsEmpty()) {
+            context.setState("WaitingForReceiver");
+        } else if (context.getCurFloor() == context.getDestFloor()) {
             context.setState("StationaryDoorsOpen");
         } else {
             context.setState("MovingDoorsClosed");
