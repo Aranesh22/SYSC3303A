@@ -69,7 +69,7 @@ public abstract class ElevatorState {
 /**
  * Concrete state class representing when an elevator is stationary and its doors are closed
  */
-class StationaryDoorsOpen extends ElevatorState {
+class StationaryDoorsClosed extends ElevatorState {
 
     /**
      * Actions to do on entry of state
@@ -92,8 +92,10 @@ class StationaryDoorsOpen extends ElevatorState {
 
 }
 
+/**
+ * Concrete state class representing when an elevator is waiting for a request.
+ */
 class WaitingForReceiver extends ElevatorState {
-
     /**
      * Actions to do within a state
      * @param context Current context of the state machine.
@@ -117,20 +119,19 @@ class WaitingForReceiver extends ElevatorState {
             context.setState(new MovingDoorsClosed());
         }
     }
-
 }
 
 /**
  * Concrete state class representing when an elevator is stationary and its doors are open
  * to allow passengers to load/unload
  */
-class StationaryDoorsClosed extends ElevatorState {
-
+class StationaryDoorsOpen extends ElevatorState {
     /**
      * Actions to do on entry of state
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
+        super.onEntry(context);
         System.out.println(context + ": Closing Doors");
         new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
     }
