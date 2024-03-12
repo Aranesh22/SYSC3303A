@@ -101,13 +101,18 @@ public class Elevator extends Thread {
     @Override
     public void run() {
         //Set initial state
-        this.setState("StationaryDoorsClosed");
+        String initialStateName = "StationaryDoorsClosed";
+        System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
+        this.setState(initialStateName);
     }
 
     /**
      * Sets the current state of the state machine
      */
     public void setState(String stateName) {
+        if ((this.currentState != null) && (!this.currentState.toString().equals(stateName))) {
+            System.out.println("[STATE][" + this + "]: State changed to " + stateName);
+        }
         this.currentState = this.getState(stateName);
         this.currentState.handleState(this);
     }

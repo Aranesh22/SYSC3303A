@@ -22,9 +22,7 @@ public abstract class ElevatorState {
      * Actions to do on entry of state
      * @param context Current context of the state machine.
      */
-    public void onEntry(Elevator context) {
-        System.out.println("[STATE][" + context + "]: State changed to " + this);
-    };
+    public void onEntry(Elevator context) {};
 
     /**
      * Actions to do within a state
