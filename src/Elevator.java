@@ -31,6 +31,7 @@ public class Elevator extends Thread {
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
+    public final static long DEFAULT_FLOOR_TRAVEL_TIME = 3;
 
     /**
      * Default constructor.
@@ -97,7 +98,7 @@ public class Elevator extends Thread {
      */
     public void sendElevatorStatus() {
         // Create ElevatorStatus message
-        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, true, direction);
+        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, moving, direction);
         // Send message to Scheduler
         try {
             // Get IP address of Scheduler

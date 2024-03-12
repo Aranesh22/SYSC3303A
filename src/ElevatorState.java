@@ -112,6 +112,7 @@ class WaitingForReceiver extends ElevatorState {
     @Override
     public void requestReceived(Elevator context) {
         if (context.getDestFloor() == 0) {
+            context.sendElevatorStatus();
             context.setState(new WaitingForReceiver());
         } else if (context.getCurFloor() == context.getDestFloor()) {
             context.setState(new StationaryDoorsOpen());
@@ -132,7 +133,7 @@ class StationaryDoorsOpen extends ElevatorState {
      */
     public void onEntry(Elevator context) {
         super.onEntry(context);
-        System.out.println(context + ": Closing Doors");
+        System.out.println(context + ": Opening Doors");
         new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
     }
 
@@ -157,24 +158,8 @@ class MovingDoorsClosed extends ElevatorState {
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
-        new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
-    }
-
-    /**
-     * Actions to do on in state
-     * @param context Current context of the state machine.
-     */
-    public void doActions(Elevator context) {
-        context.goToFloor();
-    }
-
-    /**
-     * Actions to do on exit of state
-     * @param context Current context of the state machine.
-     */
-    @Override
-    public void onExit(Elevator context) {
-        context.sendElevatorStatus();
+        super.onEntry(context);
+        new Timer(Elevator.DEFAULT_FLOOR_TRAVEL_TIME, context);
     }
 
     /**
@@ -183,6 +168,8 @@ class MovingDoorsClosed extends ElevatorState {
      */
     @Override
     public void timerExpired(Elevator context) {
+        context.goToFloor();
+        context.sendElevatorStatus();
         if (context.getCurFloor() == context.getDestFloor()) {
             context.setState(new StationaryDoorsOpen());
         } else {
@@ -196,9 +183,7 @@ class MovingDoorsClosed extends ElevatorState {
      */
     @Override
     public void requestReceived(Elevator context) {
-        if (context.getDestFloor() == 0) {
-            context.setState(new WaitingForReceiver());
-        } else if (context.getCurFloor() == context.getDestFloor()) {
+        if (context.getCurFloor() == context.getDestFloor()) {
             context.setState(new StationaryDoorsOpen());
         } else {
             context.setState(new MovingDoorsClosed());
