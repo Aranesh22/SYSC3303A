@@ -39,6 +39,14 @@ public class ElevatorTaskQueue {
     }
 
     /**
+     * Adds both the starting and destination floors to floorsToVisit.
+     * @param floorRequest floor request to be added.
+     */
+    public void addFloorRequest(FloorRequest floorRequest) {
+        this.addFloorToVisit(floorRequest.getStartFloor());
+        this.addFloorToVisit(floorRequest.getDestinationFloor());
+    }
+    /**
      * Add new floor to visit into sorted queue.
      * @param floor Floor to add.
      */
