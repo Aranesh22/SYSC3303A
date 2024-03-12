@@ -13,22 +13,20 @@ public class Main {
      * Creates and starts the scheduler,floor and elevator threads.
      */
     public static void main(String[] args) {
-        
-        Thread elevator, elevatorReceiver, scheduler, floorSubsystem, floorRequestSimulator;
+
+        Thread scheduler, floorSubsystem, floorRequestSimulator;
+        ElevatorSubsystem elevatorSubsystem;
         ElevatorRequestBox elevatorRequestBox;
 
 
         scheduler = new Thread(new Scheduler(), "Scheduler");
         floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
-        elevatorRequestBox = new ElevatorRequestBox();
-        elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
-        elevator = new Thread(new Elevator(elevatorRequestBox), "Elevator");
         floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
+        elevatorSubsystem = new ElevatorSubsystem(1);
+
 
         scheduler.start();
         floorSubsystem.start();
-        elevator.start();
-        elevatorReceiver.start();
         floorRequestSimulator.start();
     }
 }

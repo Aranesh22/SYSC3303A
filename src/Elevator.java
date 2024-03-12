@@ -16,7 +16,7 @@ import java.util.Objects;
  *
  */
 
-public class Elevator extends Thread {
+public class Elevator {
 
     private ElevatorState currentState;
     // Fields
@@ -28,8 +28,6 @@ public class Elevator extends Thread {
     private int destFloor;
     private boolean moving;
     private String direction;
-    private final float velocity;
-    private final float floorHeight;
 
     // Constants
     public final static float DEFAULT_VELOCITY = 1.75f * 1000;
@@ -39,25 +37,21 @@ public class Elevator extends Thread {
      * Default constructor.
      * @param requestBox Request box elevator shares with Elevator Receiver
      */
-    public Elevator(ElevatorRequestBox requestBox) {
-        this(requestBox, 1, 1, Elevator.DEFAULT_VELOCITY, FloorSubsystem.DEFAULT_FLOOR_HEIGHT);
+    public Elevator(ElevatorRequestBox requestBox, int id) {
+        this(requestBox, id, 1);
     }
 
     /**
      * Overloaded constructor.
      * @param id Id of elevator.
      * @param curFloor FloorRequestSimulator elevator is starting at.
-     * @param velocity Speed of the elevator.
-     * @param floorHeight Height of a floor in a building.
      */
-    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, float velocity, float floorHeight) {
+    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor) {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
         this.moving = false;
         this.direction = "N/A";
-        this.velocity = velocity;
-        this.floorHeight = floorHeight;
         this.destFloor = -1;
         elevatorReceiverPortNum = -1;
 
@@ -70,18 +64,6 @@ public class Elevator extends Thread {
         //Set initial state
         this.setState(new StationaryDoorsClosed());
 
-    }
-
-
-    /**
-     * Main task of elevator. Keep getting and going to floors.
-     */
-    @Override
-    public void run() {
-        // While synchronizer is running, go to the floor we get from synchronizer.
-        while (true) {
-            this.currentState.handleState(this);
-        }
     }
 
     /**

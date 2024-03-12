@@ -49,7 +49,7 @@ public class FloorRequest {
      */
     public FloorRequest(String udpString) {
         this(udpString.split(",")[0], Integer.parseInt(udpString.split(",")[1]),
-                Integer.parseInt(udpString.split(",")[3]), udpString.split(",")[2]);
+                Integer.parseInt(udpString.split(",")[2]), udpString.split(",")[3]);
     }
 
     /**
@@ -90,7 +90,7 @@ public class FloorRequest {
      * @return udp representation of floor request
      */
     public byte[] toUdpStringBytes() {
-        return (this.time + "," + this.startFloor + "," + this.direction + "," + this.destinationFloor).getBytes();
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor+ "," + this.direction).getBytes();
     }
 
     /**
