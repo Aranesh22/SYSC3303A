@@ -8,5 +8,6 @@ public class ElevatorSubsystem {
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
         elevator = new Elevator(elevatorRequestBox, id);
         elevatorReceiver.start();
+        elevator.start();
     }
 }

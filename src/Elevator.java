@@ -16,7 +16,7 @@ import java.util.Objects;
  *
  */
 
-public class Elevator {
+public class Elevator extends Thread {
 
     private ElevatorState currentState;
     // Fields
@@ -60,9 +60,15 @@ public class Elevator {
         } catch (SocketException e) {
             System.exit(1);
         }
+    }
+
+    /**
+     * Sets initial state to begin elevator.
+     */
+    @Override
+    public void run() {
         //Set initial state
         this.setState(new StationaryDoorsClosed());
-
     }
 
     /**
