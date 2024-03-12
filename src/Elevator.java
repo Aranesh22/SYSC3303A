@@ -81,6 +81,7 @@ public class Elevator extends Thread {
         ElevatorMessage request = requestBox.getRequest();
         this.elevatorReceiverPortNum = request.getElevatorReceiverPortNum();
         this.destFloor = request.getTargetFloor();
+        this.setMoving(this.curFloor != this.destFloor);
         // Request received event
         this.requestReceived();
     }
@@ -141,15 +142,17 @@ public class Elevator extends Thread {
      */
     public void goToFloor() {
         // Update current floor and notify we have arrived at this floor.
-        if (Objects.equals(this.direction, "up")) {
-            this.curFloor++;
-        } else {
-            this.curFloor--;
-        }
-        this.setMoving(this.curFloor == this.destFloor);
-        System.out.println(this + ": Currently at floor " + this.curFloor);
-        if (!this.requestBoxIsEmpty()) {
-            this.getElevatorMessage();
+        if (!Objects.equals(this.direction, "N/A")) {
+            if (Objects.equals(this.direction, "up")) {
+                this.curFloor++;
+            } else {
+                this.curFloor--;
+            }
+            this.setMoving(this.curFloor != this.destFloor);
+            System.out.println(this + ": Currently at floor " + this.curFloor);
+            if (!this.requestBoxIsEmpty()) {
+                this.getElevatorMessage();
+            }
         }
     }
 

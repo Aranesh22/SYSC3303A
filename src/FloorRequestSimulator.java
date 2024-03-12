@@ -79,6 +79,11 @@ public class FloorRequestSimulator extends Thread {
     private void sendRequests() {
         // Time format of the requests
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // Sends each request and waits in between each request.
         for (int i = 0; i < reqList.size(); i++) {

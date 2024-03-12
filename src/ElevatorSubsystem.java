@@ -1,4 +1,4 @@
-public class ElevatorSubsystem {
+public class ElevatorSubsystem extends Thread {
     private ElevatorRequestBox elevatorRequestBox;
     private ElevatorReceiver elevatorReceiver;
     private Elevator elevator;
@@ -7,7 +7,10 @@ public class ElevatorSubsystem {
         elevatorRequestBox = new ElevatorRequestBox();
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
         elevator = new Elevator(elevatorRequestBox, id);
-        elevatorReceiver.start();
-        elevator.start();
+    }
+
+    public void run() {
+        this.elevatorReceiver.start();
+        this.elevator.start();
     }
 }

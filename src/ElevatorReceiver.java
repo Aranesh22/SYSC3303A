@@ -30,13 +30,13 @@ public class ElevatorReceiver extends Thread {
         } catch(SocketException e) {
             System.exit(1);
         }
-        this.putInitialElevatorMsg();
     }
 
     /**
      * Run method
      */
     public void run() {
+        this.putInitialElevatorMsg();
         while (true) {
             getMsg();
             putElevatorMsg();

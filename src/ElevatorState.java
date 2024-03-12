@@ -44,7 +44,7 @@ public abstract class ElevatorState {
      * @param context Elevator context in which the state transition occurs.
      */
     public void requestReceived(Elevator context) {
-        throw new RuntimeException("Illegal Receive Request Event");
+        throw new RuntimeException("Illegal Receive Request Event In State " + this);
     };
 
     /**
@@ -53,7 +53,7 @@ public abstract class ElevatorState {
      * @param context The Elevator context in which the state transition occurs.
      */
     public void timerExpired(Elevator context) {
-        throw new RuntimeException("Illegal Timer Expired Event");
+        throw new RuntimeException("Illegal Timer Expired Event In State " + this);
     };
 
     /**
