@@ -1,6 +1,8 @@
 import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,7 @@ public class Elevator extends Thread {
     private int destFloor;
     private boolean moving;
     private String direction;
+    private Map<String, ElevatorState> elevatorStates;
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -53,7 +56,8 @@ public class Elevator extends Thread {
         this.moving = false;
         this.direction = "N/A";
         this.destFloor = 1;
-        elevatorReceiverPortNum = -1;
+        this.elevatorReceiverPortNum = -1;
+        this.elevatorStates = new HashMap<>();
 
         // Set up socket for sending (bind to any available port)
         try {
@@ -61,6 +65,34 @@ public class Elevator extends Thread {
         } catch (SocketException e) {
             System.exit(1);
         }
+        this.initializeStates();
+    }
+
+    /**
+     * Initialize context object with the default states of the state machine.
+     */
+    private void initializeStates() {
+        // Elevator States in the state machine diagram
+        this.addState(new WaitingForReceiver());
+        this.addState(new StationaryDoorsClosed());
+        this.addState(new StationaryDoorsOpen());
+        this.addState(new MovingDoorsClosed());
+    }
+
+    /**
+     * Add state to the state machine.
+     * @param state State to be added.
+     */
+    private void addState(ElevatorState state) {
+        this.elevatorStates.put(state.toString(), state);
+    }
+
+    /**
+     * Set current state to new state.
+     * @param stateName Name of state to transition into.
+     */
+    private ElevatorState getState(String stateName) {
+        return this.elevatorStates.get(stateName);
     }
 
     /**
@@ -69,7 +101,15 @@ public class Elevator extends Thread {
     @Override
     public void run() {
         //Set initial state
-        this.setState(new StationaryDoorsClosed());
+        this.setState("StationaryDoorsClosed");
+    }
+
+    /**
+     * Sets the current state of the state machine
+     */
+    public void setState(String stateName) {
+        this.currentState = this.getState(stateName);
+        this.currentState.handleState(this);
     }
 
     /**
@@ -171,14 +211,6 @@ public class Elevator extends Thread {
 
     public int getCurFloor(){ return this.curFloor; }
     public int getDestFloor(){ return this.destFloor; }
-
-    /**
-     * Sets the current state of the state machine
-     */
-    public void setState(ElevatorState newState) {
-        this.currentState = newState;
-        this.currentState.handleState(this);
-    }
 
     /**
      * Event of a timer expiring.

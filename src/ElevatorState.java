@@ -87,7 +87,7 @@ class StationaryDoorsClosed extends ElevatorState {
      */
     @Override
     public void onExit(Elevator context) {
-        context.setState(new WaitingForReceiver());
+        context.setState("WaitingForReceiver");
     }
 
 }
@@ -113,11 +113,11 @@ class WaitingForReceiver extends ElevatorState {
     public void requestReceived(Elevator context) {
         if (context.getDestFloor() == 0) {
             context.sendElevatorStatus();
-            context.setState(new WaitingForReceiver());
+            context.setState("WaitingForReceiver");
         } else if (context.getCurFloor() == context.getDestFloor()) {
-            context.setState(new StationaryDoorsOpen());
+            context.setState("StationaryDoorsOpen");
         } else {
-            context.setState(new MovingDoorsClosed());
+            context.setState("MovingDoorsClosed");
         }
     }
 }
@@ -143,7 +143,7 @@ class StationaryDoorsOpen extends ElevatorState {
      */
     @Override
     public void timerExpired(Elevator context) {
-        context.setState(new StationaryDoorsClosed());
+        context.setState("StationaryDoorsClosed");
     }
 
 }
@@ -171,9 +171,9 @@ class MovingDoorsClosed extends ElevatorState {
         context.goToFloor();
         context.sendElevatorStatus();
         if (context.getCurFloor() == context.getDestFloor()) {
-            context.setState(new StationaryDoorsOpen());
+            context.setState("StationaryDoorsOpen");
         } else {
-            context.setState(new MovingDoorsClosed());
+            context.setState("MovingDoorsClosed");
         }
     }
 
@@ -184,9 +184,9 @@ class MovingDoorsClosed extends ElevatorState {
     @Override
     public void requestReceived(Elevator context) {
         if (context.getCurFloor() == context.getDestFloor()) {
-            context.setState(new StationaryDoorsOpen());
+            context.setState("StationaryDoorsOpen");
         } else {
-            context.setState(new MovingDoorsClosed());
+            context.setState("MovingDoorsClosed");
         }
     }
 
