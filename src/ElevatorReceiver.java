@@ -31,6 +31,7 @@ public class ElevatorReceiver extends Thread {
         } catch(SocketException e) {
             System.exit(1);
         }
+        this.putInitialElevatorMsg();
     }
 
     /**
@@ -53,6 +54,14 @@ public class ElevatorReceiver extends Thread {
 
         // Put ElevatorMessage in request box for elevator
         requestBox.putRequest(request);
+    }
+
+    /**
+     * Puts initial message into request box.
+     */
+    private void putInitialElevatorMsg() {
+        ElevatorMessage msg = new ElevatorMessage(receiveSocket.getPort());
+        requestBox.putRequest(msg);
     }
 
     /**
