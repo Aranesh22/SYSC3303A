@@ -23,6 +23,14 @@ public class ElevatorTaskQueue {
     }
 
     /**
+     * Returns elevator status
+     * @return elevator status
+     */
+    public ElevatorStatus getElevatorStatus() {
+        return this.elevatorStatus;
+    }
+
+    /**
      * Update elevator status.
      * @param elevatorStatus Elevator status to be updated to.
      */
