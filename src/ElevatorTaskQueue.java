@@ -1,3 +1,4 @@
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -11,14 +12,16 @@ import java.util.Objects;
 public class ElevatorTaskQueue {
     // Fields
     private ElevatorStatus elevatorStatus;
+    private final InetAddress elevatorIpAddress;
     private final ArrayList<Integer> floorsToVisit;
 
     /**
      * Constructor
      * @param elevatorStatus Elevator status for the task queue.
      */
-    public ElevatorTaskQueue(ElevatorStatus elevatorStatus) {
+    public ElevatorTaskQueue(ElevatorStatus elevatorStatus, InetAddress elevatorIpAddress) {
         this.elevatorStatus = elevatorStatus;
+        this.elevatorIpAddress = elevatorIpAddress;
         this.floorsToVisit = new ArrayList<>();
     }
 
@@ -28,6 +31,14 @@ public class ElevatorTaskQueue {
      */
     public ElevatorStatus getElevatorStatus() {
         return this.elevatorStatus;
+    }
+
+    /**
+     * Returns elevator's ip address
+     * @return IP address of elevator.
+     */
+    public InetAddress getElevatorIpAddress() {
+        return this.elevatorIpAddress;
     }
 
     /**
@@ -46,6 +57,7 @@ public class ElevatorTaskQueue {
         this.addFloorToVisit(floorRequest.getStartFloor());
         this.addFloorToVisit(floorRequest.getDestinationFloor());
     }
+
     /**
      * Add new floor to visit into sorted queue.
      * @param floor Floor to add.
