@@ -30,7 +30,6 @@ public class Elevator {
     private String direction;
 
     // Constants
-    public final static float DEFAULT_VELOCITY = 1.75f * 1000;
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
 
     /**

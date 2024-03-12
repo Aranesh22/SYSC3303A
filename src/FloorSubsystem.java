@@ -12,7 +12,7 @@ import java.net.*;
 public class FloorSubsystem extends Thread {
 
     // Fields
-    private DatagramSocket receiveSocket;
+    private DatagramSocket sendReceiveSocket;
     private DatagramPacket receivePacket;
 
     /**
@@ -37,7 +37,7 @@ public class FloorSubsystem extends Thread {
      */
     public FloorSubsystem() {
         try {
-            this.receiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
+            this.sendReceiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
         } catch (SocketException se) {
             this.close(se);
         }
@@ -59,8 +59,8 @@ public class FloorSubsystem extends Thread {
      * @param e Error received during runtime.
      */
     private void close(Exception e) {
-        if (this.receiveSocket != null) {
-            this.receiveSocket.close();
+        if (this.sendReceiveSocket != null) {
+            this.sendReceiveSocket.close();
         }
         e.printStackTrace();
         System.exit(1);
@@ -74,7 +74,7 @@ public class FloorSubsystem extends Thread {
         this.receivePacket = new DatagramPacket(data, data.length);
 
         try {
-            receiveSocket.receive(this.receivePacket);
+            sendReceiveSocket.receive(this.receivePacket);
         } catch(IOException e) {
             this.close(e);
         }
@@ -109,9 +109,7 @@ public class FloorSubsystem extends Thread {
         DatagramPacket sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
                 Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
         try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            sendSocket.send(sendPacket);
-            sendSocket.close();
+            sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
             this.close(e);
         }
