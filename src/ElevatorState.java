@@ -75,7 +75,6 @@ class StationaryDoorsClosed extends ElevatorState {
      */
     @Override
     public void onEntry(Elevator context) {
-        super.onEntry(context);
         context.closeDoors();
     }
 
@@ -130,8 +129,8 @@ class StationaryDoorsOpen extends ElevatorState {
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
-        super.onEntry(context);
         context.openDoors();
+        context.sendElevatorStatus();
         new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
     }
 
@@ -165,7 +164,6 @@ class MovingDoorsClosed extends ElevatorState {
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
-        super.onEntry(context);
         new Timer(Elevator.DEFAULT_FLOOR_TRAVEL_TIME, context);
     }
 
@@ -175,7 +173,6 @@ class MovingDoorsClosed extends ElevatorState {
      */
     public void onExit(Elevator context) {
         context.goToFloor();
-        context.sendElevatorStatus();
     }
 
     /**
@@ -190,6 +187,7 @@ class MovingDoorsClosed extends ElevatorState {
         } else if (context.getCurFloor() == context.getDestFloor()) {
             context.setState("StationaryDoorsOpen");
         } else {
+            context.sendElevatorStatus();
             context.setState("MovingDoorsClosed");
         }
     }
