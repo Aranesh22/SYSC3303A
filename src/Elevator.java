@@ -28,6 +28,7 @@ public class Elevator extends Thread {
     private final int id;
     private int curFloor;
     private int destFloor;
+    private boolean doorsOpened;
     private boolean moving;
     private String direction;
     private final Map<String, ElevatorState> elevatorStates;
@@ -53,6 +54,7 @@ public class Elevator extends Thread {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
+        this.doorsOpened = false;
         this.moving = false;
         this.direction = "N/A";
         this.destFloor = 1;
@@ -177,10 +179,12 @@ public class Elevator extends Thread {
      * Simulates opening the doors of the elevator.
      */
     public void openDoors() {
+        this.doorsOpened = true;
         System.out.println(this + ": Opening Doors");
     }
 
     public void closeDoors() {
+        this.doorsOpened = false;
         System.out.println(this + ": Closing Doors");
     }
 
