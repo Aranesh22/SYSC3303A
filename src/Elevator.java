@@ -174,6 +174,17 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Simulates opening the doors of the elevator.
+     */
+    public void openDoors() {
+        System.out.println(this + ": Opening Doors");
+    }
+
+    public void closeDoors() {
+        System.out.println(this + ": Closing Doors");
+    }
+
+    /**
      * Update moving field.
      * @param moving if the elevator is moving or is stationary.
      */

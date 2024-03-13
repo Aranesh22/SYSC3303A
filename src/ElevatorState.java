@@ -76,7 +76,7 @@ class StationaryDoorsClosed extends ElevatorState {
     @Override
     public void onEntry(Elevator context) {
         super.onEntry(context);
-        System.out.println(context + ": Closing Doors ");
+        context.closeDoors();
     }
 
     /**
@@ -131,7 +131,7 @@ class StationaryDoorsOpen extends ElevatorState {
      */
     public void onEntry(Elevator context) {
         super.onEntry(context);
-        System.out.println(context + ": Opening Doors");
+        context.openDoors();
         new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
     }
 
