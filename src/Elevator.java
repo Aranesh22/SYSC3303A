@@ -146,7 +146,7 @@ public class Elevator extends Thread {
      */
     public void sendElevatorStatus() {
         // Create ElevatorStatus message
-        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, moving, direction);
+        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, doorsOpened, moving, direction);
         // Send message to Scheduler
         try {
             // Get IP address of Scheduler
