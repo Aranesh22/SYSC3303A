@@ -1,4 +1,3 @@
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
@@ -32,6 +31,8 @@ public class Elevator extends Thread {
     private boolean moving;
     private String direction;
     private final Map<String, ElevatorState> elevatorStates;
+    private final long loadUnloadTime;
+    private final long floorTravelTime;
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -60,6 +61,8 @@ public class Elevator extends Thread {
         this.destFloor = 1;
         this.elevatorReceiverPortNum = -1;
         this.elevatorStates = new HashMap<>();
+        this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
+        this.floorTravelTime = DEFAULT_FLOOR_TRAVEL_TIME;
 
         // Set up socket for sending (bind to any available port)
         try {
@@ -224,6 +227,22 @@ public class Elevator extends Thread {
      * @return Destination floor of elevator.
      */
     public int getDestFloor(){ return this.destFloor; }
+
+    /**
+     * Returns elevator load/unload time.
+     * @return elevator load/unload time.
+     */
+    public long getLoadUnloadTime() {
+        return this.loadUnloadTime;
+    }
+
+    /**
+     * Returns elevator floor travel time.
+     * @return elevator floor travel time.
+     */
+    public long getFloorTravelTime() {
+        return this.floorTravelTime;
+    }
 
     /**
      * Event of a timer expiring.

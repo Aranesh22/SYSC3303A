@@ -131,7 +131,7 @@ class StationaryDoorsOpen extends ElevatorState {
     public void onEntry(Elevator context) {
         context.openDoors();
         context.sendElevatorStatus();
-        new Timer(Elevator.DEFAULT_LOAD_UNLOAD_TIME, context);
+        new Timer(context.getLoadUnloadTime(), context);
     }
 
     /**
@@ -164,7 +164,7 @@ class MovingDoorsClosed extends ElevatorState {
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
-        new Timer(Elevator.DEFAULT_FLOOR_TRAVEL_TIME, context);
+        new Timer(context.getFloorTravelTime(), context);
     }
 
     /**
