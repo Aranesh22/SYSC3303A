@@ -30,7 +30,7 @@ public class Elevator extends Thread {
     private int destFloor;
     private boolean moving;
     private String direction;
-    private Map<String, ElevatorState> elevatorStates;
+    private final Map<String, ElevatorState> elevatorStates;
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -69,6 +69,17 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Sets initial state to begin elevator.
+     */
+    @Override
+    public void run() {
+        //Set initial state
+        String initialStateName = "StationaryDoorsClosed";
+        System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
+        this.setState(initialStateName);
+    }
+
+    /**
      * Initialize context object with the default states of the state machine.
      */
     private void initializeStates() {
@@ -96,17 +107,6 @@ public class Elevator extends Thread {
     }
 
     /**
-     * Sets initial state to begin elevator.
-     */
-    @Override
-    public void run() {
-        //Set initial state
-        String initialStateName = "StationaryDoorsClosed";
-        System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
-        this.setState(initialStateName);
-    }
-
-    /**
      * Sets the current state of the state machine
      */
     public void setState(String stateName) {
@@ -115,6 +115,13 @@ public class Elevator extends Thread {
         }
         this.currentState = this.getState(stateName);
         this.currentState.handleState(this);
+    }
+
+    /**
+     * @return true if the request box is empty, and false otherwise
+     */
+    public boolean requestBoxIsEmpty() {
+        return requestBox.isEmpty();
     }
 
     /**
@@ -129,13 +136,6 @@ public class Elevator extends Thread {
         this.setMoving(this.curFloor != this.destFloor);
         // Request received event
         this.requestReceived();
-    }
-
-    /**
-     * @return true if the request box is empty, and false otherwise
-     */
-    public boolean requestBoxIsEmpty() {
-        return requestBox.isEmpty();
     }
 
     /**
@@ -154,6 +154,22 @@ public class Elevator extends Thread {
             sendSocket.send(sendPacket);
         } catch (IOException e) {
             System.exit(1);
+        }
+    }
+
+    /**
+     * Moves elevator to the specified floor.
+     */
+    public void goToFloor() {
+        // Update current floor and notify we have arrived at this floor.
+        if (!Objects.equals(this.direction, "N/A")) {
+            if (Objects.equals(this.direction, "up")) {
+                this.curFloor++;
+            } else {
+                this.curFloor--;
+            }
+            this.setMoving(this.curFloor != this.destFloor);
+            System.out.println(this + ": Currently at floor " + this.curFloor);
         }
     }
 
@@ -183,35 +199,15 @@ public class Elevator extends Thread {
     }
 
     /**
-     * Moves elevator to the specified floor.
+     * Returns current floor of elevator.
+     * @return Current floor of elevator.
      */
-    public void goToFloor() {
-        // Update current floor and notify we have arrived at this floor.
-        if (!Objects.equals(this.direction, "N/A")) {
-            if (Objects.equals(this.direction, "up")) {
-                this.curFloor++;
-            } else {
-                this.curFloor--;
-            }
-            this.setMoving(this.curFloor != this.destFloor);
-            System.out.println(this + ": Currently at floor " + this.curFloor);
-        }
-    }
+    public int getCurFloor(){ return this.curFloor; }
 
     /**
-     * Converts this elevator object to a readable string.
-     * @return String representing this elevator.
+     * Returns destination floor of elevator.
+     * @return Destination floor of elevator.
      */
-    @Override
-    public String toString() {
-        return "Elevator " + this.id;
-    }
-
-
-
-//---------Iteration 2/3 Code
-
-    public int getCurFloor(){ return this.curFloor; }
     public int getDestFloor(){ return this.destFloor; }
 
     /**
@@ -226,6 +222,15 @@ public class Elevator extends Thread {
      */
     public void requestReceived() {
        this.currentState.requestReceived(this);
+    }
+
+    /**
+     * Converts this elevator object to a readable string.
+     * @return String representing this elevator.
+     */
+    @Override
+    public String toString() {
+        return "Elevator " + this.id;
     }
 
 }
