@@ -293,15 +293,19 @@ class ProcessingFloorRequest extends SchedulerState {
         HashMap<Integer, Double> suitableElevators = new HashMap<>();
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-            // Criteria 1: Elevator is stationary or is moving in same direction
-            if (!elevatorStatus.getMoving() || floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
+            // Criteria 1: Elevator is stationary
+            if (!elevatorStatus.getMoving()) {
                 // Compute floor difference and add to map
                 suitableElevators.put(elevatorId, (double) Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor()));
             }
-            // Criteria 2: Elevator is moving in same direction
-            if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
-                // Compute floor difference and add to map
-                suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+            // Criteria 2: Elevator is moving in same direction as the floor request AND
+            else if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
+                boolean ascending = elevatorStatus.getDirection().equals("up");
+                // Criteria 3: Elevator is currently moving towards the floor request
+                if ((ascending && (floorRequest.getStartFloor() > elevatorStatus.getCurrentFloor())) || (!ascending && (floorRequest.getStartFloor() < elevatorStatus.getCurrentFloor()))) {
+                    // Compute floor difference and add to map
+                    suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+                }
             }
         }
         return suitableElevators;
