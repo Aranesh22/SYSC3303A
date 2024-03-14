@@ -115,8 +115,8 @@ public class ElevatorStatus {
      */
     @Override
     public String toString() {
-        return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + " | PortNum"
-                + this.receiverPortNum + "Direction of Car -->" + this.direction + " | Moving" + this.moving
+        return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + " | PortNum:"
+                + this.receiverPortNum + " | Direction of Car-->" + this.direction + " | Moving: " + this.moving
                 + " | Doors " + ((this.doorsOpened)? "Open" : "Closed");
     }
 }

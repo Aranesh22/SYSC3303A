@@ -277,8 +277,6 @@ public class Scheduler extends Thread {
      * Sends the target floor to the elevator's receiver.
      */
     public void sendTargetFloor(int elevatorId, int nextFloor) {
-        System.out.println("Elevator ID: " + elevatorId);
-        System.out.println("Elevator next floor: " + nextFloor);
         // Get Elevator Task Queue
         ElevatorTaskQueue taskQueue = elevatorTaskQueueHashMap.get(elevatorId);
         String nextFloorStr = String.valueOf(nextFloor);

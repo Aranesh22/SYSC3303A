@@ -200,11 +200,9 @@ class CheckingPacketType extends SchedulerState {
     private SchedulerState enterJunctionPoint() {
         // Check guard condition for entering ProcessingFloorRequest state
         if (suitableElevatorExists()) {
-            System.out.println("Entering ProcessingFloorRequest");
             return schedulerContext.getState("ProcessingFloorRequest");
         }
         // If no suitable elevator, save FloorRequest
-        System.out.println("Entering SavingFloorRequest");
         return schedulerContext.getState("SavingFloorRequest");
     }
 
@@ -227,7 +225,6 @@ class CheckingPacketType extends SchedulerState {
         HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap = schedulerContext.getElevatorTaskQueueHashMap();
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-            System.out.println(elevatorStatus);
             // Criteria: Elevator is stationary or is moving in same direction
             if (!elevatorStatus.getMoving() || floorRequest.getDirection() == elevatorStatus.getDirection()) {
                 return true;

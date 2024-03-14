@@ -58,7 +58,7 @@ public class Elevator extends Thread {
         this.doorsOpened = false;
         this.moving = false;
         this.direction = "N/A";
-        this.destFloor = 1;
+        this.destFloor = 0;
         this.elevatorReceiverPortNum = -1;
         this.elevatorStates = new HashMap<>();
         this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
@@ -137,8 +137,10 @@ public class Elevator extends Thread {
     public void getElevatorMessage() {
         ElevatorMessage request = requestBox.getRequest();
         this.elevatorReceiverPortNum = request.getElevatorReceiverPortNum();
-        this.destFloor = request.getTargetFloor();
-        this.setMoving(this.curFloor != this.destFloor);
+        if (request.getTargetFloor() != 0) {
+            this.destFloor = request.getTargetFloor();
+            this.setMoving(this.curFloor != this.destFloor);
+        }
         // Request received event
         this.requestReceived();
     }
