@@ -105,6 +105,61 @@ Iteration 2 builds upon iteration 1 by refactoring the project to follow the sta
 
 * The SchedulerState file consists of inner SchedulerState classes that models each possible Scheduler State. Each of the inner classes implements the SchedulerState interface which outlines all possible Scheduler Events.
 
+
+## Iteration 3
+
+### Scheduler Algorithm
+#### Storing Elevator Information
+Within the Scheduler, an ElevatorTaskQueue is created for each elevator. The task queue itself
+stores the IP address of the elevator's receiver, its most recent ElevatorStatus, and an ArrayList
+of floors to visit.
+#### Received Packet
+If the Scheduler receives a packet, it can be either a new FloorRequest (sent from Floor subsystem),
+or an ElevatorStatus from an elevator. The Scheduler will distinguish between the two, and process them
+accordingly
+#### FloorRequest received
+If the received packet is a FloorRequest, the Scheduler will first check if there's any elevators that
+are suitable to service the request. A suitable elevator is an elevator that is either stationary or
+is moving in the same direction as the FloorRequest. If at least a one suitable elevator is found,
+the Scheduler will then select the closest elevator from the group of suitable elevators.
+
+Once found, the Scheduler will add the FloorRequest to the elevator's list of floors to visit (adds the start floor followed by the end floor).
+Lastly, the Scheduler will send the next floor to visit to the elevator's receiver (in this case, the starting floor of the new FloorRequest)
+via UDP. Once the packet is sent, the Scheduler will return to waiting for another packet. If no suitable elevators are found, the FloorRequest is saved in Scheduler to be serviced at a later time.
+
+#### ElevatorStatus received
+If the Scheduler received an ElevatorStatus, it will first check if it has received an ElevatorStatus
+from the elevator before. If not, it will create a new ElevatorTaskQueue object for the elevator.
+Otherwise, it will simply take the new ElevatorStatus and update the elevator's existing ElevatorStatus in its
+task queue.
+
+Next, the Scheduler will see if the elevator has reached its target floor (i.e. completed servicing its request).
+If so, it will remove the floor that the elevator just reached (target floor) from its list of floors to visit,
+and try to get the next floor to visit.
+
+If there is a next floor to visit, the Scheduler will send the next floor to the elevator's receiver via UDP.
+If the elevator has no more floors to visit, the Scheduler will look through all the FloorRequests that were saved
+to be serviced at a later time, and assign the closest FloorRequest to it.
+
+When assigning the FloorRequest to the elevator, the Scheduler will check if the starting floor of the request
+is the same as the current floor that the elevator is currently on. If this is the case, there is no need for the elevator
+to 'move' to the current floor by opening/closing its doors again. Therefore, the Scheduler will only add the destination
+floor of the FloorRequest to the elevator's list of floors to visit.
+(Assumption: If a saved FloorRequest exists, it must have been recently saved. If the FloorRequest
+was saved for a long period of time, the elevator would need to stop at the current floor and open/close its doors)
+
+If the elevator is not starting at the same floor it's currently on, then the Scheduler simply adds the starting floor
+and destination floor of the FloorRequest to the elevator's list of floors to visit.
+Lastly, the Scheduler will send the next floor to the elevator's receiver via UDP (in this case, the starting floor of the FloorRequest).
+
+### Communication Overview
+- Elevator's receiver will put an initial ElevatorMessage into the ElevatorRequestBox
+- Elevator will get the ElevatorMessage from the ElevatorRequestBox, and sends an ElevatorStatus to the Scheduler via UDP
+- Scheduler receives ElevatorStatus from Elevator, processes it, and sends it to the Floor subsystem
+- Floor subsystem sends a newly arrived FloorRequest to the Scheduler via UDP
+- Scheduler receives the FloorRequest, processes it, and either sends it to the selected elevator's receiver, or saves internally to be serviced later
+
+
 ## Design
 These design decisions form the initial structure of our elevator control system. With each iteration, we will refine our system to fit to specific iteration requirements. Here are the key design decisions we made:
 
