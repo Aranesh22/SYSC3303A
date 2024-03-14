@@ -52,6 +52,14 @@ public abstract class SchedulerState {
     }
 
     /**
+     * Handles event where the received FloorRequest is saved to be serviced at a later time
+     */
+    SchedulerState floorRequestSaved() {
+        System.out.println("(Scheduler's current state does not handle this event");
+        return null;
+    }
+
+    /**
      * Handles the event where either the FloorRequest or ElevatorStatus was sent to its destination.
      */
     SchedulerState packetSent() {
@@ -66,6 +74,7 @@ public abstract class SchedulerState {
         // Empty by default
     }
 }
+
 
 /**
  * The WaitingForPacket class models the state in the Scheduler
@@ -128,6 +137,7 @@ class WaitingForPacket extends SchedulerState {
     }
 }
 
+
 /**
  * The CheckingPacketType class models the state of the Scheduler
  * where the received packet is checked to determine whether it is
@@ -169,10 +179,12 @@ class CheckingPacketType extends SchedulerState {
         DatagramPacket receivedPacket = schedulerContext.getReceivedPacket();
         if (receivedPacket.getPort() == FloorSubsystem.FLOOR_SUBSYSTEM_PORT) {
             // Received packet is a FloorRequest
+            schedulerContext.constructFloorRequest();
             schedulerContext.floorRequestReceived();
         }
         else {
             // Received packet is an ElevatorStatus
+            schedulerContext.constructElevatorStatus();
             schedulerContext.elevatorStatusReceived();
         }
     }
@@ -182,7 +194,18 @@ class CheckingPacketType extends SchedulerState {
      */
     public SchedulerState floorRequestReceived() {
         // Return next state
-        return schedulerContext.getState("ProcessingFloorRequest");
+        return enterJunctionPoint();
+    }
+
+    private SchedulerState enterJunctionPoint() {
+        // Check guard condition for entering ProcessingFloorRequest state
+        if (suitableElevatorExists()) {
+            System.out.println("Entering ProcessingFloorRequest");
+            return schedulerContext.getState("ProcessingFloorRequest");
+        }
+        // If no suitable elevator, save FloorRequest
+        System.out.println("Entering SavingFloorRequest");
+        return schedulerContext.getState("SavingFloorRequest");
     }
 
     /**
@@ -191,6 +214,26 @@ class CheckingPacketType extends SchedulerState {
     public SchedulerState elevatorStatusReceived() {
         // Return next state
         return schedulerContext.getState("ProcessingElevatorStatus");
+    }
+
+    /**
+     * @return true if there is at least 1 elevator
+     * that is suitable to service the FloorRequest.
+     * Otherwise, return false.
+     */
+    private boolean suitableElevatorExists() {
+        // Iterate through all elevators
+        FloorRequest floorRequest = schedulerContext.getFloorRequest();
+        HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap = schedulerContext.getElevatorTaskQueueHashMap();
+        for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
+            ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
+            System.out.println(elevatorStatus);
+            // Criteria: Elevator is stationary or is moving in same direction
+            if (!elevatorStatus.getMoving() || floorRequest.getDirection() == elevatorStatus.getDirection()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -226,48 +269,45 @@ class ProcessingFloorRequest extends SchedulerState {
      * Do activities
      */
     private void doActivities() {
-        int suitableElevator = chooseElevatorForRequest();
-        sendTargetFloor(suitableElevator);
+        selectElevatorForRequest();
     }
 
     /**
      * Exit actions
      */
     private void exit() {
+        // Generate Packet sent event
         schedulerContext.packetSent();
     }
 
-    private int chooseElevatorForRequest() {
-        // Recreate FloorRequest
-        byte[] floorRequestData = schedulerContext.getReceivedPacket().getData();
-        FloorRequest floorRequest = new FloorRequest(floorRequestData, floorRequestData.length);
+    private void selectElevatorForRequest() {
+        // Get closest elevator
+        int closestElevator = getClosestElevator(getSuitableElevators());
+        // Assign them the FloorRequest
+        schedulerContext.addFloorRequestToTaskQueue(closestElevator, schedulerContext.getFloorRequest());
+        // Send the target floor to the elevator
+        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit());
+    }
 
+    private HashMap<Integer, Double> getSuitableElevators() {
+        // Select suitable elevators
+        FloorRequest floorRequest = schedulerContext.getFloorRequest();
         HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap = schedulerContext.getElevatorTaskQueueHashMap();
         HashMap<Integer, Double> suitableElevators = new HashMap<>();
-        // Iterate through each entry
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-            // Check if elevator is not moving
-            if (!elevatorStatus.getMoving()) {
+            // Criteria 1: Elevator is stationary or is moving in same direction
+            if (!elevatorStatus.getMoving() || floorRequest.getDirection() == elevatorStatus.getDirection()) {
+                // Compute floor difference and add to map
                 suitableElevators.put(elevatorId, (double) Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor()));
             }
-            // Check if elevator is moving in same direction
+            // Criteria 2: Elevator is moving in same direction
             if (floorRequest.getDirection() == elevatorStatus.getDirection()) {
                 // Compute floor difference and add to map
                 suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
             }
         }
-        // Check if no elevators suitable
-        if (suitableElevators.isEmpty()) {
-            for (Integer elevatorId: elevatorTaskQueueHashMap.keySet()) {
-                ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-                suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() + 0.5));
-            }
-        }
-        // Add FloorRequest to suitable elevator's task queue
-        int suitableElevator = getClosestElevator(suitableElevators);
-        schedulerContext.addFloorRequestToTaskQueue(suitableElevator, floorRequest);
-        return suitableElevator;
+        return suitableElevators;
     }
 
     private int getClosestElevator(HashMap<Integer, Double> suitableElevators) {
@@ -285,32 +325,75 @@ class ProcessingFloorRequest extends SchedulerState {
     }
 
     /**
-     * Sends the target floor to the elevator's receiver.
-     */
-    private void sendTargetFloor(int elevatorId) {
-        // Get Elevator Task Queue
-        ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorId);
-        String nextFloorStr = String.valueOf(taskQueue.nextFloorToVisit());
-
-        // Get port number of elevator car's receiver
-        int elevatorReceiverPortNum = schedulerContext.getElevatorStatus(elevatorId).getReceiverPortNum();
-        try {
-            // Send packet
-            DatagramSocket sendSocket = schedulerContext.getSendSocket();
-            DatagramPacket sendPacket = new DatagramPacket(nextFloorStr.getBytes(), nextFloorStr.getBytes().length, taskQueue.getElevatorIpAddress(), elevatorReceiverPortNum);
-            sendSocket.send(sendPacket);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * Handles the packet sent event.
      */
     public SchedulerState packetSent() {
         return schedulerContext.getState("WaitingForPacket");
     }
 }
+
+
+/**
+ * The SavingFloorRequest models the state of the Scheduler
+ * where no elevators are suitable to service the received
+ * FloorRequest. In this case, the FloorRequest is saved
+ * to be serviced by an elevator at a later time.
+ *
+ * @author Pathum Danthanarayana, 101181411
+ * @date March 13, 2024
+ */
+class SavingFloorRequest extends SchedulerState {
+
+    /**
+     * Constructor
+     *
+     * @param schedulerContext - context
+     */
+    protected SavingFloorRequest(Scheduler schedulerContext) {
+        super(schedulerContext);
+    }
+
+    /**
+     * Start the state.
+     */
+    public void start() {
+        doActivities();
+        exit();
+    }
+
+    /**
+     * Do activities
+     */
+    private void doActivities() {
+        saveFloorRequest();
+    }
+
+    /**
+     * Exit actions
+     */
+    private void exit() {
+        // Generate FloorRequest saved event
+        schedulerContext.floorRequestSaved();
+    }
+
+    /**
+     * Saves the FloorRequest in context so that it can be
+     * serviced at a later time
+     */
+    private void saveFloorRequest() {
+        // Save the FloorRequest to be served at a later time
+        schedulerContext.addFloorRequestToServe(schedulerContext.getFloorRequest());
+    }
+
+    /**
+     * Handles the FloorRequest saved event
+     * @return the next state
+     */
+    public SchedulerState floorRequestSaved() {
+        return schedulerContext.getState("WaitingForPacket");
+    }
+}
+
 
 /**
  * The ProcessingElevatorStatus class models the state of the Scheduler
@@ -351,6 +434,7 @@ class ProcessingElevatorStatus extends SchedulerState {
      * Do activities
      */
     private void doActivities() {
+        checkReachedTargetFloor();
         sendElevatorStatus();
     }
 
@@ -367,10 +451,7 @@ class ProcessingElevatorStatus extends SchedulerState {
      * actions
      */
     private void checkedReceivedPriorMessage() {
-        // Construct ElevatorStatus from received packet
-        byte[] statusData = schedulerContext.getReceivedPacket().getData();
-        ElevatorStatus elevatorStatus = new ElevatorStatus(statusData, statusData.length);
-
+        ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         // Check if there's already an elevator task queue for the elevator
         if (!schedulerContext.containsElevatorId(elevatorStatus.getElevatorId())) {
             // If not, create elevator task queue for the elevator
@@ -379,6 +460,35 @@ class ProcessingElevatorStatus extends SchedulerState {
         else {
             // Update the elevator's elevator status
             schedulerContext.updateElevatorStatus(elevatorStatus.getElevatorId(), elevatorStatus);
+        }
+    }
+
+    /**
+     * Checks if the elevator has reached its target floor.
+     * If so, it sets its next floor to visit (if there exists one).
+     * Otherwise, it gets assigned the closest FloorRequest that was
+     * saved (if one exists).
+     */
+    private void checkReachedTargetFloor() {
+        // Check if the elevator has reached its target floor
+        ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
+        ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
+        if (elevatorStatus.getCurrentFloor() == elevatorStatus.getTargetFloor()) {
+            // Set the next floor (if it's scheduled to visit a floor)
+            int nextFloorToVisit = taskQueue.nextFloorToVisit();
+            if (nextFloorToVisit != 0) {
+                // Send elevator to next floor
+                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit);
+            }
+            else {
+                // Check if there's at least 1 FloorRequest waiting to be served
+                if (schedulerContext.hasFloorRequestsToServe()) {
+                    // Get assigned closest FloorRequest
+                    taskQueue.addFloorRequest(schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor()));
+                    // Send elevator to next floor
+                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
+                }
+            }
         }
     }
 
@@ -405,6 +515,3 @@ class ProcessingElevatorStatus extends SchedulerState {
         return schedulerContext.getState("WaitingForPacket");
     }
 }
-
-
-
