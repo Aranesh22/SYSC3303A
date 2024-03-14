@@ -480,8 +480,13 @@ class ProcessingElevatorStatus extends SchedulerState {
             else {
                 // Check if there's at least 1 FloorRequest waiting to be served
                 if (schedulerContext.hasFloorRequestsToServe()) {
-                    // Get assigned closest FloorRequest
-                    taskQueue.addFloorRequest(schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor()));
+                    FloorRequest nextFloorRequest = schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor());
+                    // If the elevator is currently on the start floor, it only needs to be sent to the destination floor
+                    if (elevatorStatus.getCurrentFloor() == nextFloorRequest.getStartFloor()) {
+                        taskQueue.addFloorToVisit(nextFloorRequest.getDestinationFloor());
+                    } else {
+                        taskQueue.addFloorRequest(nextFloorRequest);
+                    }
                     // Send elevator to next floor
                     schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
                 }
