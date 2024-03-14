@@ -226,7 +226,7 @@ class CheckingPacketType extends SchedulerState {
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
             // Criteria: Elevator is stationary or is moving in same direction
-            if (!elevatorStatus.getMoving() || floorRequest.getDirection() == elevatorStatus.getDirection()) {
+            if (!elevatorStatus.getMoving() || floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
                 return true;
             }
         }
@@ -294,12 +294,12 @@ class ProcessingFloorRequest extends SchedulerState {
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
             // Criteria 1: Elevator is stationary or is moving in same direction
-            if (!elevatorStatus.getMoving() || floorRequest.getDirection() == elevatorStatus.getDirection()) {
+            if (!elevatorStatus.getMoving() || floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
                 // Compute floor difference and add to map
                 suitableElevators.put(elevatorId, (double) Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor()));
             }
             // Criteria 2: Elevator is moving in same direction
-            if (floorRequest.getDirection() == elevatorStatus.getDirection()) {
+            if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
                 // Compute floor difference and add to map
                 suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
             }
@@ -471,6 +471,7 @@ class ProcessingElevatorStatus extends SchedulerState {
         ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
         if (elevatorStatus.getCurrentFloor() == elevatorStatus.getTargetFloor()) {
+            taskQueue.nextFloorVisited();
             // Set the next floor (if it's scheduled to visit a floor)
             int nextFloorToVisit = taskQueue.nextFloorToVisit();
             if (nextFloorToVisit != 0) {

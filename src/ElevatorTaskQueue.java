@@ -77,8 +77,9 @@ public class ElevatorTaskQueue {
             // Add floor into sorted position
             else {
                 for (int i = 0; i < this.floorsToVisit.size(); i++) {
-                    if (((this.floorsToVisit.get(i) < floor) && ascending) || ((this.floorsToVisit.get(i) > floor) && !ascending)) {
+                    if (((floor < this.floorsToVisit.get(i)) && ascending) || ((floor > this.floorsToVisit.get(i)) && !ascending)) {
                         this.floorsToVisit.add(i, floor);
+                        break;
                     }
                 }
             }
@@ -91,9 +92,16 @@ public class ElevatorTaskQueue {
      */
     public int nextFloorToVisit() {
         if (!this.floorsToVisit.isEmpty()) {
-            return this.floorsToVisit.removeFirst();
+            return this.floorsToVisit.getFirst();
         }
         return 0;
+    }
+
+    /**
+     * Removes the next floor to visit.
+     */
+    public void nextFloorVisited() {
+        this.floorsToVisit.removeFirst();
     }
 
 }
