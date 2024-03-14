@@ -270,6 +270,7 @@ public class Scheduler extends Thread {
                 closestFloorRequest = floorRequest;
             }
         }
+        floorRequestsToServe.remove(closestFloorRequest);
         return closestFloorRequest;
     }
 
