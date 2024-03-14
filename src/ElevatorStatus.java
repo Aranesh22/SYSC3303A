@@ -106,7 +106,7 @@ public class ElevatorStatus {
      */
     public byte[] toUdpStringBytes() {
         return (this.elevatorId + "," + this.currentFloor + "," + this.targetFloor + "," + this.receiverPortNum + ","
-                + this.doorsOpened + "," + this.moving + "," + this.direction).getBytes();
+                + this.doorsOpened + "," + this.moving + "," + this.direction + ",").getBytes();
     }
 
     /**

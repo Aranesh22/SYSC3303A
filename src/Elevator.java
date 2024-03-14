@@ -57,7 +57,7 @@ public class Elevator extends Thread {
         this.curFloor = curFloor;
         this.doorsOpened = false;
         this.moving = false;
-        this.direction = "N/A";
+        this.direction = "up";
         this.destFloor = 0;
         this.elevatorReceiverPortNum = -1;
         this.elevatorStates = new HashMap<>();
