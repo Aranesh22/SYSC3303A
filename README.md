@@ -11,6 +11,26 @@ This project simulates an elevator control system using a real-time multi-thread
 🏅 Lindsay Dickson, 101160876<br>
 🏅 Harishan Amutheesan, 101154757<br>
 
+## Breakdown of Responsibilities (Iteration 3)
+* Yehan De Silva
+  * Developed the Scheduler State Machine Diagram
+  * Completed the scheduler algorithm enhancements
+
+* Pathum Danthanarayana
+  * Finalized the scheduler algorithm
+
+* Aranesh Athavan
+  * Updated the UML sequence diagram to reflect changes in the system
+
+* Lindsay Dickson
+  * Refactored and created new tests to accommodate the switch from synchronizer to UDP
+  * Addressed compatibility issues with existing tests due to the refactoring
+
+* Harishan Amutheesan
+  * Revised the UML class diagram to represent the system's latest architectural changes
+  * Updated the README file with new system information and documentation
+
+
 ## Breakdown of Responsibilities (Iteration 2)
 * Yehan De Silva
   * Broke down possible states, events and actions 
@@ -60,53 +80,39 @@ This project simulates an elevator control system using a real-time multi-thread
   * Developed JUnit tests for Scheduler class
   * UML class diagram
   * README file
- 
-
-## Iteration 0
-
-In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
-
-## Iteration 1
-
-Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the FloorRequestSimulator, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.  
-[Iteration 1 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%201)
-
-### 🏢 FloorRequestSimulator Subsystem
-
-* The FloorRequestSimulator subsystem is responsible for simulating the floor-level operations of the elevator system. It handles the input from users on each floor, generating requests for elevator service.
-
-### 🛗 Elevator Subsystem
-
-* The Elevator subsystem simulates the behavior of individual elevator cars. It responds to requests from the FloorRequestSimulator subsystem, picking up and transporting users to their desired floors.
-
-### ⏰ Scheduler Subsystem
-
-* The Scheduler subsystem acts as the central decision-making unit. It receives requests from the FloorRequestSimulator subsystem, then process and sends them to the appropriate Elevator subsystem.
-
-### ⌛ Synchronizer Class
-
-* The Synchronizer class is crucial for the correct operation of the system by ensuring thread-safe communication between the subsystems. It manages the flow of information throughout the system.
-
-### 📢 FloorRequest Class
-
-* The FloorRequest class encapsulates the data related to a user's floorRequest for elevator service, including the starting floor, destination floor, and direction.
-
-## Iteration 2
-
-Iteration 2 builds upon iteration 1 by refactoring the project to follow the state design pattern. This iteration introduces the ElevatorState and SchedulerState files.  
-[Iteration 2 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%202)
-
-
-### 🛗Elevator State
-
-* The ElevatorState file consists of inner ElevatorState classes that models each possible Elevator State. Each of the inner classes implements the ElevatorState interface which outlines all possible Elevator Events.
-
-### ⏰ Scheduler State
-
-* The SchedulerState file consists of inner SchedulerState classes that models each possible Scheduler State. Each of the inner classes implements the SchedulerState interface which outlines all possible Scheduler Events.
-
 
 ## Iteration 3
+
+Iteration 3 advances the elevator control system with a state machine architecture, enhancing the responsiveness and robustness of the system. This iteration also adds complexity to the interaction between different subsystems, providing a closer simulation to real-world scenarios.
+
+### Scheduler State Machine
+
+The Scheduler functions as the central command, coordinating between the FloorRequests and the Elevators through various states:
+- **WaitingForPacket**: Awaits incoming UDP packets containing either FloorRequests or ElevatorStatuses.
+- **CheckingPacketType**: Identifies the type of the received packet and routes it for appropriate handling.
+- **ProcessingFloorRequest**: Allocates the most suitable elevator to fulfill an incoming FloorRequest.
+- **SavingFloorRequest**: Holds FloorRequests when no suitable elevator is immediately available, queuing them for later service.
+- **ProcessingElevatorStatus**: Processes updates from elevators, maintains an internal task queue, and communicates status to the Floor subsystem.
+
+### Elevator State Machine
+
+Elevators in the system mirror real-life behavior with distinct states:
+- **StationaryDoorsClosed**: The elevator is idle with its doors closed.
+- **WaitingForReceiver**: Awaits new requests from the Scheduler.
+- **StationaryDoorsOpen**: Opens its doors to allow passengers to board or exit.
+- **MovingDoorsClosed**: In motion towards its target floor with doors closed.
+
+### Communication
+
+The system leverages UDP packets for inter-subsystem communication, with `ElevatorMessage` objects facilitating the transfer of target floor information and receiver port numbers.
+
+### Key Components
+
+- **ElevatorReceiver**: Listens for and passes FloorRequests from the Scheduler to the Elevator via the `ElevatorRequestBox`.
+- **ElevatorRequestBox**: A thread-safe construct that allows for synchronized message exchange between the Elevator Receiver and Elevator subsystem.
+- **ElevatorMessage**: Defines the structure for network messages, which contain essential information for the Scheduler-Elevator interaction.
+
+This iteration's implementation demonstrates an advanced, real-time elevator control system capable of handling concurrent elevator requests efficiently.
 
 ### Scheduler Algorithm
 #### Storing Elevator Information
@@ -159,31 +165,50 @@ Lastly, the Scheduler will send the next floor to the elevator's receiver via UD
 - Floor subsystem sends a newly arrived FloorRequest to the Scheduler via UDP
 - Scheduler receives the FloorRequest, processes it, and either sends it to the selected elevator's receiver, or saves internally to be serviced later
 
+## Iteration 2
 
-## Design
-These design decisions form the initial structure of our elevator control system. With each iteration, we will refine our system to fit to specific iteration requirements. Here are the key design decisions we made:
+Iteration 2 builds upon iteration 1 by refactoring the project to follow the state design pattern. This iteration introduces the ElevatorState and SchedulerState files.  
+[Iteration 2 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%202)
 
-### Concurrency
-* We use multi-threading to simulate the real-time operation of elevators and floor requests. Each elevator and floor is managed by its own thread, allowing for concurrent processing of requests and elevator movements. The multi-threaded approach aligns with the real-world scenario where elevators operate independently of one another.
 
-### Communication and Synchronization
-* To manage communication between different subsystems, we implemented a `Synchronizer` class that acts as a mediator. This design decision was made to avoid tight coupling between subsystems and to ensure thread-safe interactions. The `Synchronizer` uses `synchronized` methods and `wait/notify` mechanisms to handle multiple threads, ensuring the system will not face concurrency-related issues like race conditions.
+### 🛗Elevator State
 
-### Request Handling
-* For Iteration 1, a simple First-In-First-Out (FIFO) strategy handles elevator requests, which was implemented in the `Scheduler` class. This was chosen for its simplicity and fairness, ensuring that all requests are addressed in the order they are received. As we further iterate, we plan to optimize the response time and efficiency.
+* The ElevatorState file consists of inner ElevatorState classes that models each possible Elevator State. Each of the inner classes implements the ElevatorState interface which outlines all possible Elevator Events.
 
-### Elevator Simulation
-* The `Elevator` class was designed to simulate the movement of an elevator car. We decided to implement a time delay to represent the elevator traveling between floors by implementing speed calculations from Iteration 0 which provides a realistic feel to the system's operation.
+### ⏰ Scheduler State
 
-### Error Handling
-* We have put initial error handling mechanisms in place, primarily in the input validation within the `Scheduler`. Invalid floor requests are logged with an error message. As we progress through the iterations, we will develop a comprehensive error handling mechanism to manage exceptions to maintain system stability.
+* The SchedulerState file consists of inner SchedulerState classes that models each possible Scheduler State. Each of the inner classes implements the SchedulerState interface which outlines all possible Scheduler Events.
 
-### Testing
-* To ensure the reliability of our system, we used JUnit testing to test each class and subsystem.
-* We only focused on testing the key functionalities of each subsystem (i.e., whether the subsystem is able to produce/consume, its state is correctly updated), as it is too difficult to test thread-related aspects like synchronization with JUnit tests.
+## Iteration 1
 
-### Code Readability
-* We value writing clean, readable code and providing documentation. Each class and method includes JavaDoc comments to explain its purpose, inputs, and outputs. This help show our current understanding of the system and ensures that professors and TAs can easily understand and grade the system.
+Iteration 1 implements Iteration 0 calculations by introducing the subsystems that form the elevator control system. This iteration includes the development of the FloorRequestSimulator, Elevator, and Scheduler subsystems, along with the classes necessary for their operation.  
+[Iteration 1 UML diagrams](https://github.com/Aranesh22/SYSC3303A/tree/main/UML/Iteration%201)
+
+### 🏢 FloorRequestSimulator Subsystem
+
+* The FloorRequestSimulator subsystem is responsible for simulating the floor-level operations of the elevator system. It handles the input from users on each floor, generating requests for elevator service.
+
+### 🛗 Elevator Subsystem
+
+* The Elevator subsystem simulates the behavior of individual elevator cars. It responds to requests from the FloorRequestSimulator subsystem, picking up and transporting users to their desired floors.
+
+### ⏰ Scheduler Subsystem
+
+* The Scheduler subsystem acts as the central decision-making unit. It receives requests from the FloorRequestSimulator subsystem, then process and sends them to the appropriate Elevator subsystem.
+
+### ⌛ Synchronizer Class
+
+* The Synchronizer class is crucial for the correct operation of the system by ensuring thread-safe communication between the subsystems. It manages the flow of information throughout the system.
+
+### 📢 FloorRequest Class
+
+* The FloorRequest class encapsulates the data related to a user's floorRequest for elevator service, including the starting floor, destination floor, and direction.
+
+
+## Iteration 0
+
+In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
+
 
 ## How to Run Project
 1. Compile and build the project.
