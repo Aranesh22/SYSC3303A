@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit testing for the ElevatorMessage Class
  *
- * @author Lindsay
+ * @author Lindsay Dickson 1011
  * @version Iteration 3
  * @date March 2024
  */
