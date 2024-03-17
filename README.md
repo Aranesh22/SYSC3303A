@@ -22,6 +22,9 @@ This project simulates an elevator control system using a real-time multi-thread
 
 * Aranesh Athavan
   * Updated the UML sequence diagram to reflect changes in the system
+  * Implemented Elevator Status Class
+  * Implemented UDP change for Scheduler
+
 
 * Lindsay Dickson
   * Refactored and created new tests to accommodate the switch from synchronizer to UDP
