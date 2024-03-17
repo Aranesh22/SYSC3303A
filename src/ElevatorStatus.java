@@ -1,3 +1,10 @@
+/**
+ * Elevator Status is reposnsbile for holding the object entity of the elevator credientials
+ *
+ * @author Aranesh Athavan 101152794
+ * @version Iteration3
+ * @date March 14th, 2024
+ */
 public class ElevatorStatus {
 
     //Fields
