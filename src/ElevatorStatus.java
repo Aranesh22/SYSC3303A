@@ -1,6 +1,7 @@
 /**
  * Class models the status containing all pertinent fields for an elevator car.
- * @author YehanDeSilva 101185388
+ * @author YehanDeSilva 101185388 
+ * @author Aranesh Athavan 101152794
  * @version iteration3
  */
 public class ElevatorStatus {
