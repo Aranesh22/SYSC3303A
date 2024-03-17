@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Testing for ElevatorStatus class
  *
- * @author Lindsay
+ * @author Lindsay Dickson 101160876
  * @version Iteration 3
  * @date March 2024
  */

@@ -1,12 +1,18 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testing Scheduler Class
+ *
+ *
+ */
 class SchedulerTest {
+    Scheduler scheduler;
 
     @BeforeEach
     void setUp() {
+//        scheduler = new Scheduler();
     }
 
     @Test
