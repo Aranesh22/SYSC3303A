@@ -1,8 +1,7 @@
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -19,10 +18,6 @@ import java.net.UnknownHostException;
  * @version iteration1, iteration2
  */
 public class Scheduler extends Thread {
-    private final Synchronizer synchronizer; // Synchronizer object to interact with the elevator system
-    private SchedulerState currentState; // Current state of the Scheduler
-    private FloorRequest currentRequest; // Current request being handled by the Scheduler
-
     public static final InetAddress SCHEDULER_IP;   // IP address of Scheduler
     static {
         try {
@@ -31,140 +26,276 @@ public class Scheduler extends Thread {
             throw new RuntimeException(e);
         }
     }
-
     public static final int SCHEDULER_PORT = 25; //Current Port
+    private DatagramSocket sendSocket, receiveSocket;
+    private DatagramPacket receivePacket;
+    private FloorRequest floorRequest;
+    private ElevatorStatus elevatorStatus;
+    private SchedulerState currentState;
+    private HashMap<String, SchedulerState> states;
+    private HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap;
+    private ArrayList<FloorRequest> floorRequestsToServe;
 
-    private DatagramSocket sendSocket,receiveSocket;
-    private DatagramPacket sendPacket,receivePacket;
     /**
-     * Constructor for the Scheduler class.
-     * @param synchronizer Synchronizer object to interact with the elevator system
+     * Constructor for the Scheduler class
      */
-    public Scheduler(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
-        setState(new WaitingForFloorRequest()); // Set initial state
-    }
-
-    private void getMsg() {
-        byte[] data = new byte[100];
-        this.receivePacket = new DatagramPacket(data, data.length);
-
+    public Scheduler() {
+        // Initialize sockets
         try {
-            receiveSocket.receive(this.receivePacket);
-        } catch (IOException e) {
-
+            // For receiving FloorRequests and ElevatorStatus (bind to dedicated port)
+            receiveSocket = new DatagramSocket(SCHEDULER_PORT);
+            // For sending FloorRequests and ElevatorStatus (bind to any available port)
+            sendSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
         }
 
-        //Case to check what function to switch
+        // Initialize elevator task queue hashmap
+        elevatorTaskQueueHashMap =  new HashMap<>();
+        // Initialize floor request list
+        floorRequestsToServe = new ArrayList<>();
 
-        //if message is for Elevator call elevator
-        getMsgElvStatus();
-        //else call Floor Request
-        getMsgFloorReq();
+        // Initialize current FloorRequest and ElevatorStatus
+        floorRequest = null;
+        elevatorStatus = null;
 
+        // Add all states
+        states = new HashMap<>();
+        states.put("WaitingForPacket", new WaitingForPacket(this));
+        states.put("CheckingPacketType", new CheckingPacketType(this));
+        states.put("ProcessingElevatorStatus", new ProcessingElevatorStatus(this));
+        states.put("ProcessingFloorRequest", new ProcessingFloorRequest(this));
+        states.put("SavingFloorRequest", new SavingFloorRequest(this));
+        // Set the initial state
+        setState(new WaitingForPacket(this));
     }
 
-    private void getMsgElvStatus() {
-
-        try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(), InetAddress.getLocalHost(),
-                    FloorSubsystem.FLOOR_SUBSYSTEM_PORT);
-        } catch (UnknownHostException e) {
-
-        }
-
-        try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
-            sendSocket.close();
-        } catch (IOException e) {
-        }
-
-    }
-    private void getMsgFloorReq() {
-
-
-    }
-
-    private void sendReqtoRecieve() {
-        try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
-                    InetAddress.getLocalHost(), ElevatorReceiver.ELEVATOR_RECEIVER_PORT);
-        } catch (UnknownHostException e) {
-        }
-        try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
-            sendSocket.close();
-        } catch (IOException e) {
-        }
-    }
     /**
-     * Overridden run method from Thread class.
-     * Continuously handles the current state of the Scheduler as long as the Synchronizer is running.
+     * Run method
      */
-    @Override
     public void run() {
-        while (synchronizer.isRunning()) {
-            currentState.handleState(this);
+        while(true) {
+            // Start the current state
+            currentState.start();
         }
     }
 
     /**
-     * Stops the Scheduler and the Synchronizer.
+     * Handles event where packet is received
      */
-    public void stopScheduler() {
-        System.out.println("Scheduler: Stopping scheduler and exiting.");
-        synchronizer.stopRunning();
+    public void packetReceived() {
+        setState(currentState.packetReceived());
     }
 
     /**
-     * Sets the current state of the Scheduler.
-     * @param newState New state to be set
+     * Handles event where ElevatorStatus is received
      */
-    public void setState(SchedulerState newState) {
-        this.currentState = newState;
-        System.out.println("[Scheduler-STATE]: State changed to " + newState.getClass().getSimpleName());
+    public void elevatorStatusReceived() {
+        setState(currentState.elevatorStatusReceived());
     }
 
     /**
-     * Handles the status of the elevator.
-     * Continuously gets the status of the elevator from the Synchronizer until the elevator reaches the target floor.
-     * @param targetFloor The floor that the elevator is supposed to reach
+     * Handles event where FloorRequest is received
      */
-    public void handleElevatorStatus(int targetFloor) {
-        int elevatorStatus;
-        do {
-            elevatorStatus = synchronizer.getElevatorStatus();
-            // TODO had to remove this to prevent the scheduler from getting stuck. Remove when removing synchronizer.
-            // synchronizer.putCurrentFloor(elevatorStatus);
-        } while (elevatorStatus != targetFloor);
-        System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
+    public void floorRequestReceived() {
+        setState(currentState.floorRequestReceived());
     }
 
     /**
-     * Returns the Synchronizer object.
-     * @return Synchronizer object
+     * Handles event where FloorRequest is saved instead of being serviced
      */
-    public Synchronizer getSynchronizer() {
-        return synchronizer;
+    public void floorRequestSaved() {
+        setState(currentState.floorRequestSaved());
     }
 
     /**
-     * Returns the current request being handled by the Scheduler.
-     * @return Current request
+     * Handles the event where a packet is sent by the Scheduler
      */
-    public FloorRequest getCurrentRequest() {
-        return currentRequest;
+    public void packetSent() {
+        setState(currentState.packetSent());
     }
 
     /**
-     * Sets the current request to be handled by the Scheduler.
-     * @param request New request to be handled
+     * Sets the current state of the Scheduler
      */
-    public void setCurrentRequest(FloorRequest request) {
-        this.currentRequest = request;
+    private void setState(SchedulerState nextState) {
+        // Set the current state
+        currentState = nextState;
+        // Display current state info
+        currentState.displayState();
+    }
+
+    /**
+     * Returns the state object according to the specified state name
+     * @param stateName - name of the state to be returned
+     * @return a state
+     */
+    public SchedulerState getState(String stateName) {
+        return states.get(stateName);
+    }
+
+    /**
+     * @return the DatagramSocket used for sending packets
+     */
+    public DatagramSocket getSendSocket() {
+        return sendSocket;
+    }
+
+    /**
+     * @return the DatagramSocket used for receiving packets
+     */
+    public DatagramSocket getReceiveSocket() {
+        return receiveSocket;
+    }
+
+    /**
+     * Stores/saves the received packet
+     * @param packet - the packet to save
+     */
+    public void saveReceivedPacket(DatagramPacket packet) {
+        receivePacket = packet;
+    }
+
+    /**
+     * @return the DatagramPacket that was received
+     */
+    public DatagramPacket getReceivedPacket() {
+        return receivePacket;
+    }
+
+    /**
+     * Constructs a FloorRequest object based on the data
+     * from the received packet.
+     */
+    public void constructFloorRequest() {
+        // Recreate FloorRequest from received packet
+        byte[] floorRequestData = receivePacket.getData();
+        floorRequest = new FloorRequest(floorRequestData, floorRequestData.length);
+    }
+
+    /**
+     * Constructs an ElevatorStatus object based on the data
+     * from the received packet.
+     */
+    public void constructElevatorStatus() {
+        // Construct ElevatorStatus from received packet
+        byte[] statusData = receivePacket.getData();
+        elevatorStatus = new ElevatorStatus(statusData, statusData.length);
+    }
+
+    /**
+     * @return the (currently received) FloorRequest
+     */
+    public FloorRequest getFloorRequest() {
+        return floorRequest;
+    }
+
+    /**
+     * @return the (currently received) ElevatorStatus
+     */
+    public ElevatorStatus getElevatorStatus() {
+        return elevatorStatus;
+    }
+
+    /**
+     * @param elevatorId - the ID of the elevator
+     * @return true if the specified elevator has its own task queue,
+     * and false otherwise
+     */
+    public boolean containsElevatorId(int elevatorId) {
+        return elevatorTaskQueueHashMap.containsKey(elevatorId);
+    }
+
+    /**
+     * Adds a new elevator to the Elevator Task Queue hashmap
+     * @param elevatorId - the ID of the elevator
+     * @param elevatorStatus - the elevator's ElevatorStatus
+     * @param elevatorIP - the IP address of the Elevator's receiver
+     */
+    public void addElevator(int elevatorId, ElevatorStatus elevatorStatus, InetAddress elevatorIP) {
+        elevatorTaskQueueHashMap.put(elevatorId, new ElevatorTaskQueue(elevatorStatus, elevatorIP));
+    }
+
+    /**
+     * Updates the elevator's ElevatorStatus (from the Elevator's Task Queue)
+     * @param elevatorId - the ID of the elevator
+     * @param elevatorStatus - the elevator's new ElevatorStatus
+     */
+    public void updateElevatorStatus(int elevatorId, ElevatorStatus elevatorStatus) {
+        elevatorTaskQueueHashMap.get(elevatorId).setElevatorStatus(elevatorStatus);
+    }
+
+    /**
+     * @param elevatorId - the ID of the elevator
+     * @return the ElevatorStatus of the specified elevator
+     */
+    public ElevatorStatus getElevatorStatus(int elevatorId) {
+        return elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
+    }
+
+    /**
+     * Adds a FloorRequest to the specified elevator's task queue
+     * @param elevatorId - the ID of the elevator
+     * @param floorRequest - the FloorRequest to be added
+     */
+    public void addFloorRequestToTaskQueue(int elevatorId, FloorRequest floorRequest) {
+        elevatorTaskQueueHashMap.get(elevatorId).addFloorRequest(floorRequest);
+    }
+
+    /**
+     * Adds a FloorRequest to the list of FloorRequests to be served later.
+     * @param floorRequest - the FloorRequest to add
+     */
+    public void addFloorRequestToServe(FloorRequest floorRequest) {
+        floorRequestsToServe.add(floorRequest);
+    }
+
+    /**
+     * @return true if there's at least one FloorRequest
+     * that needs to be served, or false otherwise
+     */
+    public boolean hasFloorRequestsToServe() {
+        return !floorRequestsToServe.isEmpty();
+    }
+
+    /**
+     * @param currentFloor - the current floor that the elevator is on
+     * @return the FloorRequest that is closest to the current floor
+     */
+    public FloorRequest getFloorRequestToServe(int currentFloor) {
+        FloorRequest closestFloorRequest = floorRequestsToServe.getFirst();
+        for (FloorRequest floorRequest : floorRequestsToServe) {
+            // Check if current FloorRequest is closer to currentFloor
+            if ((Math.abs(floorRequest.getDestinationFloor() - currentFloor)) < (Math.abs(closestFloorRequest.getDestinationFloor() - currentFloor))) {
+                closestFloorRequest = floorRequest;
+            }
+        }
+        floorRequestsToServe.remove(closestFloorRequest);
+        return closestFloorRequest;
+    }
+
+    /**
+     * Sends the target floor to the elevator's receiver.
+     */
+    public void sendTargetFloor(int elevatorId, int nextFloor) {
+        // Get Elevator Task Queue
+        ElevatorTaskQueue taskQueue = elevatorTaskQueueHashMap.get(elevatorId);
+        String nextFloorStr = String.valueOf(nextFloor);
+        // Get port number of elevator car's receiver
+        int elevatorReceiverPortNum = getElevatorStatus(elevatorId).getReceiverPortNum();
+        try {
+            // Send packet
+            DatagramPacket sendPacket = new DatagramPacket(nextFloorStr.getBytes(), nextFloorStr.getBytes().length, taskQueue.getElevatorIpAddress(), elevatorReceiverPortNum);
+            sendSocket.send(sendPacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @return the elevator task queue hashmap
+     */
+    public HashMap<Integer, ElevatorTaskQueue> getElevatorTaskQueueHashMap() {
+        return elevatorTaskQueueHashMap;
     }
 }

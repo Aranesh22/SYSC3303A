@@ -48,11 +48,17 @@ public class FloorRequest {
      * @param udpString UDP string to be used to make request
      */
     public FloorRequest(String udpString) {
-        String[] data = udpString.split(",");
-        this.time = data[0];
-        this.startFloor = Integer.parseInt(data[1]);
-        this.destinationFloor = Integer.parseInt(data[3]);
-        this.direction = data[2];
+        this(udpString.split(",")[0], Integer.parseInt(udpString.split(",")[1]),
+                Integer.parseInt(udpString.split(",")[2]), udpString.split(",")[3]);
+    }
+
+    /**
+     * Constructor which takes in a byte array and length to create a floor request.
+     * @param msg Entire floor request message
+     * @param length Length of message
+     */
+    public FloorRequest(byte[] msg, int length) {
+        this(new String(msg, 0, length));
     }
 
     /**
@@ -84,7 +90,7 @@ public class FloorRequest {
      * @return udp representation of floor request
      */
     public byte[] toUdpStringBytes() {
-        return (this.time + "," + this.startFloor + "," + this.direction + "," + this.destinationFloor).getBytes();
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor+ "," + this.direction + ",").getBytes();
     }
 
     /**

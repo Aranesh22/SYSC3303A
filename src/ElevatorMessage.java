@@ -11,7 +11,7 @@
 public class ElevatorMessage {
 
     // Fields
-    private int elevatorReceiverPortNum;
+    private final int elevatorReceiverPortNum;
     private int targetFloor;
 
     /**
@@ -20,6 +20,10 @@ public class ElevatorMessage {
     public ElevatorMessage(int elevatorReceiverPortNum, int targetFloor) {
         this.elevatorReceiverPortNum = elevatorReceiverPortNum;
         this.targetFloor = targetFloor;
+    }
+
+    public ElevatorMessage(int elevatorReceiverPortNum) {
+        this.elevatorReceiverPortNum = elevatorReceiverPortNum;
     }
 
     /**

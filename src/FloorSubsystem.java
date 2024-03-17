@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
 
 /**
  * The FloorSubsystem class is responsible for sending floor requests to the scheduler as well as receiving elevator
@@ -13,9 +12,8 @@ import java.util.Arrays;
 public class FloorSubsystem extends Thread {
 
     // Fields
-    private final Synchronizer synchronizer;
-    private DatagramSocket receiveSocket;
-    private DatagramPacket receivePacket, sendPacket;
+    private DatagramSocket sendReceiveSocket;
+    private DatagramPacket receivePacket;
 
     /**
      * Initializing static data to be used throughout the program
@@ -23,28 +21,37 @@ public class FloorSubsystem extends Thread {
     public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
     public final static int DEFAULT_MAX_FLOOR = 7;
+
+    public static final InetAddress FLOOR_SUBSYSTEM_IP;   // IP address of Scheduler
+    static {
+        try {
+            FLOOR_SUBSYSTEM_IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static final int FLOOR_SUBSYSTEM_PORT = 24;
 
-
-    public FloorSubsystem(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
+    /**
+     * Floor Subsystem constructor.
+     */
+    public FloorSubsystem() {
         try {
-            this.receiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
+            this.sendReceiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
         } catch (SocketException se) {
             this.close(se);
         }
     }
 
+    /**
+     * Main method of floor subsystem thread. Get message, process it and loop.
+     */
     @Override
     public void run() {
         while (true) {
             this.getMsg();
             this.processMsg();
         }
-        // TODO This should be moved to processMsg() when we determine that we received an elevator status message
-        /*while (synchronizer.isRunning()) {
-            System.out.println("FloorRequestSimulator: Elevator at " + synchronizer.getCurrentFloor());
-        }*/
     }
 
     /**
@@ -52,8 +59,8 @@ public class FloorSubsystem extends Thread {
      * @param e Error received during runtime.
      */
     private void close(Exception e) {
-        if (this.receiveSocket != null) {
-            this.receiveSocket.close();
+        if (this.sendReceiveSocket != null) {
+            this.sendReceiveSocket.close();
         }
         e.printStackTrace();
         System.exit(1);
@@ -67,7 +74,7 @@ public class FloorSubsystem extends Thread {
         this.receivePacket = new DatagramPacket(data, data.length);
 
         try {
-            receiveSocket.receive(this.receivePacket);
+            sendReceiveSocket.receive(this.receivePacket);
         } catch(IOException e) {
             this.close(e);
         }
@@ -78,29 +85,31 @@ public class FloorSubsystem extends Thread {
      * Packet could be a floor request or an elevator status.
      */
     private void processMsg() {
-        // TODO This method should differentiate between floor requests and elevator status before deciding on appropriate method to service method
-        FloorRequest floorRequest = new FloorRequest(new String(this.receivePacket.getData(), 0, this.receivePacket.getLength()));
-        System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
-        this.sendMsgToScheduler();
-        this.synchronizer.putRequest(floorRequest);
+        // Try creating an elevator status object.
+        try {
+            ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
+            System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                    " at floor " + elevatorStatus.getCurrentFloor());
+        } catch (Exception e) {
+            // If it throws an exception, try creating a floor request object.
+            try {
+                FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
+                System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
+                this.sendMsgToScheduler();
+            } catch (Exception e2) {
+                this.close(e2);
+            }
+        }
     }
 
     /**
      * Relay floor request to scheduler.
      */
     private void sendMsgToScheduler() {
+        DatagramPacket sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
+                Scheduler.SCHEDULER_IP, Scheduler.SCHEDULER_PORT);
         try {
-            this.sendPacket = new DatagramPacket(this.receivePacket.getData(), this.receivePacket.getLength(),
-                    InetAddress.getLocalHost(), Scheduler.SCHEDULER_PORT);
-        } catch (UnknownHostException e) {
-            this.close(e);
-        }
-        try {
-            DatagramSocket sendSocket = new DatagramSocket();
-            // TODO Remove timeout one synchronizer is removed
-            sendSocket.setSoTimeout(1000);
-            sendSocket.send(this.sendPacket);
-            sendSocket.close();
+            sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
             this.close(e);
         }
