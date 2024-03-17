@@ -13,7 +13,8 @@ import java.util.HashMap;
  * It interacts with the Synchronizer to get the status of the elevator and handle requests.
  *
  * @author Harishan Amutheesan, 101154757
- * @author Yehan De Silva, 101185388
+ * @author Yehan De Silva, 101185388 
+ * @author Aranesh Athavan 101152794
  * @date February 2nd, 2024 / February 22nd, 2024
  * @version iteration1, iteration2
  */
