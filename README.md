@@ -13,11 +13,12 @@ This project simulates an elevator control system using a real-time multi-thread
 
 ## Breakdown of Responsibilities (Iteration 3)
 * Yehan De Silva
-  * Developed the Scheduler State Machine Diagram
-  * Completed the scheduler algorithm enhancements
+  * Designed new state machine diagram for Elevator subsystem and completed its implementation
+  * Implemented new scheduler algorithm
 
 * Pathum Danthanarayana
-  * Finalized the scheduler algorithm
+  * Designed new state machine diagram for Scheduler subsystem and completed its implementation
+  * Implemented new scheduler algorithm
 
 * Aranesh Athavan
   * Updated the UML sequence diagram to reflect changes in the system
