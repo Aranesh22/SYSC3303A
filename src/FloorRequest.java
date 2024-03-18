@@ -1,14 +1,15 @@
 
 /**
- * Request class is responsible for providing the message structure and information of requests
+ * FloorRequest class is responsible for providing the message structure and information of requests
  * utilized by the synchronizer class
  *
  * @author Lindsay Dickson, 101160876
- * @version Iteration1
- * @date February 2nd, 2024
+ * @author Yehan De Silva (101185388)
+ * @version Iteration3
+ * @date March 6th, 2024
  */
 
-public class Request {
+public class FloorRequest {
 
     //Fields
     private final String time;
@@ -19,12 +20,13 @@ public class Request {
     /*
     Default constructor.
      */
-    public Request(){
+    public FloorRequest(){
         time = null;
         startFloor = -1;
         destinationFloor = -1;
         direction = null;
     }
+
 
     /**
      * Overloaded constructor
@@ -34,11 +36,29 @@ public class Request {
      * @param direction will be either up/down
      *
      */
-    public Request(String time, int startFloor, int destinationFloor, String direction) {
+    public FloorRequest(String time, int startFloor, int destinationFloor, String direction) {
         this.time = time;
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
         this.direction = direction;
+    }
+
+    /**
+     * Constructor which takes in a UDP string to construct a floor request
+     * @param udpString UDP string to be used to make request
+     */
+    public FloorRequest(String udpString) {
+        this(udpString.split(",")[0], Integer.parseInt(udpString.split(",")[1]),
+                Integer.parseInt(udpString.split(",")[2]), udpString.split(",")[3]);
+    }
+
+    /**
+     * Constructor which takes in a byte array and length to create a floor request.
+     * @param msg Entire floor request message
+     * @param length Length of message
+     */
+    public FloorRequest(byte[] msg, int length) {
+        this(new String(msg, 0, length));
     }
 
     /**
@@ -66,11 +86,19 @@ public class Request {
     public String getDirection() { return direction; }
 
     /**
+     * Returns udp representation of floor request.
+     * @return udp representation of floor request
+     */
+    public byte[] toUdpStringBytes() {
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor+ "," + this.direction + ",").getBytes();
+    }
+
+    /**
      * Returns a readable string representation of request.
      * @return String representation of request.
      */
     @Override
     public String toString() {
-        return "Time:" + this.time + " | Request:" + this.startFloor + "->" + this.destinationFloor;
+        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor;
     }
 }

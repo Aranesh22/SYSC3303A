@@ -8,45 +8,114 @@
  * @date Feb 21, 2024
  */
 
-interface ElevatorState {
+public abstract class ElevatorState {
+    /**
+     * Handles the flow of the state
+     */
+    public void handleState(Elevator context) {
+        this.onEntry(context);
+        this.doActions(context);
+        this.onExit(context);
+    };
+
+    /**
+     * Actions to do on entry of state
+     * @param context Current context of the state machine.
+     */
+    public void onEntry(Elevator context) {};
+
+    /**
+     * Actions to do within a state
+     * @param context Current context of the state machine.
+     */
+    public void doActions(Elevator context){};
+
+    /**
+     * Actions to do on exit of state
+     * @param context Current context of the state machine.
+     */
+    public void onExit(Elevator context) {};
+
     /**
      * Handles the event of receiving a new request from Scheduler
-     * @param context The Elevator context in which the state transition occurs.
+     * Throws error as this method should never be called through polymorphism.
+     * @param context Elevator context in which the state transition occurs.
      */
-    void receiveRequest(Elevator context);
+    public void requestReceived(Elevator context) {
+        throw new RuntimeException("Illegal Receive Request Event In State " + this);
+    };
 
     /**
      * Handles the event of when the elevator door timer expires
+     * Throws error as this method should never be called through polymorphism.
      * @param context The Elevator context in which the state transition occurs.
      */
-    void timerExpired(Elevator context);
+    public void timerExpired(Elevator context) {
+        throw new RuntimeException("Illegal Timer Expired Event In State " + this);
+    };
 
     /**
-     * Handles the event of when the elevator reaches its destination floor
-     * @param context The Elevator context in which the state transition occurs.
+     * Returns a string representation of class.
+     * @return string representation of class.
      */
-    void  arriveAtFloor(Elevator context);
-
-     String getSTATENAME() ;
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }
 
 /**
  * Concrete state class representing when an elevator is stationary and its doors are closed
  */
-class StationaryDoorsClosed implements  ElevatorState{
+class StationaryDoorsClosed extends ElevatorState {
+
     /**
-     * Event conditional on curFloor != desFloor
+     * Actions to do on entry of state
+     * @param context Current context of the state machine.
      */
     @Override
-    public void receiveRequest(Elevator context) {
-        context.setState("MovingDoorsClosed");
+    public void onEntry(Elevator context) {
+        context.closeDoors();
     }
-    public void timerExpired(Elevator context){ /*Timer is not set*/ }
-    public void arriveAtFloor(Elevator context){ /*Elevator has not arrived*/ }
-    private final String STATENAME = "StationaryDoorsClosed";
-    public String getSTATENAME() {
 
-        return STATENAME;
+    /**
+     * Actions to do on exit of state
+     * @param context Current context of the state machine.
+     */
+    @Override
+    public void onExit(Elevator context) {
+        context.setState("WaitingForReceiver");
+    }
+
+}
+
+/**
+ * Concrete state class representing when an elevator is waiting for a request.
+ */
+class WaitingForReceiver extends ElevatorState {
+    /**
+     * Actions to do within a state
+     * @param context Current context of the state machine.
+     */
+    @Override
+    public void doActions(Elevator context) {
+        context.getElevatorMessage();
+    }
+
+    /**
+     * Handles the event of receiving a new request from Scheduler
+     * @param context Elevator context in which the state transition occurs.
+     */
+    @Override
+    public void requestReceived(Elevator context) {
+        if (context.getDestFloor() == 0) {
+            context.sendElevatorStatus();
+            context.setState("WaitingForReceiver");
+        } else if (context.getCurFloor() == context.getDestFloor()) {
+            context.setState("StationaryDoorsOpen");
+        } else {
+            context.setState("MovingDoorsClosed");
+        }
     }
 }
 
@@ -54,49 +123,73 @@ class StationaryDoorsClosed implements  ElevatorState{
  * Concrete state class representing when an elevator is stationary and its doors are open
  * to allow passengers to load/unload
  */
-class StationaryDoorsOpen implements ElevatorState{
-    @Override
-    public void receiveRequest(Elevator context) { /*Request is being processed*/ }
+class StationaryDoorsOpen extends ElevatorState {
+    /**
+     * Actions to do on entry of state
+     * @param context Current context of the state machine.
+     */
+    public void onEntry(Elevator context) {
+        context.openDoors();
+        context.sendElevatorStatus();
+        new Timer(context.getLoadUnloadTime(), context);
+    }
 
     /**
-     * Event Conditional on the expiry of the timer for elevator
+     * Handles the event of when the elevator door timer expires
+     * @param context The Elevator context in which the state transition occurs.
      */
     @Override
     public void timerExpired(Elevator context) {
         context.setState("StationaryDoorsClosed");
     }
-    @Override
-    public void arriveAtFloor(Elevator context) { /* Elevator is Stationary and doors are open*/ }
 
-    private final String STATENAME = "StationaryDoorsOpen";
-    public String getSTATENAME() {
-
-        return STATENAME;
-    }
 }
 
 /**
  * Concrete state class representing when an elevator is in motion and its doors are closed
  */
-class MovingDoorsClosed implements ElevatorState{
-    @Override
-    public void receiveRequest(Elevator context) { /*Elevator is currently servicing a request*/ }
-
-    @Override
-    public void timerExpired(Elevator context) { /* No timer active */ }
+class MovingDoorsClosed extends ElevatorState {
 
     /**
-     * Event conditional on curFloor == desFloor
+     * How to handle current state.
+     * @param context Current context of the state machine.
      */
     @Override
-    public void arriveAtFloor(Elevator context) {
-        context.setState("StationaryDoorsOpen");
+    public void handleState(Elevator context) {
+        this.onEntry(context);
     }
 
-    private final String STATENAME = "MovingDoorsClosed";
-    public String getSTATENAME() {
+    /**
+     * Actions to do on entry of state
+     * @param context Current context of the state machine.
+     */
+    public void onEntry(Elevator context) {
+        new Timer(context.getFloorTravelTime(), context);
+    }
 
-        return STATENAME;
+    /**
+     * Actions to do on exit of state
+     * @param context Current context of the state machine.
+     */
+    public void onExit(Elevator context) {
+        context.goToFloor();
+    }
+
+    /**
+     * Handles the event of when the elevator door timer expires
+     * @param context The Elevator context in which the state transition occurs.
+     */
+    @Override
+    public void timerExpired(Elevator context) {
+        this.onExit(context);
+        if (!context.requestBoxIsEmpty()) {
+            context.setState("WaitingForReceiver");
+        } else if (context.getCurFloor() == context.getDestFloor()) {
+            context.setState("StationaryDoorsOpen");
+        } else {
+            context.sendElevatorStatus();
+            context.setState("MovingDoorsClosed");
+        }
     }
 
 }

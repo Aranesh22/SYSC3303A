@@ -14,15 +14,19 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        Synchronizer synchronizer = new Synchronizer();
-        Thread elevator, scheduler, floor;
+        Thread scheduler, floorSubsystem, floorRequestSimulator, elevatorSubsystem1, elevatorSubsystem2;
 
-        scheduler = new Thread(new Scheduler(synchronizer), "Scheduler");
-        floor = new Thread(new Floor(synchronizer), "Floor");
-        elevator = new Thread(new Elevator(synchronizer), "Elevator");
+
+        scheduler = new Thread(new Scheduler(), "Scheduler");
+        elevatorSubsystem1 = new Thread(new ElevatorSubsystem(1), "ElevatorSubsystem");
+        elevatorSubsystem2 = new Thread(new ElevatorSubsystem(2), "ElevatorSubsystem");
+        floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
+        floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
 
         scheduler.start();
-        floor.start();
-        elevator.start();
+        elevatorSubsystem1.start();
+        //elevatorSubsystem2.start();
+        floorSubsystem.start();
+        floorRequestSimulator.start();
     }
 }

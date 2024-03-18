@@ -1,194 +1,302 @@
-import java.util.Objects;
+import java.io.IOException;
+import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
+ *
  * The Scheduler class manages elevator requests and coordinates
  * the elevators based on the current system state. It receives requests
  * from floors, processes them, and assigns elevators to fulfill those requests.
  * It also checks the current floor status of elevators and sends the status to the floor.
+ * Scheduler class extends Thread and is responsible for managing the state of the elevator system.
+ * It interacts with the Synchronizer to get the status of the elevator and handle requests.
  *
  * @author Harishan Amutheesan, 101154757
- * @author Yehan De Silva, 101185388
+ * @author Yehan De Silva, 101185388 
+ * @author Aranesh Athavan 101152794
  * @date February 2nd, 2024 / February 22nd, 2024
  * @version iteration1, iteration2
  */
 public class Scheduler extends Thread {
-
-    // Fields
-    private final Synchronizer synchronizer;
-    private Map<String, SchedulerState> states;
+    public static final InetAddress SCHEDULER_IP;   // IP address of Scheduler
+    static {
+        try {
+            SCHEDULER_IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static final int SCHEDULER_PORT = 25; //Current Port
+    private DatagramSocket sendSocket, receiveSocket;
+    private DatagramPacket receivePacket;
+    private FloorRequest floorRequest;
+    private ElevatorStatus elevatorStatus;
     private SchedulerState currentState;
+    private HashMap<String, SchedulerState> states;
+    private HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap;
+    private ArrayList<FloorRequest> floorRequestsToServe;
 
     /**
-     * Constructor for Scheduler
-     *
-     * @param synchronizer An instance of Synchronizer for coordinating with other subsystems
+     * Constructor for the Scheduler class
      */
-    public Scheduler(Synchronizer synchronizer) {
-        this.synchronizer = synchronizer;
-        this.states = new HashMap<>();
-        initializeStates();
+    public Scheduler() {
+        // Initialize sockets
+        try {
+            // For receiving FloorRequests and ElevatorStatus (bind to dedicated port)
+            receiveSocket = new DatagramSocket(SCHEDULER_PORT);
+            // For sending FloorRequests and ElevatorStatus (bind to any available port)
+            sendSocket = new DatagramSocket();
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Initialize elevator task queue hashmap
+        elevatorTaskQueueHashMap =  new HashMap<>();
+        // Initialize floor request list
+        floorRequestsToServe = new ArrayList<>();
+
+        // Initialize current FloorRequest and ElevatorStatus
+        floorRequest = null;
+        elevatorStatus = null;
+
+        // Add all states
+        states = new HashMap<>();
+        states.put("WaitingForPacket", new WaitingForPacket(this));
+        states.put("CheckingPacketType", new CheckingPacketType(this));
+        states.put("ProcessingElevatorStatus", new ProcessingElevatorStatus(this));
+        states.put("ProcessingFloorRequest", new ProcessingFloorRequest(this));
+        states.put("SavingFloorRequest", new SavingFloorRequest(this));
+        // Set the initial state
+        setState(new WaitingForPacket(this));
     }
 
     /**
-     * Initializes the states for the Scheduler.
+     * Run method
      */
-    private void initializeStates() {
-        addState("WaitingForFloorRequest", new WaitingForFloorRequest());
-        addState("SendingElevatorToStartingFloor", new SendingElevatorToStartingFloor());
-        addState("SendingElevatorToDestinationFloor", new SendingElevatorToDestinationFloor());
-        setState("WaitingForFloorRequest");
-    }
-
-    /**
-     * The main run method executes when the Scheduler thread is started
-     * It continuously checks for new requests, the current status of elevators, and processes requests
-     */
-    @Override
     public void run() {
-        while (this.synchronizer.isRunning()) {
-            processRequest(getValidFloorRequest());
+        while(true) {
+            // Start the current state
+            currentState.start();
         }
-        System.out.println("Scheduler: Has exited");
     }
 
     /**
-     * Processes the floor request by determining which elevator should be dispatched.
-     * This method is will be more complex in later iterations
-     *
-     * @param request The request to be processed
+     * Handles event where packet is received
      */
-    private void processRequest(Request request) {
-        if (request == null) {
-            this.synchronizer.stopRunning();
-            this.endReceived(); //State transition
-            return;
-        }
-
-        System.out.println("Scheduler: Received request: " + request);
-        this.receivedFloorRequest(request); //State transition
-
-        this.sendElevatorToFloor(request.getStartFloor());
-        this.handleElevatorStatus(request.getStartFloor());
-        this.sendElevatorToFloor(request.getDestinationFloor());
-        this.handleElevatorStatus(request.getDestinationFloor());
+    public void packetReceived() {
+        setState(currentState.packetReceived());
     }
 
     /**
-     * Continuously attempts to get a valid request or null if no more requests.
-     * @return Next Request to service or null if no more requests.
+     * Handles event where ElevatorStatus is received
      */
-    public Request getValidFloorRequest() {
-        Request floorRequest;
-        // Loop until we get a valid floor request
-        while (true) {
-            floorRequest = synchronizer.getRequest();
-            // Signifies no more requests
-            if (Objects.equals(floorRequest.getTime(), "END_REQUEST")) {
-                return null;
-            }
-            else if (isValidFloorRequest(floorRequest)) {
-                break;
-            } else {
-                System.out.println("Scheduler: Invalid floor request - " + floorRequest);
-            }
-        }
+    public void elevatorStatusReceived() {
+        setState(currentState.elevatorStatusReceived());
+    }
+
+    /**
+     * Handles event where FloorRequest is received
+     */
+    public void floorRequestReceived() {
+        setState(currentState.floorRequestReceived());
+    }
+
+    /**
+     * Handles event where FloorRequest is saved instead of being serviced
+     */
+    public void floorRequestSaved() {
+        setState(currentState.floorRequestSaved());
+    }
+
+    /**
+     * Handles the event where a packet is sent by the Scheduler
+     */
+    public void packetSent() {
+        setState(currentState.packetSent());
+    }
+
+    /**
+     * Sets the current state of the Scheduler
+     */
+    private void setState(SchedulerState nextState) {
+        // Set the current state
+        currentState = nextState;
+        // Display current state info
+        currentState.displayState();
+    }
+
+    /**
+     * Returns the state object according to the specified state name
+     * @param stateName - name of the state to be returned
+     * @return a state
+     */
+    public SchedulerState getState(String stateName) {
+        return states.get(stateName);
+    }
+
+    /**
+     * @return the DatagramSocket used for sending packets
+     */
+    public DatagramSocket getSendSocket() {
+        return sendSocket;
+    }
+
+    /**
+     * @return the DatagramSocket used for receiving packets
+     */
+    public DatagramSocket getReceiveSocket() {
+        return receiveSocket;
+    }
+
+    /**
+     * Stores/saves the received packet
+     * @param packet - the packet to save
+     */
+    public void saveReceivedPacket(DatagramPacket packet) {
+        receivePacket = packet;
+    }
+
+    /**
+     * @return the DatagramPacket that was received
+     */
+    public DatagramPacket getReceivedPacket() {
+        return receivePacket;
+    }
+
+    /**
+     * Constructs a FloorRequest object based on the data
+     * from the received packet.
+     */
+    public void constructFloorRequest() {
+        // Recreate FloorRequest from received packet
+        byte[] floorRequestData = receivePacket.getData();
+        floorRequest = new FloorRequest(floorRequestData, floorRequestData.length);
+    }
+
+    /**
+     * Constructs an ElevatorStatus object based on the data
+     * from the received packet.
+     */
+    public void constructElevatorStatus() {
+        // Construct ElevatorStatus from received packet
+        byte[] statusData = receivePacket.getData();
+        elevatorStatus = new ElevatorStatus(statusData, statusData.length);
+    }
+
+    /**
+     * @return the (currently received) FloorRequest
+     */
+    public FloorRequest getFloorRequest() {
         return floorRequest;
     }
 
     /**
-     * Validates if the floor request range is valid
-     *
-     * @param floorRequest The request to be validated
-     * @return true if the floor request is within range, false otherwise
+     * @return the (currently received) ElevatorStatus
      */
-    private boolean isValidFloorRequest(Request floorRequest) {
-        return (floorRequest.getStartFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getStartFloor() <= Floor.DEFAULT_MAX_FLOOR)
-                && (floorRequest.getDestinationFloor() >= Floor.DEFAULT_MIN_FLOOR) && (floorRequest.getDestinationFloor() <= Floor.DEFAULT_MAX_FLOOR);
+    public ElevatorStatus getElevatorStatus() {
+        return elevatorStatus;
     }
 
     /**
-     * Sends elevator to specified floor.
-     * @param floor Integer representing floor to send elevator to.
+     * @param elevatorId - the ID of the elevator
+     * @return true if the specified elevator has its own task queue,
+     * and false otherwise
      */
-    public void sendElevatorToFloor(int floor) {
-        synchronizer.putDestinationFloor(floor);
-        System.out.println("Scheduler: Dispatched elevator to floor: " + floor);
-
+    public boolean containsElevatorId(int elevatorId) {
+        return elevatorTaskQueueHashMap.containsKey(elevatorId);
     }
 
     /**
-     * Monitors the status of the elevator which it relays to the floor system.
-     * Once the elevator arrives at the intended floor, method returns.
-     * @param targetFloor Integer representing the final destination floor of the elevator.
+     * Adds a new elevator to the Elevator Task Queue hashmap
+     * @param elevatorId - the ID of the elevator
+     * @param elevatorStatus - the elevator's ElevatorStatus
+     * @param elevatorIP - the IP address of the Elevator's receiver
      */
-    private void handleElevatorStatus(int targetFloor) {
-        int elevatorStatus;
-        do {
-            elevatorStatus = synchronizer.getElevatorStatus();
-            synchronizer.putCurrentFloor(elevatorStatus);
-        } while (elevatorStatus != targetFloor);
-
-        System.out.println("Scheduler: Elevator has arrived at requested floor " + elevatorStatus);
-        this.receivedElevatorStatus(); //State transition
-    }
-
-//-----------------------------------------------Iteration 2--------------------------------------------//
-    /**
-     * Adds a new state to the state machine.
-     * This method is used for the state machine with all possible states.
-     *
-     * @param stateName The name of the state. This is used as the key in the map.
-     * @param state     The state to be added. This is the value associated with the key in the map.
-     */
-    public void addState(String stateName, SchedulerState state) {
-        states.put(stateName, state);
+    public void addElevator(int elevatorId, ElevatorStatus elevatorStatus, InetAddress elevatorIP) {
+        elevatorTaskQueueHashMap.put(elevatorId, new ElevatorTaskQueue(elevatorStatus, elevatorIP));
     }
 
     /**
-     * Changes the current state of the state machine.
-     * This method is used to transition from one state to another in response to an event.
-     *
-     * @param stateName The name of the state to transition to. This should match a key in the map.
+     * Updates the elevator's ElevatorStatus (from the Elevator's Task Queue)
+     * @param elevatorId - the ID of the elevator
+     * @param elevatorStatus - the elevator's new ElevatorStatus
      */
-    public void setState(String stateName){
-        System.out.println("[Scheduler-STATE] " + stateName);
-        this.currentState = states.get(stateName);
+    public void updateElevatorStatus(int elevatorId, ElevatorStatus elevatorStatus) {
+        elevatorTaskQueueHashMap.get(elevatorId).setElevatorStatus(elevatorStatus);
     }
 
     /**
-     * @return the current state of the Scheduler.
+     * @param elevatorId - the ID of the elevator
+     * @return the ElevatorStatus of the specified elevator
      */
-    public SchedulerState getCurrentState() {
-        return this.currentState;
+    public ElevatorStatus getElevatorStatus(int elevatorId) {
+        return elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
     }
 
     /**
-     * Handles the event of receiving an end signal from the floor request.
-     * This method is used to delegate the handling of the endReceived event to the current state.
+     * Adds a FloorRequest to the specified elevator's task queue
+     * @param elevatorId - the ID of the elevator
+     * @param floorRequest - the FloorRequest to be added
      */
-    public void endReceived(){
-        currentState.endReceived(this);
+    public void addFloorRequestToTaskQueue(int elevatorId, FloorRequest floorRequest) {
+        elevatorTaskQueueHashMap.get(elevatorId).addFloorRequest(floorRequest);
     }
 
     /**
-     * Handles the event of receiving a new floor request from a floor.
-     * This method is used to delegate the handling of the receivedFloorRequest event to the current state.
-     *
-     * @param request Request received
+     * Adds a FloorRequest to the list of FloorRequests to be served later.
+     * @param floorRequest - the FloorRequest to add
      */
-    public void receivedFloorRequest(Request request) {
-        if (request != null) {
-            currentState.receivedFloorRequest(this);
+    public void addFloorRequestToServe(FloorRequest floorRequest) {
+        floorRequestsToServe.add(floorRequest);
+    }
+
+    /**
+     * @return true if there's at least one FloorRequest
+     * that needs to be served, or false otherwise
+     */
+    public boolean hasFloorRequestsToServe() {
+        return !floorRequestsToServe.isEmpty();
+    }
+
+    /**
+     * @param currentFloor - the current floor that the elevator is on
+     * @return the FloorRequest that is closest to the current floor
+     */
+    public FloorRequest getFloorRequestToServe(int currentFloor) {
+        FloorRequest closestFloorRequest = floorRequestsToServe.getFirst();
+        for (FloorRequest floorRequest : floorRequestsToServe) {
+            // Check if current FloorRequest is closer to currentFloor
+            if ((Math.abs(floorRequest.getDestinationFloor() - currentFloor)) < (Math.abs(closestFloorRequest.getDestinationFloor() - currentFloor))) {
+                closestFloorRequest = floorRequest;
+            }
+        }
+        floorRequestsToServe.remove(closestFloorRequest);
+        return closestFloorRequest;
+    }
+
+    /**
+     * Sends the target floor to the elevator's receiver.
+     */
+    public void sendTargetFloor(int elevatorId, int nextFloor) {
+        // Get Elevator Task Queue
+        ElevatorTaskQueue taskQueue = elevatorTaskQueueHashMap.get(elevatorId);
+        String nextFloorStr = String.valueOf(nextFloor);
+        // Get port number of elevator car's receiver
+        int elevatorReceiverPortNum = getElevatorStatus(elevatorId).getReceiverPortNum();
+        try {
+            // Send packet
+            DatagramPacket sendPacket = new DatagramPacket(nextFloorStr.getBytes(), nextFloorStr.getBytes().length, taskQueue.getElevatorIpAddress(), elevatorReceiverPortNum);
+            sendSocket.send(sendPacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     /**
-     * Handles the event of receiving an elevator status update.
-     * This method is used to delegate the handling of the receivedElevatorStatus event to the current state.
+     * @return the elevator task queue hashmap
      */
-    public void receivedElevatorStatus(){
-        currentState.receivedElevatorStatus(this);
+    public HashMap<Integer, ElevatorTaskQueue> getElevatorTaskQueueHashMap() {
+        return elevatorTaskQueueHashMap;
     }
 }
