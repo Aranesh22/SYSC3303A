@@ -16,6 +16,11 @@ public class ElevatorSubsystem extends Thread {
 
     public static void main(String[] args) {
         Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(1), "ElevatorSubsystem");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         elevatorSubsystem1.start();
     }
 }
