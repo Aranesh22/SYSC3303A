@@ -184,6 +184,7 @@ public class Elevator extends Thread {
      * Simulates opening the doors of the elevator.
      */
     public void openDoors() {
+        System.out.println("Elevator " + this.id + ": Doors Opening");
         this.doorsOpened = true;
     }
 
@@ -191,6 +192,7 @@ public class Elevator extends Thread {
      * Simulates closing the doors of the elevator.
      */
     public void closeDoors() {
+        System.out.println("Elevator " + this.id + ": Doors Closing");
         this.doorsOpened = false;
     }
 
