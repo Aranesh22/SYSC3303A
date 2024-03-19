@@ -79,7 +79,7 @@ public class Elevator extends Thread {
     @Override
     public void run() {
         //Set initial state
-        String initialStateName = "StationaryDoorsClosed";
+        String initialStateName = "WaitingForReceiver";
         System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
         this.setState(initialStateName);
     }
@@ -120,6 +120,14 @@ public class Elevator extends Thread {
         }
         this.currentState = this.getState(stateName);
         this.currentState.handleState(this);
+    }
+
+    /**
+     * Shuts down the elevator
+     */
+    public void shutdown() {
+        System.out.println(this + ": Shutting down");
+        throw new RuntimeException(this + ": Shutting down");
     }
 
     /**
@@ -184,7 +192,7 @@ public class Elevator extends Thread {
      * Simulates opening the doors of the elevator.
      */
     public void openDoors() {
-        System.out.println("Elevator " + this.id + ": Doors Opening");
+        System.out.println(this + ": Doors Opening");
         this.doorsOpened = true;
     }
 
@@ -192,7 +200,7 @@ public class Elevator extends Thread {
      * Simulates closing the doors of the elevator.
      */
     public void closeDoors() {
-        System.out.println("Elevator " + this.id + ": Doors Closing");
+        System.out.println(this + ": Doors Closing");
         this.doorsOpened = false;
     }
 
@@ -204,6 +212,7 @@ public class Elevator extends Thread {
         this.moving = moving;
         this.updateDirection();
     }
+
 
     /**
      * Sets the direction of the elevator
@@ -261,6 +270,13 @@ public class Elevator extends Thread {
      */
     public void requestReceived() {
        this.currentState.requestReceived(this);
+    }
+
+    /**
+     * Event of the Elevator detecting an error.
+     */
+    public void errorDetected() {
+        this.currentState.errorDetected(this);
     }
 
     /**

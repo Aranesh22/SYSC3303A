@@ -128,22 +128,4 @@ public class ElevatorStatus {
                 + this.receiverPortNum + " | Direction of Car-->" + this.direction + " | Moving: " + this.moving
                 + " | Doors " + ((this.doorsOpened)? "Open" : "Closed");
     }
-
-    /**
-     * Returns if elevator status doors opened field is the same.
-     * @param o Other object to compare
-     * @return True if doors opened field is the same
-     */
-    public boolean doorsOpenedEquals(Object o) {
-
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof ElevatorStatus other)) {
-            return false;
-        }
-
-        return this.doorsOpened == other.doorsOpened;
-    }
 }
