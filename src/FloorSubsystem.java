@@ -115,4 +115,12 @@ public class FloorSubsystem extends Thread {
             this.close(e);
         }
     }
+
+    public static void main(String[] args) {
+        Thread floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
+        Thread floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
+
+        floorSubsystem.start();
+        floorRequestSimulator.start();
+    }
 }

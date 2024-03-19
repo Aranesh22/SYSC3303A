@@ -316,4 +316,9 @@ public class Scheduler extends Thread {
     public HashMap<Integer, ElevatorTaskQueue> getElevatorTaskQueueHashMap() {
         return elevatorTaskQueueHashMap;
     }
+
+    public static void main(String[] args) {
+        Thread scheduler = new Thread(new Scheduler(), "Scheduler");
+        scheduler.start();
+    }
 }
