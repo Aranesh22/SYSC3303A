@@ -94,6 +94,14 @@ public class ElevatorStatus {
     }
 
     /**
+     * Returns whether elevator doors are open.
+     * @return True if elevator doors are open
+     */
+    public boolean getDoorsOpened() {
+        return doorsOpened;
+    }
+
+    /**
      * Returns direction elevator is moving in.
      * @return direction elevator is moving in.
      */
@@ -119,5 +127,23 @@ public class ElevatorStatus {
         return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + " | PortNum:"
                 + this.receiverPortNum + " | Direction of Car-->" + this.direction + " | Moving: " + this.moving
                 + " | Doors " + ((this.doorsOpened)? "Open" : "Closed");
+    }
+
+    /**
+     * Returns if elevator status doors opened field is the same.
+     * @param o Other object to compare
+     * @return True if doors opened field is the same
+     */
+    public boolean doorsOpenedEquals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ElevatorStatus other)) {
+            return false;
+        }
+
+        return this.doorsOpened == other.doorsOpened;
     }
 }

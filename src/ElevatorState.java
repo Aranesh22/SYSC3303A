@@ -108,8 +108,8 @@ class WaitingForReceiver extends ElevatorState {
      */
     @Override
     public void requestReceived(Elevator context) {
+        context.sendElevatorStatus();
         if (context.getDestFloor() == 0) {
-            context.sendElevatorStatus();
             context.setState("WaitingForReceiver");
         } else if (context.getCurFloor() == context.getDestFloor()) {
             context.setState("StationaryDoorsOpen");
@@ -185,6 +185,7 @@ class MovingDoorsClosed extends ElevatorState {
         if (!context.requestBoxIsEmpty()) {
             context.setState("WaitingForReceiver");
         } else if (context.getCurFloor() == context.getDestFloor()) {
+            context.sendElevatorStatus();
             context.setState("StationaryDoorsOpen");
         } else {
             context.sendElevatorStatus();
