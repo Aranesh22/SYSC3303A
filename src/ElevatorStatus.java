@@ -16,11 +16,6 @@ public class ElevatorStatus {
     private final String direction;
     private final int errorCode;
 
-    //Constants
-    public static final int GOOD = 0;
-    public static final int DOOR = 1;
-    public static final int STUCK = 2;
-
     /**
      * Overloaded constructor
      * @param currentFloor Current floor of elevator.
@@ -59,20 +54,6 @@ public class ElevatorStatus {
      */
     public ElevatorStatus(byte[] msg, int length) {
         this(new String(msg, 0, length));
-    }
-
-    /**
-     * Returns error message of code.
-     * @param errorCode code to get error message.
-     * @return error message of code.
-     */
-    public static String getErrorMessage(int errorCode) {
-        return switch (errorCode) {
-            case GOOD -> "GOOD";
-            case DOOR -> "DOOR";
-            case STUCK -> "STUCK";
-            default -> "UNKNOWN";
-        };
     }
 
     /**

@@ -41,7 +41,7 @@ public class Timer extends Thread {
             context.errorDetected();
         } else {
             // Generate timeout event on the context.
-            context.setErrorCode(ElevatorStatus.GOOD);
+            context.setErrorCode(ElevatorError.GOOD);
             context.timerExpired();
         }
     }
