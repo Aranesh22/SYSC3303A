@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
@@ -31,9 +33,10 @@ public class Elevator extends Thread {
     private boolean moving;
     private String direction;
     private final Map<String, ElevatorState> elevatorStates;
-    private final long loadUnloadTime;
-    private final long floorTravelTime;
+    private long loadUnloadTime;
+    private long floorTravelTime;
     private int errorCode;
+    private final Map<Integer, ElevatorError> injectedErrors;
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -44,7 +47,7 @@ public class Elevator extends Thread {
      * @param requestBox Request box elevator shares with Elevator Receiver
      */
     public Elevator(ElevatorRequestBox requestBox, int id) {
-        this(requestBox, id, 1);
+        this(requestBox, id, 1, "data/error.csv");
     }
 
     /**
@@ -52,7 +55,7 @@ public class Elevator extends Thread {
      * @param id Id of elevator.
      * @param curFloor FloorRequestSimulator elevator is starting at.
      */
-    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor) {
+    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, String errorFileName) {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
@@ -65,6 +68,7 @@ public class Elevator extends Thread {
         this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
         this.floorTravelTime = DEFAULT_FLOOR_TRAVEL_TIME;
         this.errorCode = 0;
+        this.injectedErrors = new HashMap<>();
 
         // Set up socket for sending (bind to any available port)
         try {
@@ -73,6 +77,7 @@ public class Elevator extends Thread {
             System.exit(1);
         }
         this.initializeStates();
+        this.initializeInjectedErrors(errorFileName);
     }
 
     /**
@@ -186,6 +191,7 @@ public class Elevator extends Thread {
                 this.curFloor--;
             }
             this.setMoving(this.curFloor != this.destFloor);
+            this.updateInjectedErrors();
             System.out.println(this + ": Currently at floor " + this.curFloor);
         }
     }
@@ -232,6 +238,38 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Injects all errors into the elevator.
+     */
+    private void initializeInjectedErrors(String errorFile) {
+        String line;
+        try {
+            BufferedReader readBuff = new BufferedReader(new FileReader(errorFile));
+            // Go through lines in data file to parse floor requests
+            while ((line = readBuff.readLine()) != null) {
+                this.injectedErrors.put(Integer.parseInt(line.split(",")[0]), new ElevatorError(line));
+            }
+        } catch (IOException e) {
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Injects any errors into the elevator.
+     */
+    private void updateInjectedErrors() {
+        // Set error values if error is injected for this current floor
+        if (this.injectedErrors.containsKey(this.curFloor)) {
+            ElevatorError elevatorError = this.injectedErrors.get(this.curFloor);
+            this.floorTravelTime = elevatorError.getTravelTime();
+            this.loadUnloadTime = elevatorError.getLoadTime();
+            this.injectedErrors.remove(this.curFloor);
+        } else {
+            this.floorTravelTime = Elevator.DEFAULT_FLOOR_TRAVEL_TIME;
+            this.loadUnloadTime = Elevator.DEFAULT_LOAD_UNLOAD_TIME;
+        }
+    }
+
+    /**
      * Returns current floor of elevator.
      * @return Current floor of elevator.
      */
@@ -260,10 +298,21 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Resets error values back to default to prevent more errors;
+     */
+    public void resetErrorValues() {
+        this.floorTravelTime = Elevator.DEFAULT_FLOOR_TRAVEL_TIME;
+        this.loadUnloadTime = Elevator.DEFAULT_LOAD_UNLOAD_TIME;
+    }
+
+    /**
      * Sets error code.
      * @param errorCode error code to set to.
      */
     public void setErrorCode(int errorCode) {
+        if (errorCode != 0) {
+            System.out.println(this + ": Detected " + ElevatorError.getErrorMessage(errorCode) + " error");
+        }
         this.errorCode = errorCode;
     }
 

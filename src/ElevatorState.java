@@ -170,6 +170,7 @@ class StationaryDoorsOpen extends ElevatorState {
      */
     @Override
     public void errorDetected(Elevator context) {
+        context.resetErrorValues();
         context.setState("StationaryDoorsOpen");
     }
 
@@ -228,6 +229,7 @@ class MovingDoorsClosed extends ElevatorState {
      */
     @Override
     public void errorDetected(Elevator context) {
+        context.resetErrorValues();
         context.sendElevatorStatus();
         context.shutdown();
     }
