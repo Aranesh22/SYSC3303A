@@ -8,6 +8,7 @@ public class Timer extends Thread {
     private final long duration;
     private final long expectedDuration;
     private final Elevator context;
+    private final int errorCode;
 
     /**
      * Constructor for timer object.
@@ -15,10 +16,11 @@ public class Timer extends Thread {
      * @param expectedDuration Expected duration (Seconds) of timer.
      * @param context Current context of the state machine.
      */
-    public Timer(long duration, long expectedDuration, Elevator context) {
+    public Timer(long duration, long expectedDuration, Elevator context, int errorCode) {
         this.duration = duration;
         this.expectedDuration = expectedDuration;
         this.context = context;
+        this.errorCode = errorCode;
         this.start();
     }
 
@@ -35,9 +37,11 @@ public class Timer extends Thread {
 
         if (duration > expectedDuration) {
             // Generate error detected event on the context.
+            context.setErrorCode(this.errorCode);
             context.errorDetected();
         } else {
             // Generate timeout event on the context.
+            context.setErrorCode(ElevatorStatus.GOOD);
             context.timerExpired();
         }
     }
