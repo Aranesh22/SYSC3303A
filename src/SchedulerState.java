@@ -474,8 +474,8 @@ class ProcessingElevatorStatus extends SchedulerState {
         // Check if the elevator has reached its target floor
         ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
-        // Don't need to process the message if the only change is the doors opening/closing
-        if (!elevatorStatus.doorsOpenedEquals(schedulerContext.getPrevElevatorStatus())) {
+        // Don't need to process the message if the elevator has not changed floors
+        if ((schedulerContext.getPrevElevatorStatus() != null) && (elevatorStatus.getCurrentFloor() != schedulerContext.getPrevElevatorStatus().getCurrentFloor())) {
             if (elevatorStatus.getCurrentFloor() == elevatorStatus.getTargetFloor()) {
                 taskQueue.nextFloorVisited();
                 // Set the next floor (if it's scheduled to visit a floor)
