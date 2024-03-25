@@ -12,6 +12,7 @@ import java.util.Objects;
 public class ElevatorTaskQueue {
     // Fields
     private ElevatorStatus elevatorStatus;
+    private ElevatorStatus prevElevatorStatus;
     private final InetAddress elevatorIpAddress;
     private final ArrayList<Integer> floorsToVisit;
 
@@ -21,6 +22,7 @@ public class ElevatorTaskQueue {
      */
     public ElevatorTaskQueue(ElevatorStatus elevatorStatus, InetAddress elevatorIpAddress) {
         this.elevatorStatus = elevatorStatus;
+        this.prevElevatorStatus = null;
         this.elevatorIpAddress = elevatorIpAddress;
         this.floorsToVisit = new ArrayList<>();
     }
@@ -30,6 +32,13 @@ public class ElevatorTaskQueue {
      * @return elevator status
      */
     public ElevatorStatus getElevatorStatus() {
+        return this.elevatorStatus;
+    }
+
+    /**
+     * @ return the previous elevator status
+     */
+    public ElevatorStatus getPrevElevatorStatus() {
         return this.elevatorStatus;
     }
 
@@ -46,6 +55,9 @@ public class ElevatorTaskQueue {
      * @param elevatorStatus Elevator status to be updated to.
      */
     public void setElevatorStatus(ElevatorStatus elevatorStatus) {
+        // Set previous elevator status
+        this.prevElevatorStatus = this.elevatorStatus;
+        // Set new elevator status
         this.elevatorStatus = elevatorStatus;
     }
 
