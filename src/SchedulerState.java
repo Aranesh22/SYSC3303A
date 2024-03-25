@@ -502,29 +502,27 @@ class ProcessingElevatorStatus extends SchedulerState {
         // Check if the elevator has reached its target floor
         ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
-        // Don't need to process the message if the elevator has not changed floors
-        if ((taskQueue.getPrevElevatorStatus() != null) && (elevatorStatus.getCurrentFloor() != taskQueue.getPrevElevatorStatus().getCurrentFloor())) {
-            if (elevatorStatus.getCurrentFloor() == elevatorStatus.getTargetFloor()) {
-                taskQueue.nextFloorVisited();
-                // Set the next floor (if it's scheduled to visit a floor)
-                int nextFloorToVisit = taskQueue.nextFloorToVisit();
-                if (nextFloorToVisit != 0) {
-                    // Send elevator to next floor
-                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit);
-                }
-                else {
-                    // Check if there's at least 1 FloorRequest waiting to be served
-                    if (schedulerContext.hasFloorRequestsToServe()) {
-                        FloorRequest nextFloorRequest = schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor());
-                        // If the elevator is currently on the start floor, it only needs to be sent to the destination floor
-                        if (elevatorStatus.getCurrentFloor() == nextFloorRequest.getStartFloor()) {
-                            taskQueue.addFloorToVisit(nextFloorRequest.getDestinationFloor());
-                        } else {
-                            taskQueue.addFloorRequest(nextFloorRequest);
-                        }
-                        // Send elevator to next floor
-                        schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
+        // If the elevator's doors have opened, it needs a new command from the scheduler
+        if (elevatorStatus.getDoorsOpened()) {
+            taskQueue.nextFloorVisited();
+            // Set the next floor (if it's scheduled to visit a floor)
+            int nextFloorToVisit = taskQueue.nextFloorToVisit();
+            if (nextFloorToVisit != 0) {
+                // Send elevator to next floor
+                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit);
+            }
+            else {
+                // Check if there's at least 1 FloorRequest waiting to be served
+                if (schedulerContext.hasFloorRequestsToServe()) {
+                    FloorRequest nextFloorRequest = schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor());
+                    // If the elevator is currently on the start floor, it only needs to be sent to the destination floor
+                    if (elevatorStatus.getCurrentFloor() == nextFloorRequest.getStartFloor()) {
+                        taskQueue.addFloorToVisit(nextFloorRequest.getDestinationFloor());
+                    } else {
+                        taskQueue.addFloorRequest(nextFloorRequest);
                     }
+                    // Send elevator to next floor
+                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
                 }
             }
         }
