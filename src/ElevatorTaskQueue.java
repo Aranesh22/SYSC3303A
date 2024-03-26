@@ -56,18 +56,18 @@ public class ElevatorTaskQueue {
      * @param floorRequest floor request to be added.
      */
     public void addFloorRequest(FloorRequest floorRequest) {
-        this.addFloorToVisit(floorRequest.getStartFloor());
-        this.addFloorToVisit(floorRequest.getDestinationFloor());
+        this.addFloorToVisit(floorRequest.getStartFloor(), floorRequest.getDirection());
+        this.addFloorToVisit(floorRequest.getDestinationFloor(), floorRequest.getDirection());
     }
 
     /**
      * Add new floor to visit into sorted queue.
      * @param floor Floor to add.
      */
-    public void addFloorToVisit(int floor) {
+    public void addFloorToVisit(int floor, String direction) {
         // Do not add duplicates to array list
         if (!this.floorsToVisit.contains(floor)) {
-            boolean ascending = Objects.equals(this.elevatorStatus.getDirection(), "up");
+            boolean ascending = Objects.equals(direction, "up");
             // Add floor if list is empty
             if (this.floorsToVisit.isEmpty()) {
                 this.floorsToVisit.add(floor);
