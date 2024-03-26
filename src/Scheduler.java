@@ -32,7 +32,6 @@ public class Scheduler extends Thread {
     private DatagramPacket receivePacket;
     private FloorRequest floorRequest;
     private ElevatorStatus elevatorStatus;
-    private ElevatorStatus prevElevatorStatus;
     private SchedulerState currentState;
     private HashMap<String, SchedulerState> states;
     private HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap;
@@ -182,7 +181,6 @@ public class Scheduler extends Thread {
     public void constructElevatorStatus() {
         // Construct ElevatorStatus from received packet
         byte[] statusData = receivePacket.getData();
-        this.setPrevElevatorStatus(this.elevatorStatus);
         elevatorStatus = new ElevatorStatus(statusData, statusData.length);
     }
 
@@ -198,21 +196,6 @@ public class Scheduler extends Thread {
      */
     public ElevatorStatus getElevatorStatus() {
         return elevatorStatus;
-    }
-
-    /**
-     * @return the previous ElevatorStatus
-     */
-    public ElevatorStatus getPrevElevatorStatus() {
-        return prevElevatorStatus;
-    }
-
-    /**
-     * Sets previous elevator status.
-     * @param prevElevatorStatus previous elevator to set.
-     */
-    public void setPrevElevatorStatus(ElevatorStatus prevElevatorStatus) {
-        this.prevElevatorStatus = prevElevatorStatus;
     }
 
     /**

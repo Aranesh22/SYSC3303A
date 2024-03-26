@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class ElevatorSubsystem extends Thread {
     private ElevatorRequestBox elevatorRequestBox;
     private ElevatorReceiver elevatorReceiver;
@@ -15,9 +17,9 @@ public class ElevatorSubsystem extends Thread {
     }
 
     public static void main(String[] args) {
-        Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(1), "ElevatorSubsystem");
+        Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(Integer.parseInt(args[0])), "ElevatorSubsystem");
         try {
-            Thread.sleep(5000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

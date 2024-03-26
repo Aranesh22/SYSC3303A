@@ -120,7 +120,7 @@ public class FloorSubsystem extends Thread {
         Thread floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
         Thread floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
         try {
-            Thread.sleep(5000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
