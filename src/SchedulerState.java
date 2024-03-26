@@ -463,8 +463,8 @@ class ProcessingElevatorStatus extends SchedulerState {
      * Do activities
      */
     private void doActivities() {
-        checkReachedTargetFloor();
         sendElevatorStatus();
+        checkReachedTargetFloor();
     }
 
     /**

@@ -32,7 +32,6 @@ public class Scheduler extends Thread {
     private DatagramPacket receivePacket;
     private FloorRequest floorRequest;
     private ElevatorStatus elevatorStatus;
-    private ElevatorStatus prevElevatorStatus;
     private SchedulerState currentState;
     private HashMap<String, SchedulerState> states;
     private HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap;
