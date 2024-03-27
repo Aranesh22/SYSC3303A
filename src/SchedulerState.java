@@ -463,8 +463,8 @@ class ProcessingElevatorStatus extends SchedulerState {
      * Do activities
      */
     private void doActivities() {
-        sendElevatorStatus();
-        checkReachedTargetFloor();
+        sendElevatorStatusToFloor();
+        checkElevatorDoorsOpened();
     }
 
     /**
@@ -493,12 +493,16 @@ class ProcessingElevatorStatus extends SchedulerState {
     }
 
     /**
-     * Checks if the elevator has reached its target floor.
-     * If so, it sets its next floor to visit (if there exists one).
-     * Otherwise, it gets assigned the closest FloorRequest that was
-     * saved (if one exists).
+     * Checks if the elevator's doors are open (meaning the elevator
+     * has finished serving its current request. This means that the
+     * Scheduler should look if the elevator has a next floor to visit,
+     * and if so, should send it to the elevator's receiver (so that
+     * the elevator can begin serving its next request).
+     * If the elevator has no more floors to visit, the Scheduler will
+     * try and assign it a previously received floor request to serve.
+     * try and assign it a previously received floor request to serve.
      */
-    private void checkReachedTargetFloor() {
+    private void checkElevatorDoorsOpened() {
         // Check if the elevator has reached its target floor
         ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
@@ -531,7 +535,7 @@ class ProcessingElevatorStatus extends SchedulerState {
     /**
      * Sends the ElevatorStatus to the Floor subsystem.
      */
-    private void sendElevatorStatus() {
+    private void sendElevatorStatusToFloor() {
         try {
             DatagramSocket sendSocket = schedulerContext.getSendSocket();
             byte[] statusData = schedulerContext.getReceivedPacket().getData();
