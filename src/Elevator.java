@@ -47,7 +47,7 @@ public class Elevator extends Thread {
      * @param requestBox Request box elevator shares with Elevator Receiver
      */
     public Elevator(ElevatorRequestBox requestBox, int id) {
-        this(requestBox, id, 1, "data/error.csv");
+        this(requestBox, id, 1, -1);
     }
 
     /**
@@ -55,7 +55,7 @@ public class Elevator extends Thread {
      * @param id Id of elevator.
      * @param curFloor FloorRequestSimulator elevator is starting at.
      */
-    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, String errorFileName) {
+    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, int errorCode) {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
@@ -67,7 +67,7 @@ public class Elevator extends Thread {
         this.elevatorStates = new HashMap<>();
         this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
         this.floorTravelTime = DEFAULT_FLOOR_TRAVEL_TIME;
-        this.errorCode = 0;
+        this.errorCode = errorCode;
         this.injectedErrors = new HashMap<>();
 
         // Set up socket for sending (bind to any available port)
@@ -77,7 +77,7 @@ public class Elevator extends Thread {
             System.exit(1);
         }
         this.initializeStates();
-        this.initializeInjectedErrors(errorFileName);
+        this.initializeInjectedErrors(errorCode);
     }
 
     /**
@@ -240,17 +240,22 @@ public class Elevator extends Thread {
     /**
      * Injects all errors into the elevator.
      */
-    private void initializeInjectedErrors(String errorFile) {
-        String line;
-        try {
-            BufferedReader readBuff = new BufferedReader(new FileReader(errorFile));
-            // Go through lines in data file to parse floor requests
-            while ((line = readBuff.readLine()) != null) {
-                this.injectedErrors.put(Integer.parseInt(line.split(",")[0]), new ElevatorError(line));
-            }
-        } catch (IOException e) {
-            System.exit(1);
+    private void initializeInjectedErrors(int errorCode) {
+        System.out.println(errorCode + ": Injecting errors");
+        switch (errorCode) {
+
+            case 0:
+                break;
+
+            case 1:
+                this.injectedErrors.put(1, new ElevatorError("5,7,3,"));
+                break;
+
+            case 2:
+                this.injectedErrors.put(2, new ElevatorError("6,5,5,"));
+                break;
         }
+
     }
 
     /**

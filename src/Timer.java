@@ -35,6 +35,8 @@ public class Timer extends Thread {
             throw new RuntimeException(e);
         }
 
+        System.out.println("Timer: Duration: " + duration + " Expected Duration: " + expectedDuration);
+
         if (duration > expectedDuration) {
             // Generate error detected event on the context.
             context.setErrorCode(this.errorCode);

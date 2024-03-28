@@ -25,7 +25,7 @@ public class Main {
 
         scheduler.start();
         elevatorSubsystem1.start();
-        //elevatorSubsystem2.start();
+        elevatorSubsystem2.start();
         floorSubsystem.start();
         floorRequestSimulator.start();
     }
