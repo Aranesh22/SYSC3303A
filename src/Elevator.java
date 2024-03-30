@@ -46,8 +46,8 @@ public class Elevator extends Thread {
      * Default constructor.
      * @param requestBox Request box elevator shares with Elevator Receiver
      */
-    public Elevator(ElevatorRequestBox requestBox, int id) {
-        this(requestBox, id, 1, "data/error.csv");
+    public Elevator(ElevatorRequestBox requestBox, int id, String errorFileName) {
+        this(requestBox, id, 1, errorFileName);
     }
 
     /**
