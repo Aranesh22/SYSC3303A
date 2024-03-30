@@ -46,7 +46,7 @@ public class ElevatorReceiver extends Thread {
     /**
      * Put elevator msg in shared box for elevator to access.
      */
-    private void putElevatorMsg() {
+    void putElevatorMsg() {
         // Create ElevatorMessage: Port number of this Elevator Receiver and target floor
         ElevatorMessage request = new ElevatorMessage(receiveSocket.getLocalPort(),
                 Integer.parseInt(new String(receivePacket.getData(), 0, receivePacket.getLength())));
@@ -58,7 +58,7 @@ public class ElevatorReceiver extends Thread {
     /**
      * Puts initial message into request box.
      */
-    private void putInitialElevatorMsg() {
+    void putInitialElevatorMsg() {
         ElevatorMessage msg = new ElevatorMessage(receiveSocket.getLocalPort());
         requestBox.putRequest(msg);
     }
@@ -66,7 +66,7 @@ public class ElevatorReceiver extends Thread {
     /**
      * Get message from scheduler.
      */
-    private void getMsg() {
+    void getMsg() {
         // Wait to receive floor request from Scheduler
         byte[] data = new byte[100];
         receivePacket = new DatagramPacket(data, data.length);
@@ -76,4 +76,9 @@ public class ElevatorReceiver extends Thread {
             System.exit(1);
         }
     }
+
+    public ElevatorRequestBox getElevatorRequestBox() { return this.requestBox; }
+
+
+
 }
