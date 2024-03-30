@@ -46,8 +46,8 @@ public class Elevator extends Thread {
      * Default constructor.
      * @param requestBox Request box elevator shares with Elevator Receiver
      */
-    public Elevator(ElevatorRequestBox requestBox, int id, String errorFileName) {
-        this(requestBox, id, 1, errorFileName);
+    public Elevator(ElevatorRequestBox requestBox, int id) {
+        this(requestBox, id, 1);
     }
 
     /**
@@ -55,7 +55,7 @@ public class Elevator extends Thread {
      * @param id Id of elevator.
      * @param curFloor FloorRequestSimulator elevator is starting at.
      */
-    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor, String errorFileName) {
+    public Elevator(ElevatorRequestBox requestBox, int id, int curFloor) {
         this.requestBox = requestBox;
         this.id = id;
         this.curFloor = curFloor;
@@ -77,7 +77,7 @@ public class Elevator extends Thread {
             System.exit(1);
         }
         this.initializeStates();
-        this.initializeInjectedErrors(errorFileName);
+        this.initializeInjectedErrors("data/error" + this.id + ".csv");
     }
 
     /**

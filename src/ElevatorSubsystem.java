@@ -3,10 +3,10 @@ public class ElevatorSubsystem extends Thread {
     private ElevatorReceiver elevatorReceiver;
     private Elevator elevator;
 
-    public ElevatorSubsystem(int id, String errorFileName) {
+    public ElevatorSubsystem(int id) {
         elevatorRequestBox = new ElevatorRequestBox();
         elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
-        elevator = new Elevator(elevatorRequestBox, id, errorFileName);
+        elevator = new Elevator(elevatorRequestBox, id);
     }
 
     public void run() {
@@ -15,7 +15,7 @@ public class ElevatorSubsystem extends Thread {
     }
 
     public static void main(String[] args) {
-        Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(Integer.parseInt(args[0]), args[1]), "ElevatorSubsystem");
+        Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(Integer.parseInt(args[0])), "ElevatorSubsystem");
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
