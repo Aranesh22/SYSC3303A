@@ -464,7 +464,7 @@ class ProcessingElevatorStatus extends SchedulerState {
      */
     private void doActivities() {
         sendElevatorStatusToFloor();
-        checkElevatorDoorsOpened();
+        processMessage();
     }
 
     /**
@@ -489,6 +489,22 @@ class ProcessingElevatorStatus extends SchedulerState {
         else {
             // Update the elevator's elevator status
             schedulerContext.updateElevatorStatus(elevatorStatus.getElevatorId(), elevatorStatus);
+        }
+    }
+
+    /**
+     * Processes the received elevator status message.
+     */
+    private void processMessage() {
+        ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
+        int errorCode = elevatorStatus.getErrorCode();
+        if (errorCode == 1) {
+            System.out.println("Scheduler: " + "Elevator " + elevatorStatus.getElevatorId() + " doors stuck");
+        } else if (errorCode == 2) {
+            System.out.println("Scheduler: " + "Elevator " + elevatorStatus.getElevatorId() + " stuck, closing elevator");
+            schedulerContext.removeElevator(elevatorStatus.getElevatorId());
+        } else {
+            checkElevatorDoorsOpened();
         }
     }
 

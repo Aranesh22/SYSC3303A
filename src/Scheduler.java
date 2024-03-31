@@ -218,6 +218,14 @@ public class Scheduler extends Thread {
     }
 
     /**
+     * Removes elevator from the Elevator Task Queue hashmap
+     * @param elevatorId the ID of the elevator
+     */
+    public void removeElevator(int elevatorId) {
+        elevatorTaskQueueHashMap.remove(elevatorId);
+    }
+
+    /**
      * Updates the elevator's ElevatorStatus (from the Elevator's Task Queue)
      * @param elevatorId - the ID of the elevator
      * @param elevatorStatus - the elevator's new ElevatorStatus
