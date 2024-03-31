@@ -69,7 +69,7 @@ public class FloorSubsystem extends Thread {
     /**
      * Get a UDP packet from socket.
      */
-    private void getMsg() {
+    protected void getMsg() {
         byte[] data = new byte[100];
         this.receivePacket = new DatagramPacket(data, data.length);
 
@@ -84,7 +84,7 @@ public class FloorSubsystem extends Thread {
      * Process the received packet.
      * Packet could be a floor request or an elevator status.
      */
-    private void processMsg() {
+    protected void processMsg() {
         // Try creating an elevator status object.
         try {
             ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
