@@ -21,10 +21,11 @@ class FloorRequestTest {
     int destinationFloor = 7;
     String direction = "up";
 
+    int errorCode = 0;
 
     @BeforeEach
     void setUp() {
-       udpString = "14:05:15,2,7,up,";
+       udpString = "14:05:15,2,7,up,0";
        floorRequest = new FloorRequest(udpString);
     }
 
@@ -71,7 +72,7 @@ class FloorRequestTest {
      */
     @Test
     void toUdpStringBytes() {
-        byte[] udpStr = (time + "," + startFloor + "," + destinationFloor+ "," + direction + ",").getBytes();
+        byte[] udpStr = (time + "," + startFloor + "," + destinationFloor+ "," + direction + "," + errorCode + ",").getBytes();
         assertArrayEquals(udpStr, floorRequest.toUdpStringBytes());
     }
 
@@ -81,7 +82,7 @@ class FloorRequestTest {
      */
     @Test
     void testToString() {
-        String testString = "Time:14:05:15 | FloorRequest:2->7";
+        String testString = "Time:"+ time +" | FloorRequest:"+ startFloor +"->"+ destinationFloor + " Injected Error Code: " + errorCode;
         assertEquals(testString, floorRequest.toString());
     }
 }

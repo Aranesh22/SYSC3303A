@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ElevatorTaskQueueTest {
     ElevatorStatus elevatorStatus;
 
-    int elevatorId, currentFloor, targetFloor, receivePortNum;
+    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode;
     boolean doorsOpened, moving;
     String direction;
     public static final InetAddress SCHEDULER_IP;
@@ -42,8 +42,8 @@ class ElevatorTaskQueueTest {
         doorsOpened = false;
         moving = false;
         direction = "up";
-        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction);
-
+        errorCode = 0;
+        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode);
         elevatorTaskQueue = new ElevatorTaskQueue(elevatorStatus, SCHEDULER_IP);
     }
 
@@ -53,7 +53,7 @@ class ElevatorTaskQueueTest {
      */
     @Test
     void getElevatorStatus() {
-        String statusString = "Current Floor:1 | Target Floor:7 | PortNum:52054 | Direction of Car-->up | Moving: false | Doors Closed";
+        String statusString = "Current Floor:"+currentFloor+" | Target Floor:"+ targetFloor +" | PortNum:"+ receivePortNum +" | Direction of Car-->"+ direction +" | Moving: "+ moving +" | Doors Closed | Error: "+errorCode+"";
         assertEquals(statusString, elevatorTaskQueue.getElevatorStatus().toString());
     }
 
@@ -84,7 +84,7 @@ class ElevatorTaskQueueTest {
         moving = false;
         direction = "down";
         //set the new status
-        elevatorTaskQueue.setElevatorStatus(new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction));
+        elevatorTaskQueue.setElevatorStatus(new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode));
 
         //Assert the change in status
         assertNotEquals(oldStatus, elevatorTaskQueue.getElevatorStatus());
@@ -98,7 +98,7 @@ class ElevatorTaskQueueTest {
     @Test
     void addFloorRequest() {
         assertEquals(0, elevatorTaskQueue.nextFloorToVisit());
-        elevatorTaskQueue.addFloorRequest(new FloorRequest("14:05:15,2,7,up"));
+        elevatorTaskQueue.addFloorRequest(new FloorRequest("14:05:15,2,7,up,1"));
         assertEquals(2, elevatorTaskQueue.nextFloorToVisit());
     }
 
@@ -111,7 +111,7 @@ class ElevatorTaskQueueTest {
         //Check that the request queue is empty
         assertEquals(0, elevatorTaskQueue.nextFloorToVisit());
         //add the floor to the request queue
-        elevatorTaskQueue.addFloorToVisit(4);
+        elevatorTaskQueue.addFloorToVisit(4, direction);
         //assert that the request queue is no longer empty and the requested floor is added correctly
         assertEquals(4, elevatorTaskQueue.nextFloorToVisit());
 
@@ -124,7 +124,7 @@ class ElevatorTaskQueueTest {
      */
     @Test
     void nextFloorToVisit() {
-        elevatorTaskQueue.addFloorToVisit(6);
+        elevatorTaskQueue.addFloorToVisit(6, direction);
         assertEquals(6, elevatorTaskQueue.nextFloorToVisit());
     }
 
@@ -134,7 +134,7 @@ class ElevatorTaskQueueTest {
     @Test
     void nextFloorVisited() {
         //ensure the queue is not empty
-        elevatorTaskQueue.addFloorToVisit(6);
+        elevatorTaskQueue.addFloorToVisit(6, "up");
         assertEquals(6, elevatorTaskQueue.nextFloorToVisit());
         //remove the floor from the queue
         elevatorTaskQueue.nextFloorVisited();

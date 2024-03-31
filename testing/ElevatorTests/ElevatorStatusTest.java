@@ -14,7 +14,7 @@ class ElevatorStatusTest {
 
     ElevatorStatus elevatorStatus;
 
-    int elevatorId, currentFloor, targetFloor, receivePortNum;
+    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode;
     boolean doorsOpened, moving;
     String direction;
 
@@ -30,7 +30,8 @@ class ElevatorStatusTest {
         doorsOpened = false;
         moving = false;
         direction = "up";
-        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction);
+        errorCode = 0;
+        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
 
     }
 
@@ -95,7 +96,7 @@ class ElevatorStatusTest {
      */
     @Test
     void toUdpStringBytes() {
-        byte[] udpString = (elevatorId + "," + currentFloor + "," + targetFloor + "," + receivePortNum + "," + doorsOpened + "," + moving + "," + direction + ",").getBytes();
+        byte[] udpString = (elevatorId + "," + currentFloor + "," + targetFloor + "," + receivePortNum + "," + doorsOpened + "," + moving + "," + direction + "," + this.errorCode + ",").getBytes();
         assertArrayEquals(udpString, elevatorStatus.toUdpStringBytes());
     }
 
@@ -107,7 +108,7 @@ class ElevatorStatusTest {
     void testToString() {
         String str = "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + " | PortNum:"
                 + this.receivePortNum + " | Direction of Car-->" + this.direction + " | Moving: " + this.moving
-                + " | Doors " + ((this.doorsOpened)? "Open" : "Closed");
+                + " | Doors " + ((this.doorsOpened)? "Open" : "Closed"  + " | Error: " + this.errorCode);
         assertEquals(str, elevatorStatus.toString());
     }
 }
