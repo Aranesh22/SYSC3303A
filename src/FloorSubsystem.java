@@ -88,9 +88,16 @@ public class FloorSubsystem extends Thread {
         // Try creating an elevator status object.
         try {
             ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
-            System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
-                    " at floor " + elevatorStatus.getCurrentFloor() + (elevatorStatus.getMoving()? " (Moving " : " (Stationary ")
-            + ((elevatorStatus.getDoorsOpened())? "Doors Open)" : "Doors Closed)"));
+            int errorCode = elevatorStatus.getErrorCode();
+            if (errorCode == 0) {
+                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                        " at floor " + elevatorStatus.getCurrentFloor() + (elevatorStatus.getMoving() ? " (Moving " : " (Stationary ")
+                        + ((elevatorStatus.getDoorsOpened()) ? "Doors Open)" : "Doors Closed)"));
+
+            } else {
+                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                        " at floor " + elevatorStatus.getCurrentFloor() + ((errorCode == 1)? " [ELEVATOR DOORS STUCK]" : " [ELEVATOR STUCK]"));
+            }
         } catch (Exception e) {
             // If it throws an exception, try creating a floor request object.
             try {
