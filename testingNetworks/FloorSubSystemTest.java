@@ -86,7 +86,7 @@ public class FloorSubSystemTest {
 
         floorSubsystem.processMsg();
 
-        assertEquals("FloorSubsystem: Received floor request: Time:14:05:15 | FloorRequest:1->7 Injected Error Code: 1", outContent.toString().trim());
+        assertEquals("FloorSubsystem: Received floor request: Time:14:05:15 | FloorRequest:1->7", outContent.toString().trim());
     }
 
 
