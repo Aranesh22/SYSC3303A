@@ -14,7 +14,7 @@ class ElevatorStatusTest {
 
     ElevatorStatus elevatorStatus;
 
-    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode;
+    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode, capacity;
     boolean doorsOpened, moving;
     String direction;
 
@@ -31,7 +31,8 @@ class ElevatorStatusTest {
         moving = false;
         direction = "up";
         errorCode = 0;
-        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
+        capacity = 1;
+        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0, capacity);
 
     }
 

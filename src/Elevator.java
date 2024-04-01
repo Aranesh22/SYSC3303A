@@ -37,6 +37,7 @@ public class Elevator extends Thread {
     private long floorTravelTime;
     private int errorCode;
     private final Map<Integer, ElevatorError> injectedErrors;
+    private final int capacity;
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -68,6 +69,7 @@ public class Elevator extends Thread {
         this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
         this.floorTravelTime = DEFAULT_FLOOR_TRAVEL_TIME;
         this.errorCode = 0;
+        this.capacity = 0;
         this.injectedErrors = new HashMap<>();
 
         // Set up socket for sending (bind to any available port)
@@ -166,7 +168,7 @@ public class Elevator extends Thread {
      */
     public void sendElevatorStatus() {
         // Create ElevatorStatus message
-        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, doorsOpened, moving, direction, errorCode);
+        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, doorsOpened, moving, direction, errorCode, capacity);
         // Send message to Scheduler
         try {
             // Get IP address of Scheduler

@@ -100,7 +100,7 @@ public class FloorRequest {
      * @return udp representation of floor request
      */
     public byte[] toUdpStringBytes() {
-        return (this.time + "," + this.startFloor + "," + this.destinationFloor+ "," + this.direction + ",").getBytes();
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction + "," + this.capacity + ",").getBytes();
     }
 
     /**
