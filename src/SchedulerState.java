@@ -135,6 +135,13 @@ class WaitingForPacket extends SchedulerState {
         // Return next state
         return schedulerContext.getState("CheckingPacketType");
     }
+
+    /**
+     * Displays current state.
+     */
+    public void displayState() {
+        System.out.println("[SCHEDULER STATE] Waiting to receive packet...");
+    }
 }
 
 
@@ -231,6 +238,13 @@ class CheckingPacketType extends SchedulerState {
             }
         }
         return false;
+    }
+
+    /**
+     * Displays current state.
+     */
+    public void displayState() {
+        System.out.println("[SCHEDULER STATE] Checking type of received packet");
     }
 }
 
@@ -331,6 +345,13 @@ class ProcessingFloorRequest extends SchedulerState {
     public SchedulerState packetSent() {
         return schedulerContext.getState("WaitingForPacket");
     }
+
+    /**
+     * Displays current state.
+     */
+    public void displayState() {
+        System.out.println("[SCHEDULER STATE] Processing the received FloorRequest");
+    }
 }
 
 
@@ -393,6 +414,13 @@ class SavingFloorRequest extends SchedulerState {
     public SchedulerState floorRequestSaved() {
         return schedulerContext.getState("WaitingForPacket");
     }
+
+    /**
+     * Displays current state.
+     */
+    public void displayState() {
+        System.out.println("[SCHEDULER STATE] Saving the FloorRequest to be serviced at a later time (no suitable elevators found)");
+    }
 }
 
 
@@ -435,8 +463,8 @@ class ProcessingElevatorStatus extends SchedulerState {
      * Do activities
      */
     private void doActivities() {
-        checkReachedTargetFloor();
-        sendElevatorStatus();
+        sendElevatorStatusToFloor();
+        processMessage();
     }
 
     /**
@@ -465,16 +493,37 @@ class ProcessingElevatorStatus extends SchedulerState {
     }
 
     /**
-     * Checks if the elevator has reached its target floor.
-     * If so, it sets its next floor to visit (if there exists one).
-     * Otherwise, it gets assigned the closest FloorRequest that was
-     * saved (if one exists).
+     * Processes the received elevator status message.
      */
-    private void checkReachedTargetFloor() {
+    private void processMessage() {
+        ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
+        int errorCode = elevatorStatus.getErrorCode();
+        if (errorCode == 1) {
+            System.out.println("Scheduler: " + "Elevator " + elevatorStatus.getElevatorId() + " doors stuck");
+        } else if (errorCode == 2) {
+            System.out.println("Scheduler: " + "Elevator " + elevatorStatus.getElevatorId() + " stuck, closing elevator");
+            schedulerContext.removeElevator(elevatorStatus.getElevatorId());
+        } else {
+            checkElevatorDoorsOpened();
+        }
+    }
+
+    /**
+     * Checks if the elevator's doors are open (meaning the elevator
+     * has finished serving its current request. This means that the
+     * Scheduler should look if the elevator has a next floor to visit,
+     * and if so, should send it to the elevator's receiver (so that
+     * the elevator can begin serving its next request).
+     * If the elevator has no more floors to visit, the Scheduler will
+     * try and assign it a previously received floor request to serve.
+     * try and assign it a previously received floor request to serve.
+     */
+    private void checkElevatorDoorsOpened() {
         // Check if the elevator has reached its target floor
         ElevatorStatus elevatorStatus = schedulerContext.getElevatorStatus();
         ElevatorTaskQueue taskQueue = schedulerContext.getElevatorTaskQueueHashMap().get(elevatorStatus.getElevatorId());
-        if (elevatorStatus.getCurrentFloor() == elevatorStatus.getTargetFloor()) {
+        // If the elevator's doors have opened, it needs a new command from the scheduler
+        if (elevatorStatus.getDoorsOpened()) {
             taskQueue.nextFloorVisited();
             // Set the next floor (if it's scheduled to visit a floor)
             int nextFloorToVisit = taskQueue.nextFloorToVisit();
@@ -488,7 +537,7 @@ class ProcessingElevatorStatus extends SchedulerState {
                     FloorRequest nextFloorRequest = schedulerContext.getFloorRequestToServe(elevatorStatus.getCurrentFloor());
                     // If the elevator is currently on the start floor, it only needs to be sent to the destination floor
                     if (elevatorStatus.getCurrentFloor() == nextFloorRequest.getStartFloor()) {
-                        taskQueue.addFloorToVisit(nextFloorRequest.getDestinationFloor());
+                        taskQueue.addFloorToVisit(nextFloorRequest.getDestinationFloor(), nextFloorRequest.getDirection());
                     } else {
                         taskQueue.addFloorRequest(nextFloorRequest);
                     }
@@ -502,7 +551,7 @@ class ProcessingElevatorStatus extends SchedulerState {
     /**
      * Sends the ElevatorStatus to the Floor subsystem.
      */
-    private void sendElevatorStatus() {
+    private void sendElevatorStatusToFloor() {
         try {
             DatagramSocket sendSocket = schedulerContext.getSendSocket();
             byte[] statusData = schedulerContext.getReceivedPacket().getData();
@@ -520,5 +569,12 @@ class ProcessingElevatorStatus extends SchedulerState {
     public SchedulerState packetSent() {
         // Return next state
         return schedulerContext.getState("WaitingForPacket");
+    }
+
+    /**
+     * Displays current state.
+     */
+    public void displayState() {
+        System.out.println("[SCHEDULER STATE] Processing the received ElevatorStatus");
     }
 }

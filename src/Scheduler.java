@@ -218,6 +218,14 @@ public class Scheduler extends Thread {
     }
 
     /**
+     * Removes elevator from the Elevator Task Queue hashmap
+     * @param elevatorId the ID of the elevator
+     */
+    public void removeElevator(int elevatorId) {
+        elevatorTaskQueueHashMap.remove(elevatorId);
+    }
+
+    /**
      * Updates the elevator's ElevatorStatus (from the Elevator's Task Queue)
      * @param elevatorId - the ID of the elevator
      * @param elevatorStatus - the elevator's new ElevatorStatus
@@ -298,5 +306,10 @@ public class Scheduler extends Thread {
      */
     public HashMap<Integer, ElevatorTaskQueue> getElevatorTaskQueueHashMap() {
         return elevatorTaskQueueHashMap;
+    }
+
+    public static void main(String[] args) {
+        Thread scheduler = new Thread(new Scheduler(), "Scheduler");
+        scheduler.start();
     }
 }

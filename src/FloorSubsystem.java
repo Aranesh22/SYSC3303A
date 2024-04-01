@@ -69,7 +69,7 @@ public class FloorSubsystem extends Thread {
     /**
      * Get a UDP packet from socket.
      */
-    private void getMsg() {
+    protected void getMsg() {
         byte[] data = new byte[100];
         this.receivePacket = new DatagramPacket(data, data.length);
 
@@ -84,12 +84,20 @@ public class FloorSubsystem extends Thread {
      * Process the received packet.
      * Packet could be a floor request or an elevator status.
      */
-    private void processMsg() {
+    protected void processMsg() {
         // Try creating an elevator status object.
         try {
             ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
-            System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
-                    " at floor " + elevatorStatus.getCurrentFloor());
+            int errorCode = elevatorStatus.getErrorCode();
+            if (errorCode == 0) {
+                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                        " at floor " + elevatorStatus.getCurrentFloor() + (elevatorStatus.getMoving() ? " (Moving " : " (Stationary ")
+                        + ((elevatorStatus.getDoorsOpened()) ? "Doors Open)" : "Doors Closed)"));
+
+            } else {
+                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                        " at floor " + elevatorStatus.getCurrentFloor() + ((errorCode == 1)? " [ELEVATOR DOORS STUCK]" : " [ELEVATOR STUCK]"));
+            }
         } catch (Exception e) {
             // If it throws an exception, try creating a floor request object.
             try {
@@ -113,5 +121,17 @@ public class FloorSubsystem extends Thread {
         } catch (IOException e) {
             this.close(e);
         }
+    }
+
+    public static void main(String[] args) {
+        Thread floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
+        Thread floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        floorSubsystem.start();
+        floorRequestSimulator.start();
     }
 }

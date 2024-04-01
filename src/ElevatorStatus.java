@@ -14,7 +14,7 @@ public class ElevatorStatus {
     private final boolean doorsOpened;
     private final boolean moving;
     private final String direction;
-
+    private final int errorCode;
 
     /**
      * Overloaded constructor
@@ -23,8 +23,9 @@ public class ElevatorStatus {
      * @param receivePortNum Elevator receiver port number.
      * @param moving If the elevator is moving or is stationary.
      * @param direction Direction elevator is moving in.
+     * @param errorCode Error of elevator.
      */
-    public ElevatorStatus (int elevatorId, int currentFloor, int targetFloor, int receivePortNum, boolean doorsOpened, boolean moving, String direction) {
+    public ElevatorStatus (int elevatorId, int currentFloor, int targetFloor, int receivePortNum, boolean doorsOpened, boolean moving, String direction, int errorCode) {
         this.elevatorId = elevatorId;
         this.currentFloor = currentFloor;
         this.targetFloor = targetFloor;
@@ -32,6 +33,7 @@ public class ElevatorStatus {
         this.doorsOpened = doorsOpened;
         this.moving = moving;
         this.direction = direction;
+        this.errorCode = errorCode;
     }
 
     /**
@@ -42,7 +44,7 @@ public class ElevatorStatus {
         this(Integer.parseInt(udpString.split(",")[0]), Integer.parseInt(udpString.split(",")[1]),
                 Integer.parseInt(udpString.split(",")[2]), Integer.parseInt(udpString.split(",")[3]),
                 Boolean.parseBoolean(udpString.split(",")[4]),
-                Boolean.parseBoolean(udpString.split(",")[5]), udpString.split(",")[6]);
+                Boolean.parseBoolean(udpString.split(",")[5]), udpString.split(",")[6], Integer.parseInt(udpString.split(",")[7]));
     }
 
     /**
@@ -94,6 +96,14 @@ public class ElevatorStatus {
     }
 
     /**
+     * Returns whether elevator doors are open.
+     * @return True if elevator doors are open
+     */
+    public boolean getDoorsOpened() {
+        return doorsOpened;
+    }
+
+    /**
      * Returns direction elevator is moving in.
      * @return direction elevator is moving in.
      */
@@ -102,12 +112,20 @@ public class ElevatorStatus {
     }
 
     /**
+     * Returns error code of elevator.
+     * @return error code of elevator.
+     */
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    /**
      * Returns udp representation of elevator status.
      * @return udp representation of elevator status
      */
     public byte[] toUdpStringBytes() {
         return (this.elevatorId + "," + this.currentFloor + "," + this.targetFloor + "," + this.receiverPortNum + ","
-                + this.doorsOpened + "," + this.moving + "," + this.direction + ",").getBytes();
+                + this.doorsOpened + "," + this.moving + "," + this.direction + "," + this.errorCode + ",").getBytes();
     }
 
     /**
@@ -118,6 +136,6 @@ public class ElevatorStatus {
     public String toString() {
         return "Current Floor:" + this.currentFloor + " | Target Floor:" + this.targetFloor + " | PortNum:"
                 + this.receiverPortNum + " | Direction of Car-->" + this.direction + " | Moving: " + this.moving
-                + " | Doors " + ((this.doorsOpened)? "Open" : "Closed");
+                + " | Doors " + ((this.doorsOpened)? "Open" : "Closed" + " | Error: " + this.errorCode);
     }
 }

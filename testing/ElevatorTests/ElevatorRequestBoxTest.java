@@ -26,10 +26,29 @@ class ElevatorRequestBoxTest {
 
     }
 
+    /**
+     * Assert that after calling putRequest that the box is no longer empty
+     */
     @Test
-    void putRequest() { }
+    void putRequest() {
+        assertEquals(true, elevatorRequestBox.isEmpty());
+        elevatorRequestBox.putRequest(new ElevatorMessage(52054));
+        assertEquals(false, elevatorRequestBox.isEmpty());
+    }
+
+    /**
+     * Test that the getRequest returns an initialized ElevatorMessage
+     */
     @Test
-    void getRequest() { }
+    void getRequest() {
+        ElevatorMessage elevatorMessage = null;
+        assertNull(elevatorMessage);
+        //put something in the box
+        elevatorRequestBox.putRequest(new ElevatorMessage(52054));
+        //set the originally null elevatorMessage to the new elevatorMessage
+        elevatorMessage = elevatorRequestBox.getRequest();
+        assertNotNull(elevatorMessage);
+    }
 
     /**
      * Test that the elevator Request box is first empty  (true)

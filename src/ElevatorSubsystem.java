@@ -13,4 +13,14 @@ public class ElevatorSubsystem extends Thread {
         this.elevatorReceiver.start();
         this.elevator.start();
     }
+
+    public static void main(String[] args) {
+        Thread elevatorSubsystem1 = new Thread(new ElevatorSubsystem(Integer.parseInt(args[0])), "ElevatorSubsystem");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        elevatorSubsystem1.start();
+    }
 }

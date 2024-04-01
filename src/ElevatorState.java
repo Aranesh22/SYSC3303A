@@ -4,7 +4,8 @@
  * Simulates the following states and events for the Elevator state machine as outlined in the diagram
  *
  * @author Lindsay Dickson
- * @version Iteration2
+ * @author YehanDeSilva
+ * @version Iteration4
  * @date Feb 21, 2024
  */
 
@@ -55,6 +56,15 @@ public abstract class ElevatorState {
     };
 
     /**
+     * Handles the event of when an elevator error is detected.
+     * Throws error as this method should never be called through polymorphism.
+     * @param context The Elevator context in which the state transition occurs.
+     */
+    public void errorDetected(Elevator context) {
+        throw new RuntimeException("Illegal Error Detected Event In State " + this);
+    };
+
+    /**
      * Returns a string representation of class.
      * @return string representation of class.
      */
@@ -76,6 +86,7 @@ class StationaryDoorsClosed extends ElevatorState {
     @Override
     public void onEntry(Elevator context) {
         context.closeDoors();
+        context.sendElevatorStatus();
     }
 
     /**
@@ -93,6 +104,15 @@ class StationaryDoorsClosed extends ElevatorState {
  * Concrete state class representing when an elevator is waiting for a request.
  */
 class WaitingForReceiver extends ElevatorState {
+    /**
+     * How to handle current state.
+     * @param context Current context of the state machine.
+     */
+    @Override
+    public void handleState(Elevator context) {
+        this.doActions(context);
+    }
+
     /**
      * Actions to do within a state
      * @param context Current context of the state machine.
@@ -114,6 +134,7 @@ class WaitingForReceiver extends ElevatorState {
         } else if (context.getCurFloor() == context.getDestFloor()) {
             context.setState("StationaryDoorsOpen");
         } else {
+            context.sendElevatorStatus();
             context.setState("MovingDoorsClosed");
         }
     }
@@ -131,7 +152,7 @@ class StationaryDoorsOpen extends ElevatorState {
     public void onEntry(Elevator context) {
         context.openDoors();
         context.sendElevatorStatus();
-        new Timer(context.getLoadUnloadTime(), context);
+        new Timer(context.getLoadUnloadTime(), Elevator.DEFAULT_LOAD_UNLOAD_TIME, context, ElevatorError.DOOR);
     }
 
     /**
@@ -141,6 +162,16 @@ class StationaryDoorsOpen extends ElevatorState {
     @Override
     public void timerExpired(Elevator context) {
         context.setState("StationaryDoorsClosed");
+    }
+
+    /**
+     * Handles the event of when an error is detected.
+     * @param context The Elevator context in which the state transition occurs.
+     */
+    @Override
+    public void errorDetected(Elevator context) {
+        context.resetErrorValues();
+        context.setState("StationaryDoorsOpen");
     }
 
 }
@@ -164,7 +195,7 @@ class MovingDoorsClosed extends ElevatorState {
      * @param context Current context of the state machine.
      */
     public void onEntry(Elevator context) {
-        new Timer(context.getFloorTravelTime(), context);
+        new Timer(context.getFloorTravelTime(), Elevator.DEFAULT_FLOOR_TRAVEL_TIME, context, ElevatorError.STUCK);
     }
 
     /**
@@ -192,6 +223,16 @@ class MovingDoorsClosed extends ElevatorState {
         }
     }
 
+    /**
+     * Handles the event of when an error is detected.
+     * @param context The Elevator context in which the state transition occurs.
+     */
+    @Override
+    public void errorDetected(Elevator context) {
+        context.resetErrorValues();
+        context.sendElevatorStatus();
+        context.shutdown();
+    }
 }
 
 

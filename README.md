@@ -11,6 +11,52 @@ This project simulates an elevator control system using a real-time multi-thread
 🏅 Lindsay Dickson, 101160876<br>
 🏅 Harishan Amutheesan, 101154757<br>
 
+## How to Run Project
+1. Compile and build the project.
+2. ```data``` folder must contain ```data.csv``` as well as error files for each elevator.<br>
+![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/830db496-aa2b-4b6e-9db0-ada7f472813f)
+3. Modify data.csv file for new floor requests. Format for each line must be: <br>
+   ```[time(String)],[source floor(int)],[destination floor(int)],[direction(up/down)],``` <br>
+   ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/766286c0-6336-44eb-9561-0e77e9008b99)
+4. Modify error file for each elevator. Name of file must be ```error[id].csv```. <br>
+Format for each line must be: <br>
+ ```[Floor error occurs on (int)],[Floor travel time seconds (int)],[Unload/load time seconds (int)],``` <br>
+ ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/e148ed6f-634c-46ea-92df-109f9cd2b099)
+5. Create an **Application** run configuration for:
+   - Scheduler
+   - Floor Subsystem
+   - Elevator Subsystem
+     - Each elevator subsystem should have its own application run configuration
+     - Arguments to the application should be the id of the elevator
+     - ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/a4d6f7c4-ab2d-48d9-a752-b31049cb11d8)
+
+6. Create a **Compound** run configuration containing all the applications made in the previous step. <br>
+![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/1f37946d-95aa-458b-a128-396ae106ca84)
+7. Run compoound run configuration
+
+## Breakdown of Responsibilities (Iteration 4)
+* Yehan De Silva
+  * Corrected bugs with scheduler algorithm
+  * Implemented Elevator error injection, detection and handling
+  * Updated elevator state machine diagram
+  * Updated the README file with new system information and documentation
+
+* Pathum Danthanarayana
+  * Corrected bugs with scheduler algorithm
+  * Updated scheudler state machine diagram
+
+* Aranesh Athavan
+  * Implemented Scheduler/Floor subsystem fault handling
+  * Drew timing diagram for elevator/scheduler fault detection/handling
+
+* Lindsay Dickson
+  * Refactored and created additional tests to examine networking
+  * Addressed compatibility issues with existing tests due to the refactoring
+
+* Harishan Amutheesan
+  * Revised the UML class diagram to represent the system's latest architectural changes
+  * Implemented Scheduler/Floor subsystem fault handling
+ 
 ## Breakdown of Responsibilities (Iteration 3)
 * Yehan De Silva
   * Designed new state machine diagram for Elevator subsystem and completed its implementation
@@ -212,13 +258,6 @@ Iteration 1 implements Iteration 0 calculations by introducing the subsystems th
 ## Iteration 0
 
 In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
-
-
-## How to Run Project
-1. Compile and build the project.
-2. Modify data.csv file if needed. Format must be
-   ```[time(String)],[source floor(int)],[direction(up/down)],[destination floor(int)]```.
-3. Run the program from the `Main` class.
 
 ## FAQ
 **Q: The program is not running as expected**<br>

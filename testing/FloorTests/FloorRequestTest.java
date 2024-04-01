@@ -21,10 +21,11 @@ class FloorRequestTest {
     int destinationFloor = 7;
     String direction = "up";
 
+    int errorCode = 0;
 
     @BeforeEach
     void setUp() {
-       udpString = "14:05:15,2,7,up,";
+       udpString = "14:05:15,2,7,up";
        floorRequest = new FloorRequest(udpString);
     }
 
@@ -81,7 +82,7 @@ class FloorRequestTest {
      */
     @Test
     void testToString() {
-        String testString = "Time:14:05:15 | FloorRequest:2->7";
+        String testString = "Time:"+ time +" | FloorRequest:"+ startFloor +"->"+ destinationFloor;
         assertEquals(testString, floorRequest.toString());
     }
 }

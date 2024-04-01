@@ -12,8 +12,8 @@ class ElevatorStateTest {
      */
     @Test
     void testElevatorSetState() {
-//        Synchronizer synchronizer = new Synchronizer();
         Elevator elevator = new Elevator(new ElevatorRequestBox(), 1);
+
 
 //System.out.println(elevator.getState());
         // Set to a random state
