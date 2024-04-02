@@ -54,7 +54,7 @@ class ElevatorTaskQueueTest {
      */
     @Test
     void getElevatorStatus() {
-        String statusString = "Current Floor:"+currentFloor+" | Target Floor:"+ targetFloor +" | PortNum:"+ receivePortNum +" | Direction of Car-->"+ direction +" | Moving: "+ moving +" | Doors Closed | Error: "+errorCode+"";
+        String statusString = "Current Floor:"+currentFloor+" | Target Floor:"+ targetFloor +" | PortNum:"+ receivePortNum +" | Direction of Car-->"+ direction +" | Moving: "+ moving +" | Doors Closed | " + "Passenger Count: " + capacity + " | Error: "+errorCode+"";
         assertEquals(statusString, elevatorTaskQueue.getElevatorStatus().toString());
     }
 
