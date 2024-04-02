@@ -43,6 +43,7 @@ public class Elevator extends Thread {
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
     public final static long DEFAULT_FLOOR_TRAVEL_TIME = 3;
+    public final static long DEFAULT_CAPACITY = 21;
 
     /**
      * Default constructor.

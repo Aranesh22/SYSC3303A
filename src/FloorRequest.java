@@ -109,6 +109,6 @@ public class FloorRequest {
      */
     @Override
     public String toString() {
-        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor + " (Capacity " + this.passengerCount + ")";
+        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor + " (Passengers " + this.passengerCount + ")";
     }
 }
