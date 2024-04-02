@@ -16,8 +16,8 @@ This project simulates an elevator control system using a real-time multi-thread
 2. ```data``` folder must contain ```data.csv``` as well as error files for each elevator.<br>
 ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/830db496-aa2b-4b6e-9db0-ada7f472813f)
 3. Modify data.csv file for new floor requests. Format for each line must be: <br>
-   ```[time(String)],[source floor(int)],[destination floor(int)],[direction(up/down)],``` <br>
-   ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/766286c0-6336-44eb-9561-0e77e9008b99)
+   ```[time(String)],[source floor(int)],[destination floor(int)],[direction(up/down)],[passenger count(int)],``` <br>
+   ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/cb3b4f34-eeb4-40cf-bf6c-355c8ca07209)
 4. Modify error file for each elevator. Name of file must be ```error[id].csv```. <br>
 Format for each line must be: <br>
  ```[Floor error occurs on (int)],[Floor travel time seconds (int)],[Unload/load time seconds (int)],``` <br>
