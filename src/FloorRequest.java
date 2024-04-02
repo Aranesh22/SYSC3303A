@@ -16,7 +16,7 @@ public class FloorRequest {
     private final int startFloor;
     private final int destinationFloor;
     private final String direction;
-    private final int capacity;
+    private final int passengerCount;
 
     /*
     Default constructor.
@@ -26,7 +26,7 @@ public class FloorRequest {
         startFloor = -1;
         destinationFloor = -1;
         direction = null;
-        capacity = 1;
+        passengerCount = 1;
     }
 
 
@@ -36,14 +36,14 @@ public class FloorRequest {
      * @param startFloor floor the request was made from
      * @param destinationFloor floor that user is attempting to travel to
      * @param direction will be either up/down
-     * @param capacity capacity of request
+     * @param passengerCount capacity of request
      */
-    public FloorRequest(String time, int startFloor, int destinationFloor, String direction, int capacity) {
+    public FloorRequest(String time, int startFloor, int destinationFloor, String direction, int passengerCount) {
         this.time = time;
         this.startFloor = startFloor;
         this.destinationFloor = destinationFloor;
         this.direction = direction;
-        this.capacity = capacity;
+        this.passengerCount = passengerCount;
     }
 
     /**
@@ -93,14 +93,14 @@ public class FloorRequest {
      * Returns capacity of the request.
      * @return capacity of the request.
      */
-    public int getCapacity() {return capacity;}
+    public int getPassengerCount() {return passengerCount;}
 
     /**
      * Returns udp representation of floor request.
      * @return udp representation of floor request
      */
     public byte[] toUdpStringBytes() {
-        return (this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction + "," + this.capacity + ",").getBytes();
+        return (this.time + "," + this.startFloor + "," + this.destinationFloor + "," + this.direction + "," + this.passengerCount + ",").getBytes();
     }
 
     /**
@@ -109,6 +109,6 @@ public class FloorRequest {
      */
     @Override
     public String toString() {
-        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor + " (Capacity " + this.capacity + ")";
+        return "Time:" + this.time + " | FloorRequest:" + this.startFloor + "->" + this.destinationFloor + " (Capacity " + this.passengerCount + ")";
     }
 }

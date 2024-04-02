@@ -297,7 +297,7 @@ class ProcessingFloorRequest extends SchedulerState {
         // Assign them the FloorRequest
         schedulerContext.addFloorRequestToTaskQueue(closestElevator, schedulerContext.getFloorRequest());
         // Send the target floor to the elevator
-        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit());
+        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit(), schedulerContext.getFloorRequest().getDestinationFloor(), schedulerContext.getFloorRequest().getPassengerCount());
     }
 
     private HashMap<Integer, Double> getSuitableElevators() {
@@ -529,7 +529,7 @@ class ProcessingElevatorStatus extends SchedulerState {
             int nextFloorToVisit = taskQueue.nextFloorToVisit();
             if (nextFloorToVisit != 0) {
                 // Send elevator to next floor
-                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit);
+                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit, 0, 0);
             }
             else {
                 // Check if there's at least 1 FloorRequest waiting to be served
@@ -542,7 +542,7 @@ class ProcessingElevatorStatus extends SchedulerState {
                         taskQueue.addFloorRequest(nextFloorRequest);
                     }
                     // Send elevator to next floor
-                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
+                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit(), nextFloorRequest.getDestinationFloor(), nextFloorRequest.getPassengerCount());
                 }
             }
         }
