@@ -13,13 +13,17 @@ public class ElevatorMessage {
     // Fields
     private final int elevatorReceiverPortNum;
     private int targetFloor;
+    private int passengerCount;
+    private int nextTargetFloor;
 
     /**
      * Constructor
      */
-    public ElevatorMessage(int elevatorReceiverPortNum, int targetFloor) {
+    public ElevatorMessage(int elevatorReceiverPortNum, int targetFloor, int nextTargetFloor, int passengerCount) {
         this.elevatorReceiverPortNum = elevatorReceiverPortNum;
         this.targetFloor = targetFloor;
+        this.nextTargetFloor = nextTargetFloor;
+        this.passengerCount = passengerCount;
     }
 
     public ElevatorMessage(int elevatorReceiverPortNum) {
@@ -38,5 +42,19 @@ public class ElevatorMessage {
      */
     public int getTargetFloor() {
         return targetFloor;
+    }
+
+    /**
+     * @return the next target floor number of the elevator
+     */
+    public int getNextTargetFloor() {
+        return nextTargetFloor;
+    }
+
+    /**
+     * @return the capacity of the elevator command
+     */
+    public int getPassengerCount() {
+        return passengerCount;
     }
 }

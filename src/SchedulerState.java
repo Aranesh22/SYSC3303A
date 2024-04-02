@@ -297,7 +297,7 @@ class ProcessingFloorRequest extends SchedulerState {
         // Assign them the FloorRequest
         schedulerContext.addFloorRequestToTaskQueue(closestElevator, schedulerContext.getFloorRequest());
         // Send the target floor to the elevator
-        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit());
+        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit(), schedulerContext.getFloorRequest().getDestinationFloor(), schedulerContext.getFloorRequest().getPassengerCount());
     }
 
     private HashMap<Integer, Double> getSuitableElevators() {
@@ -307,18 +307,21 @@ class ProcessingFloorRequest extends SchedulerState {
         HashMap<Integer, Double> suitableElevators = new HashMap<>();
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-            // Criteria 1: Elevator is stationary
-            if (!elevatorStatus.getMoving()) {
-                // Compute floor difference and add to map
-                suitableElevators.put(elevatorId, (double) Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor()));
-            }
-            // Criteria 2: Elevator is moving in same direction as the floor request AND
-            else if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
-                boolean ascending = elevatorStatus.getDirection().equals("up");
-                // Criteria 3: Elevator is currently moving towards the floor request
-                if ((ascending && (floorRequest.getStartFloor() > elevatorStatus.getCurrentFloor())) || (!ascending && (floorRequest.getStartFloor() < elevatorStatus.getCurrentFloor()))) {
+            //Criteria 1: Elevator has enough capacity
+            if (elevatorStatus.getPassengerCount() + floorRequest.getPassengerCount() <= Elevator.DEFAULT_CAPACITY) {
+                // Criteria 2: Elevator is stationary
+                if (!elevatorStatus.getMoving()) {
                     // Compute floor difference and add to map
-                    suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+                    suitableElevators.put(elevatorId, (double) Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor()));
+                }
+                // Criteria 3: Elevator is moving in same direction as the floor request AND
+                else if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
+                    boolean ascending = elevatorStatus.getDirection().equals("up");
+                    // Criteria 4: Elevator is currently moving towards the floor request
+                    if ((ascending && (floorRequest.getStartFloor() > elevatorStatus.getCurrentFloor())) || (!ascending && (floorRequest.getStartFloor() < elevatorStatus.getCurrentFloor()))) {
+                        // Compute floor difference and add to map
+                        suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+                    }
                 }
             }
         }
@@ -529,7 +532,7 @@ class ProcessingElevatorStatus extends SchedulerState {
             int nextFloorToVisit = taskQueue.nextFloorToVisit();
             if (nextFloorToVisit != 0) {
                 // Send elevator to next floor
-                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit);
+                schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), nextFloorToVisit, 0, 0);
             }
             else {
                 // Check if there's at least 1 FloorRequest waiting to be served
@@ -542,7 +545,7 @@ class ProcessingElevatorStatus extends SchedulerState {
                         taskQueue.addFloorRequest(nextFloorRequest);
                     }
                     // Send elevator to next floor
-                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit());
+                    schedulerContext.sendTargetFloor(elevatorStatus.getElevatorId(), taskQueue.nextFloorToVisit(), nextFloorRequest.getDestinationFloor(), nextFloorRequest.getPassengerCount());
                 }
             }
         }
