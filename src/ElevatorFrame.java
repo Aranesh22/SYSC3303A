@@ -71,6 +71,8 @@ public class ElevatorFrame extends JFrame {
             else if (direction.equals("down")) {
                 // Define x and y coordinates for a triangle pointing downwards
                 // (where the apex point is at (9, 18).
+
+                // (0, 0), (9, 18), (18, 0) ==> Forms a triangle pointing downwards
                 xCoordinates = new int[]{0, WIDTH/2, WIDTH};
                 yCoordinates = new int[]{0, HEIGHT, 0};
             }
