@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -52,26 +53,26 @@ public class ElevatorFrame extends JFrame {
             super.paintComponent(g);
             // Create a new Graphics2D
             Graphics2D graphics2D = (Graphics2D) g.create();
-            // Define new Polygon for the triangle
-            Polygon triangle;
+            // Define arrays for x and y coordinates
+            int[] xCoordinates;
+            int[] yCoordinates;
 
+            // After some experimentation, it seems that the triangle
+            // must be drawn such that the max height is 0, and
+            // the x-axis lies on x = 18.
             if (direction.equals("up")) {
-                // Define coordinates for a triangle pointing downwards
+                // Define x and y coordinates for a triangle pointing upwards
+                // (where the apex point is at (9, 0).
 
-                // (9, 0), (0, 18), (18, 18) ==> Forms a triangle pointing upwards
-                // (where p1 and p2 are for base, and p3 is for top)
-
-                // Create the triangle with the x and y coordinates above
-                triangle = new Polygon(new int[]{WIDTH / 2, 0, 18}, new int[]{0, HEIGHT, HEIGHT}, 3);
+                // (0, 18), (9, 0), (18, 18) ==> Forms a triangle pointing upwards
+                xCoordinates = new int[]{0, WIDTH/2, WIDTH};
+                yCoordinates = new int[]{HEIGHT, 0, HEIGHT};
             }
             else if (direction.equals("down")) {
-                // Define coordinates for a triangle pointing upwards
-
-                // (0, 0), (18, 0), (9, 18) ==> Forms a triangle pointing downwards
-                // (where p1 and p2 are for base, and p3 is for top)
-
-                // Create the triangle with the x and y coordinates above
-                triangle = new Polygon(new int[]{0, WIDTH, WIDTH / 2, 0}, new int[]{0, 0, HEIGHT}, 3);
+                // Define x and y coordinates for a triangle pointing downwards
+                // (where the apex point is at (9, 18).
+                xCoordinates = new int[]{0, WIDTH/2, WIDTH};
+                yCoordinates = new int[]{0, HEIGHT, 0};
             }
             else {
                 // Unknown direction specified for triangle
@@ -81,7 +82,8 @@ public class ElevatorFrame extends JFrame {
             // Set the color of the triangle
             graphics2D.setColor(color);
             // Fill graphics2D with drawn triangle
-            graphics2D.fill(triangle);
+            graphics2D.fill(new Polygon(xCoordinates, yCoordinates, 3));
+            graphics2D.dispose();
         }
 
         /**
