@@ -16,6 +16,9 @@ public class FloorSubsystem extends Thread {
     private DatagramPacket receivePacket;
     private ElevatorFrame elevatorFrame;
 
+    //Time Stamp Initialization
+    TimeStamp timeStamp = new TimeStamp();
+
     /**
      * Initializing static data to be used throughout the program
      */
@@ -95,12 +98,17 @@ public class FloorSubsystem extends Thread {
                 String message = "FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
                         " at floor " + elevatorStatus.getCurrentFloor() + (elevatorStatus.getMoving() ? " (Moving " : " (Stationary ")
                         + ((elevatorStatus.getDoorsOpened()) ? "Doors Open)" : "Doors Closed)");
+                if (elevatorStatus.getDoorsOpened()) {
+                    timeStamp.incrementMovements();
+                    timeStamp.printMovementTimeStamp();
+                }
                 elevatorFrame.addOutputMessage(message);
                 System.out.println(message);
 
             } else {
                 String message = "FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
                         " at floor " + elevatorStatus.getCurrentFloor() + ((errorCode == 1)? " [ELEVATOR DOORS STUCK]" : " [ELEVATOR STUCK]");
+                timeStamp.printMovementTimeStamp();
                 elevatorFrame.addOutputMessage(message);
                 System.out.println(message);
             }
@@ -112,6 +120,8 @@ public class FloorSubsystem extends Thread {
             try {
                 FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
                 String message = "FloorSubsystem: Received floor request: " + floorRequest;
+                timeStamp.startTimer();
+                timeStamp.printMovementTimeStamp();
                 elevatorFrame.addOutputMessage(message);
                 System.out.println(message);
                 this.sendMsgToScheduler();
