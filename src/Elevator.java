@@ -42,9 +42,11 @@ public class Elevator extends Thread {
     TimeStamp timeStamp = new TimeStamp();
 
     // Constants
-    public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
-    public final static long DEFAULT_FLOOR_TRAVEL_TIME = 3;
-    public final static long DEFAULT_CAPACITY = 21;
+    public final static long DEFAULT_LOAD_UNLOAD_TIME = 3; // 3 seconds to load/unload passengers
+    public final static long DEFAULT_FLOOR_TRAVEL_TIME = 10; // 10 seconds per floor
+    public final static long DEFAULT_CAPACITY = 5; // 5 passengers
+    public final static long DEFAULT_FAULT_RECOVERY_TIME = 20; // 20 seconds to recover from error
+    public final static long DEFAULT_PASSENGER_BOARD_TIME = 5; // 5 seconds/per passenger to board elevator
 
     /**
      * Default constructor.
@@ -276,6 +278,13 @@ public class Elevator extends Thread {
      */
     private void loadUnloadPassengers() {
         this.passengerCount += passengers.get(this.curFloor);
+
+        try {
+            Thread.sleep((this.passengerCount - passengers.get(this.curFloor)) * (DEFAULT_PASSENGER_BOARD_TIME * 1000L));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         passengers.put(curFloor, 0);
     }
 
@@ -353,7 +362,14 @@ public class Elevator extends Thread {
      */
     public void setErrorCode(int errorCode) {
         if (errorCode != 0) {
-            System.out.println(this + ": Detected " + ElevatorError.getErrorMessage(errorCode) + " error");
+            System.out.println("[ERROR]" + this + ": Detected " + ElevatorError.getErrorMessage(errorCode) + " error");
+            System.out.println("[ERROR]" + this + ": Recovering from error");
+            try {
+                Thread.sleep(Elevator.DEFAULT_FAULT_RECOVERY_TIME * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("[ERROR]" + this + ": Error recovered");
         }
         this.errorCode = errorCode;
     }
