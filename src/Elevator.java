@@ -37,7 +37,6 @@ public class Elevator extends Thread {
     private long floorTravelTime;
     private int errorCode;
     private final Map<Integer, ElevatorError> injectedErrors;
-    TimeStamp timeStamp = new TimeStamp();
 
     // Constants
     public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
@@ -90,7 +89,6 @@ public class Elevator extends Thread {
         String initialStateName = "WaitingForReceiver";
         System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
         this.setState(initialStateName);
-        timeStamp.startTimer();
     }
 
     /**
@@ -126,7 +124,6 @@ public class Elevator extends Thread {
     public void setState(String stateName) {
         if ((this.currentState != null) && (!this.currentState.toString().equals(stateName))) {
             System.out.println("[STATE][" + this + "]: State changed to " + stateName);
-            timeStamp.printTimeStamp();
         }
         this.currentState = this.getState(stateName);
         this.currentState.handleState(this);
