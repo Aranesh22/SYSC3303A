@@ -38,7 +38,7 @@ Format for each line must be: <br>
 * Yehan De Silva
   * Implemented and Tested elevator passanger count/capacity
 * Pathum Danthanarayana
-  * Implemented the GUI using JFrame
+  * Designed and implemented the GUI using Java Swing
 * Aranesh Athavan
   * Implemented timing and timestamp functionality
 * Lindsay Dickson
