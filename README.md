@@ -305,6 +305,17 @@ Iteration 1 implements Iteration 0 calculations by introducing the subsystems th
 
 In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
 
+## Testing 
+
+### Running The Tests
+There are 2 directories containing tests: 
+1. Testing 
+2. testingNetworks 
+
+All files in the 'testing' directory can be ran together
+
+in the 'testingNetworks' directory, tests must be run ***individually***
+
 ## FAQ
 **Q: The program is not running as expected**<br>
 A: Navigate to the menu at the top-left corner of IntelliJ, select `File`, click `Project Structure`, and ensure the settings
