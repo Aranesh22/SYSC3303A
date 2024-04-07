@@ -65,7 +65,7 @@ public class ElevatorReceiverTest {
         ElevatorReceiver elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
         //Check that box is empty
         assertTrue(elevatorReceiver.getElevatorRequestBox().isEmpty());
-        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
+        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0, 0);
         byte[] data = elevatorStatus.toUdpStringBytes();
         elevatorReceiver.putInitialElevatorMsg();
 
@@ -89,7 +89,7 @@ public class ElevatorReceiverTest {
         ElevatorRequestBox elevatorRequestBox = new ElevatorRequestBox();
         Elevator elevator = new Elevator(elevatorRequestBox, 1);
         ElevatorReceiver elevatorReceiver = new ElevatorReceiver(elevatorRequestBox);
-        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
+        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0, 0);
         byte[] data = elevatorStatus.toUdpStringBytes();
         helperSendPacket(data);
 

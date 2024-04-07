@@ -35,12 +35,18 @@ public class Elevator extends Thread {
     private final Map<String, ElevatorState> elevatorStates;
     private long loadUnloadTime;
     private long floorTravelTime;
+    private long openCloseDoorsTime;
     private int errorCode;
     private final Map<Integer, ElevatorError> injectedErrors;
+    private int passengerCount;
+    private final Map<Integer, Integer> passengers;
+    TimeStamp timeStamp = new TimeStamp();
 
     // Constants
-    public final static long DEFAULT_LOAD_UNLOAD_TIME = 5;
-    public final static long DEFAULT_FLOOR_TRAVEL_TIME = 3;
+    public final static long DEFAULT_OPEN_CLOSE_DOORS = 3; // 3 seconds to load/unload passengers
+    public final static long DEFAULT_FLOOR_TRAVEL_TIME = 10; // 10 seconds per floor
+    public final static long DEFAULT_CAPACITY = 5; // 5 passengers
+    public final static long DEFAULT_PASSENGER_BOARD_TIME = 5; // 5 seconds/per passenger to board elevator
 
     /**
      * Default constructor.
@@ -65,10 +71,13 @@ public class Elevator extends Thread {
         this.destFloor = 0;
         this.elevatorReceiverPortNum = -1;
         this.elevatorStates = new HashMap<>();
-        this.loadUnloadTime = DEFAULT_LOAD_UNLOAD_TIME;
+        this.openCloseDoorsTime = DEFAULT_OPEN_CLOSE_DOORS;
+        this.loadUnloadTime = DEFAULT_OPEN_CLOSE_DOORS;
         this.floorTravelTime = DEFAULT_FLOOR_TRAVEL_TIME;
         this.errorCode = 0;
+        this.passengerCount = 0;
         this.injectedErrors = new HashMap<>();
+        this.passengers = new HashMap<>();
 
         // Set up socket for sending (bind to any available port)
         try {
@@ -88,7 +97,9 @@ public class Elevator extends Thread {
         //Set initial state
         String initialStateName = "WaitingForReceiver";
         System.out.println("[STATE][" + this + "]: State changed to " + initialStateName);
+        timeStamp.startTimer();
         this.setState(initialStateName);
+
     }
 
     /**
@@ -124,6 +135,7 @@ public class Elevator extends Thread {
     public void setState(String stateName) {
         if ((this.currentState != null) && (!this.currentState.toString().equals(stateName))) {
             System.out.println("[STATE][" + this + "]: State changed to " + stateName);
+            timeStamp.printTimeStamp();
         }
         this.currentState = this.getState(stateName);
         this.currentState.handleState(this);
@@ -155,6 +167,7 @@ public class Elevator extends Thread {
         if (request.getTargetFloor() != 0) {
             this.destFloor = request.getTargetFloor();
             this.setMoving(this.curFloor != this.destFloor);
+            this.addWaitingPassengers(request);
         }
         // Request received event
         this.requestReceived();
@@ -166,7 +179,7 @@ public class Elevator extends Thread {
      */
     public void sendElevatorStatus() {
         // Create ElevatorStatus message
-        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, doorsOpened, moving, direction, errorCode);
+        ElevatorStatus status = new ElevatorStatus(id, curFloor, destFloor, elevatorReceiverPortNum, doorsOpened, moving, direction, errorCode, passengerCount);
         // Send message to Scheduler
         try {
             // Get IP address of Scheduler
@@ -192,6 +205,9 @@ public class Elevator extends Thread {
             }
             this.setMoving(this.curFloor != this.destFloor);
             this.updateInjectedErrors();
+            if (this.curFloor == this.destFloor) {
+                this.loadUnloadPassengers();
+            }
             System.out.println(this + ": Currently at floor " + this.curFloor);
         }
     }
@@ -238,6 +254,36 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Adds waiting passengers
+     * @param msg Message for elevator
+     */
+    private void addWaitingPassengers(ElevatorMessage msg) {
+        Integer firstFloorCount = passengers.get(msg.getTargetFloor());
+        Integer secondFloorCount = passengers.get(msg.getNextTargetFloor());
+        if (firstFloorCount == null) {
+            firstFloorCount = 0;
+        }
+        if (secondFloorCount == null) {
+            secondFloorCount = 0;
+        }
+        if (this.curFloor == this.destFloor) {
+            this.passengerCount += msg.getPassengerCount();
+        } else {
+            passengers.put(msg.getTargetFloor(), firstFloorCount + msg.getPassengerCount());
+        }
+        passengers.put(msg.getNextTargetFloor(), secondFloorCount - msg.getPassengerCount());
+    }
+
+    /**
+     * Unloads any passengers for this current floor.
+     */
+    private void loadUnloadPassengers() {
+        this.passengerCount += passengers.get(this.curFloor);
+        this.loadUnloadTime = this.openCloseDoorsTime + ((this.passengerCount - passengers.get(this.curFloor)) * DEFAULT_PASSENGER_BOARD_TIME);
+        passengers.put(curFloor, 0);
+    }
+
+    /**
      * Injects all errors into the elevator.
      */
     private void initializeInjectedErrors(String errorFile) {
@@ -261,11 +307,11 @@ public class Elevator extends Thread {
         if (this.injectedErrors.containsKey(this.curFloor)) {
             ElevatorError elevatorError = this.injectedErrors.get(this.curFloor);
             this.floorTravelTime = elevatorError.getTravelTime();
-            this.loadUnloadTime = elevatorError.getLoadTime();
+            this.openCloseDoorsTime = elevatorError.getLoadTime();
             this.injectedErrors.remove(this.curFloor);
         } else {
             this.floorTravelTime = Elevator.DEFAULT_FLOOR_TRAVEL_TIME;
-            this.loadUnloadTime = Elevator.DEFAULT_LOAD_UNLOAD_TIME;
+            this.openCloseDoorsTime = Elevator.DEFAULT_OPEN_CLOSE_DOORS;
         }
     }
 
@@ -290,6 +336,14 @@ public class Elevator extends Thread {
     }
 
     /**
+     * Returns elevator door open/close time.
+     * @return elevator door open/close time.
+     */
+    public long getOpenCloseDoorsTime() {
+        return this.openCloseDoorsTime;
+    }
+
+    /**
      * Returns elevator floor travel time.
      * @return elevator floor travel time.
      */
@@ -302,7 +356,8 @@ public class Elevator extends Thread {
      */
     public void resetErrorValues() {
         this.floorTravelTime = Elevator.DEFAULT_FLOOR_TRAVEL_TIME;
-        this.loadUnloadTime = Elevator.DEFAULT_LOAD_UNLOAD_TIME;
+        this.openCloseDoorsTime = Elevator.DEFAULT_OPEN_CLOSE_DOORS;
+        this.loadUnloadTime = 0;
     }
 
     /**
@@ -311,7 +366,7 @@ public class Elevator extends Thread {
      */
     public void setErrorCode(int errorCode) {
         if (errorCode != 0) {
-            System.out.println(this + ": Detected " + ElevatorError.getErrorMessage(errorCode) + " error");
+            System.out.println("[ERROR]" + this + ": Detected " + ElevatorError.getErrorMessage(errorCode) + " error");
         }
         this.errorCode = errorCode;
     }

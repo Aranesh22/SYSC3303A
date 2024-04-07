@@ -16,8 +16,8 @@ This project simulates an elevator control system using a real-time multi-thread
 2. ```data``` folder must contain ```data.csv``` as well as error files for each elevator.<br>
 ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/830db496-aa2b-4b6e-9db0-ada7f472813f)
 3. Modify data.csv file for new floor requests. Format for each line must be: <br>
-   ```[time(String)],[source floor(int)],[destination floor(int)],[direction(up/down)],``` <br>
-   ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/766286c0-6336-44eb-9561-0e77e9008b99)
+   ```[time(String)],[source floor(int)],[destination floor(int)],[direction(up/down)],[passenger count(int)],``` <br>
+   ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/cb3b4f34-eeb4-40cf-bf6c-355c8ca07209)
 4. Modify error file for each elevator. Name of file must be ```error[id].csv```. <br>
 Format for each line must be: <br>
  ```[Floor error occurs on (int)],[Floor travel time seconds (int)],[Unload/load time seconds (int)],``` <br>
@@ -34,6 +34,19 @@ Format for each line must be: <br>
 ![image](https://github.com/Aranesh22/SYSC3303A/assets/69320325/1f37946d-95aa-458b-a128-396ae106ca84)
 7. Run compoound run configuration
 
+## Breakdown of Responsibilities (Iteration 5)
+* Yehan De Silva
+  * Implemented and Tested elevator passanger count/capacity
+* Pathum Danthanarayana
+  * Implemented the GUI using JFrame
+* Aranesh Athavan
+  * Implemented timing and timestamp functionality
+* Lindsay Dickson
+  * updated README file 
+  * Implemented timing and timestamp functionality
+* Harishan Amutheesan
+  * Implemented timing and timestamp functionality 
+  
 ## Breakdown of Responsibilities (Iteration 4)
 * Yehan De Silva
   * Corrected bugs with scheduler algorithm
@@ -130,6 +143,39 @@ Format for each line must be: <br>
   * Developed JUnit tests for Scheduler class
   * UML class diagram
   * README file
+
+## Iteration 5
+
+Iteration 5 introduced a GUI, capacity parameter limits to elevators and monitoring of action times and the implementation of timestamps
+
+### GUI 
+
+The GUI is implemented in JFrame and adds a display console showing where each of the elevators is in real time and displaying any faults (if any)
+***Breakdown of structure for the GUI***
+
+* The JFrame's content pane contains a JPanel called 'elevatorsPanel', which uses a FlowLayout and contains each individual ElevatorCar
+* An ElevatorCar is modelled by another JPanel (called 'mainPanel') which contains three sub panels. The first sub panel contains the elevator's name and passenger count, the second sub panel contains the elevator's control panel (floor number display, and elevator direction triangles), and the elevator doors.
+  * Each of these sub panels contain child panels which are positioned correctly using certain layouts
+* In order to model the direction triangles, a class called ElevatorDirection class was created which extends JPanel.
+  * The JPanel has a set width and height of 18. Its default implementation of the paintComponent() method is overridden, so that when the JPanel is drawn into view, it will instead draw a Polygon with three points (triangle). The coordinates for these three points are determined based on the specified direction (up or down).
+  * Since the dimensions of the JPanel is 18 x 18, it turns out that the max height for a particular point is 0, and the x-axis lies on x = 18
+    * Therefore, to form a triangle pointing upwards, the following points can be used: (0, 18), (9, 0), (18, 18)
+
+    * To form a triangle pointing downwards, the following points can be used: (0, 0), (9, 18), (18, 0)
+
+***functionality:***
+* A console displays system messages and states of the system in real-time
+* Successfully registered elevators are displayed and their current floor and direction of travel is shown 
+* An elevator opening/closing its doors is displayed 
+* For each elevator one of two triangles will turn green to indicate the current direction of travel
+* When a fault is detected for a specific elevator, it's floor number is changed to 'ERR'
+
+
+
+## Iteration 4 
+
+Iteration 4 introduced error injections and handling
+
 
 ## Iteration 3
 
@@ -258,6 +304,17 @@ Iteration 1 implements Iteration 0 calculations by introducing the subsystems th
 ## Iteration 0
 
 In Iteration 0, we focused on recording the systems basic functions for initial measurements and time calculations for elevator movements.
+
+## Testing 
+
+### Running The Tests
+There are 2 directories containing tests: 
+1. Testing 
+2. testingNetworks 
+
+All files in the 'testing' directory can be ran together
+
+in the 'testingNetworks' directory, tests must be run ***individually***
 
 ## FAQ
 **Q: The program is not running as expected**<br>

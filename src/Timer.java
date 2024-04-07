@@ -7,17 +7,20 @@ public class Timer extends Thread {
     // Fields
     private final long duration;
     private final long expectedDuration;
+    private final long actualDuration;
     private final Elevator context;
     private final int errorCode;
 
     /**
      * Constructor for timer object.
      * @param duration Duration (Seconds) of timer.
+     * @param actualDuration Actual duration (Seconds) of timer.
      * @param expectedDuration Expected duration (Seconds) of timer.
      * @param context Current context of the state machine.
      */
-    public Timer(long duration, long expectedDuration, Elevator context, int errorCode) {
+    public Timer(long duration, long actualDuration, long expectedDuration, Elevator context, int errorCode) {
         this.duration = duration;
+        this.actualDuration = actualDuration;
         this.expectedDuration = expectedDuration;
         this.context = context;
         this.errorCode = errorCode;
@@ -35,7 +38,7 @@ public class Timer extends Thread {
             throw new RuntimeException(e);
         }
 
-        if (duration > expectedDuration) {
+        if (actualDuration > expectedDuration) {
             // Generate error detected event on the context.
             context.setErrorCode(this.errorCode);
             context.errorDetected();

@@ -14,13 +14,16 @@ public class FloorSubsystem extends Thread {
     // Fields
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket receivePacket;
+    private ElevatorFrame elevatorFrame;
+
+    //Time Stamp Initialization
+    TimeStamp timeStamp = new TimeStamp();
 
     /**
      * Initializing static data to be used throughout the program
      */
-    public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
-    public final static int DEFAULT_MAX_FLOOR = 7;
+    public final static int DEFAULT_MAX_FLOOR = 22;
 
     public static final InetAddress FLOOR_SUBSYSTEM_IP;   // IP address of Scheduler
     static {
@@ -35,12 +38,13 @@ public class FloorSubsystem extends Thread {
     /**
      * Floor Subsystem constructor.
      */
-    public FloorSubsystem() {
+    public FloorSubsystem(ElevatorFrame elevatorFrame) {
         try {
             this.sendReceiveSocket = new DatagramSocket(FLOOR_SUBSYSTEM_PORT);
         } catch (SocketException se) {
             this.close(se);
         }
+        this.elevatorFrame = elevatorFrame;
     }
 
     /**
@@ -90,19 +94,35 @@ public class FloorSubsystem extends Thread {
             ElevatorStatus elevatorStatus = new ElevatorStatus(this.receivePacket.getData(), this.receivePacket.getLength());
             int errorCode = elevatorStatus.getErrorCode();
             if (errorCode == 0) {
-                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                String message = "FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
                         " at floor " + elevatorStatus.getCurrentFloor() + (elevatorStatus.getMoving() ? " (Moving " : " (Stationary ")
-                        + ((elevatorStatus.getDoorsOpened()) ? "Doors Open)" : "Doors Closed)"));
+                        + ((elevatorStatus.getDoorsOpened()) ? "Doors Open)" : "Doors Closed)");
+                if (elevatorStatus.getDoorsOpened()) {
+                    timeStamp.incrementMovements();
+                    timeStamp.printMovementTimeStamp();
+                }
+                elevatorFrame.addOutputMessage(message);
+                System.out.println(message);
 
             } else {
-                System.out.println("FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
-                        " at floor " + elevatorStatus.getCurrentFloor() + ((errorCode == 1)? " [ELEVATOR DOORS STUCK]" : " [ELEVATOR STUCK]"));
+                String message = "FloorSubsystem: Received elevator status: Elevator " + elevatorStatus.getElevatorId() +
+                        " at floor " + elevatorStatus.getCurrentFloor() + ((errorCode == 1)? " [ELEVATOR DOORS STUCK]" : " [ELEVATOR STUCK]");
+                timeStamp.printMovementTimeStamp();
+                elevatorFrame.addOutputMessage(message);
+                System.out.println(message);
             }
+            // Notify ElevatorFrame of new ElevatorStatus
+            elevatorFrame.updateGUI(elevatorStatus);
+
         } catch (Exception e) {
             // If it throws an exception, try creating a floor request object.
             try {
                 FloorRequest floorRequest = new FloorRequest(this.receivePacket.getData(), this.receivePacket.getLength());
-                System.out.println("FloorSubsystem: Received floor request: " + floorRequest);
+                String message = "FloorSubsystem: Received floor request: " + floorRequest;
+                timeStamp.startTimer();
+                timeStamp.printMovementTimeStamp();
+                elevatorFrame.addOutputMessage(message);
+                System.out.println(message);
                 this.sendMsgToScheduler();
             } catch (Exception e2) {
                 this.close(e2);
@@ -124,7 +144,9 @@ public class FloorSubsystem extends Thread {
     }
 
     public static void main(String[] args) {
-        Thread floorSubsystem = new Thread(new FloorSubsystem(), "FloorSubsystem");
+        // Create ElevatorFrame
+        ElevatorFrame elevatorFrame = new ElevatorFrame();
+        Thread floorSubsystem = new Thread(new FloorSubsystem(elevatorFrame), "FloorSubsystem");
         Thread floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
         try {
             Thread.sleep(10000);

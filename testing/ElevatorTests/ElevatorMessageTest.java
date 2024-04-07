@@ -14,6 +14,8 @@ class ElevatorMessageTest {
     ElevatorMessage elevatorMessage;
     int portNum;
     int targetFloor;
+    int nextTargetFloor;
+    int passengerCount;
 
     /**
      * Initialize the elevatorMessage object, PortNumber and Target floor at the start of each test
@@ -22,7 +24,9 @@ class ElevatorMessageTest {
     void setUp(){
         portNum = 52054;
         targetFloor = 6;
-        elevatorMessage = new ElevatorMessage(portNum, targetFloor);
+        nextTargetFloor = 7;
+        passengerCount = 2;
+        elevatorMessage = new ElevatorMessage(portNum, targetFloor, nextTargetFloor, passengerCount);
     }
 
     /**

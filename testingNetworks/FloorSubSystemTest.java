@@ -55,10 +55,10 @@ public class FloorSubSystemTest {
      */
     @Test
     public void testProccessMsgElevatorStatus(){
-        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
+        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0, 0);
         byte[] data = elevatorStatus.toUdpStringBytes();
 
-        FloorSubsystem floorSubsystem = new FloorSubsystem();
+        FloorSubsystem floorSubsystem = new FloorSubsystem(new ElevatorFrame());
 
         helperSendPacket(data);
 
@@ -74,7 +74,7 @@ public class FloorSubSystemTest {
     @Test
     public void testProcessMsgFloorStatus() {
 
-        FloorSubsystem floorSubsystem = new FloorSubsystem();
+        FloorSubsystem floorSubsystem = new FloorSubsystem(new ElevatorFrame());
         Thread floorRequestSimulator = new Thread(new FloorRequestSimulator(), "FloorRequestSimulator");
         try {
             Thread.sleep(1000);
@@ -93,7 +93,7 @@ public class FloorSubSystemTest {
     // Unsure if this is truly testable - likely will be tested by shceduler class
     @Test
     public void testSendMsgToScheduler() {
-        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0);
+        ElevatorStatus elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, 0, 0);
         byte[] data = elevatorStatus.toUdpStringBytes();
 //
 //        FloorSubsystem floorSubsystem = new FloorSubsystem();

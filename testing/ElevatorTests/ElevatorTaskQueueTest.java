@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ElevatorTaskQueueTest {
     ElevatorStatus elevatorStatus;
 
-    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode;
+    int elevatorId, currentFloor, targetFloor, receivePortNum, errorCode, capacity;
     boolean doorsOpened, moving;
     String direction;
     public static final InetAddress SCHEDULER_IP;
@@ -43,7 +43,8 @@ class ElevatorTaskQueueTest {
         moving = false;
         direction = "up";
         errorCode = 0;
-        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode);
+        capacity = 1;
+        elevatorStatus = new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode, capacity);
         elevatorTaskQueue = new ElevatorTaskQueue(elevatorStatus, SCHEDULER_IP);
     }
 
@@ -53,7 +54,7 @@ class ElevatorTaskQueueTest {
      */
     @Test
     void getElevatorStatus() {
-        String statusString = "Current Floor:"+currentFloor+" | Target Floor:"+ targetFloor +" | PortNum:"+ receivePortNum +" | Direction of Car-->"+ direction +" | Moving: "+ moving +" | Doors Closed | Error: "+errorCode+"";
+        String statusString = "Current Floor:"+currentFloor+" | Target Floor:"+ targetFloor +" | PortNum:"+ receivePortNum +" | Direction of Car-->"+ direction +" | Moving: "+ moving +" | Doors Closed | " + "Passenger Count: " + capacity + " | Error: "+errorCode+"";
         assertEquals(statusString, elevatorTaskQueue.getElevatorStatus().toString());
     }
 
@@ -84,7 +85,7 @@ class ElevatorTaskQueueTest {
         moving = false;
         direction = "down";
         //set the new status
-        elevatorTaskQueue.setElevatorStatus(new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode));
+        elevatorTaskQueue.setElevatorStatus(new ElevatorStatus(elevatorId, currentFloor, targetFloor, receivePortNum, doorsOpened, moving, direction, errorCode, capacity));
 
         //Assert the change in status
         assertNotEquals(oldStatus, elevatorTaskQueue.getElevatorStatus());

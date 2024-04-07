@@ -286,15 +286,15 @@ public class Scheduler extends Thread {
     /**
      * Sends the target floor to the elevator's receiver.
      */
-    public void sendTargetFloor(int elevatorId, int nextFloor) {
+    public void sendTargetFloor(int elevatorId, int firstFloor, int secondFloor, int passengerCount) {
         // Get Elevator Task Queue
         ElevatorTaskQueue taskQueue = elevatorTaskQueueHashMap.get(elevatorId);
-        String nextFloorStr = String.valueOf(nextFloor);
+        byte[] command = (new ElevatorCommand(firstFloor, secondFloor, passengerCount)).toUdpStringBytes();
         // Get port number of elevator car's receiver
         int elevatorReceiverPortNum = getElevatorStatus(elevatorId).getReceiverPortNum();
         try {
             // Send packet
-            DatagramPacket sendPacket = new DatagramPacket(nextFloorStr.getBytes(), nextFloorStr.getBytes().length, taskQueue.getElevatorIpAddress(), elevatorReceiverPortNum);
+            DatagramPacket sendPacket = new DatagramPacket(command, command.length, taskQueue.getElevatorIpAddress(), elevatorReceiverPortNum);
             sendSocket.send(sendPacket);
         } catch (IOException e) {
             throw new RuntimeException(e);
