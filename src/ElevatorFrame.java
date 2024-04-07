@@ -284,9 +284,6 @@ public class ElevatorFrame extends JFrame {
                 downDirection.setColor(Color.GREEN);
                 upDirection.setColor(ElevatorFrame.DEFAULT_DIRECTION_COLOR);
             }
-            else {
-                System.out.println("Unknown direction specified");
-            }
         }
 
         /**

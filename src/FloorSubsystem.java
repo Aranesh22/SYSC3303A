@@ -22,9 +22,8 @@ public class FloorSubsystem extends Thread {
     /**
      * Initializing static data to be used throughout the program
      */
-    public final static float DEFAULT_FLOOR_HEIGHT = 3.916f;
     public final static int DEFAULT_MIN_FLOOR = 1;
-    public final static int DEFAULT_MAX_FLOOR = 7;
+    public final static int DEFAULT_MAX_FLOOR = 22;
 
     public static final InetAddress FLOOR_SUBSYSTEM_IP;   // IP address of Scheduler
     static {
