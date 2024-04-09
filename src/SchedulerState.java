@@ -232,9 +232,25 @@ class CheckingPacketType extends SchedulerState {
         HashMap<Integer, ElevatorTaskQueue> elevatorTaskQueueHashMap = schedulerContext.getElevatorTaskQueueHashMap();
         for (Integer elevatorId : elevatorTaskQueueHashMap.keySet()) {
             ElevatorStatus elevatorStatus = elevatorTaskQueueHashMap.get(elevatorId).getElevatorStatus();
-            // Criteria: Elevator is stationary or is moving in same direction
-            if (!elevatorStatus.getMoving() || floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
-                return true;
+
+            //Criteria 1: Elevator has enough capacity
+            if (elevatorStatus.getPassengerCount() + floorRequest.getPassengerCount() <= Elevator.DEFAULT_CAPACITY) {
+                // Criteria 2: Elevator is stationary
+                if (!elevatorStatus.getMoving()) {
+                    return true;
+                }
+                // Criteria 3: Elevator is moving in same direction as the floor request AND
+                else if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
+                    boolean ascending = elevatorStatus.getDirection().equals("up");
+                    // Criteria 4: Elevator is currently moving towards the floor request AND
+                    if ((ascending && (floorRequest.getStartFloor() > elevatorStatus.getCurrentFloor())) || (!ascending && (floorRequest.getStartFloor() < elevatorStatus.getCurrentFloor()))) {
+                        // Criteria 5: Elevator has less than 6 floors to visit
+                        if (elevatorTaskQueueHashMap.get(elevatorId).numNextFloorsToVisit() <= 6) {
+                            // Compute floor difference and add to map
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
