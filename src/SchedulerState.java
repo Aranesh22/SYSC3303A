@@ -294,10 +294,12 @@ class ProcessingFloorRequest extends SchedulerState {
     private void selectElevatorForRequest() {
         // Get closest elevator
         int closestElevator = getClosestElevator(getSuitableElevators());
-        // Assign them the FloorRequest
-        schedulerContext.addFloorRequestToTaskQueue(closestElevator, schedulerContext.getFloorRequest());
-        // Send the target floor to the elevator
-        schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit(), schedulerContext.getFloorRequest().getDestinationFloor(), schedulerContext.getFloorRequest().getPassengerCount());
+        if (closestElevator != -1) {
+            // Assign them the FloorRequest
+            schedulerContext.addFloorRequestToTaskQueue(closestElevator, schedulerContext.getFloorRequest());
+            // Send the target floor to the elevator
+            schedulerContext.sendTargetFloor(closestElevator, schedulerContext.getElevatorTaskQueueHashMap().get(closestElevator).nextFloorToVisit(), schedulerContext.getFloorRequest().getDestinationFloor(), schedulerContext.getFloorRequest().getPassengerCount());
+        }
     }
 
     private HashMap<Integer, Double> getSuitableElevators() {
@@ -317,10 +319,13 @@ class ProcessingFloorRequest extends SchedulerState {
                 // Criteria 3: Elevator is moving in same direction as the floor request AND
                 else if (floorRequest.getDirection().equals(elevatorStatus.getDirection())) {
                     boolean ascending = elevatorStatus.getDirection().equals("up");
-                    // Criteria 4: Elevator is currently moving towards the floor request
+                    // Criteria 4: Elevator is currently moving towards the floor request AND
                     if ((ascending && (floorRequest.getStartFloor() > elevatorStatus.getCurrentFloor())) || (!ascending && (floorRequest.getStartFloor() < elevatorStatus.getCurrentFloor()))) {
-                        // Compute floor difference and add to map
-                        suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+                        // Criteria 5: Elevator has less than 6 floors to visit
+                        if (elevatorTaskQueueHashMap.get(elevatorId).numNextFloorsToVisit() <= 6) {
+                            // Compute floor difference and add to map
+                            suitableElevators.put(elevatorId, Math.abs(elevatorStatus.getCurrentFloor() - floorRequest.getStartFloor() - 0.5));
+                        }
                     }
                 }
             }
@@ -330,8 +335,8 @@ class ProcessingFloorRequest extends SchedulerState {
 
     private int getClosestElevator(HashMap<Integer, Double> suitableElevators) {
         // Iterate through each elevator
-        int suitableElevator = 0;
-        double minFloorDistance = FloorSubsystem.DEFAULT_MAX_FLOOR - FloorSubsystem.DEFAULT_MIN_FLOOR;
+        int suitableElevator = -1;
+        double minFloorDistance = FloorSubsystem.DEFAULT_MAX_FLOOR - FloorSubsystem.DEFAULT_MIN_FLOOR + 1;
         for (Integer elevatorId : suitableElevators.keySet()) {
             double floorDistance = suitableElevators.get(elevatorId);
             if (floorDistance < minFloorDistance) {

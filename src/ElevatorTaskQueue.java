@@ -106,4 +106,12 @@ public class ElevatorTaskQueue {
         this.floorsToVisit.removeFirst();
     }
 
+    /**
+     * Returns size of floors to visit.
+     * @return number of floors to visit.
+     */
+    public int numNextFloorsToVisit() {
+        return this.floorsToVisit.size();
+    }
+
 }
