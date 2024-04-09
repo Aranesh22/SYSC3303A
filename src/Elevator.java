@@ -278,9 +278,9 @@ public class Elevator extends Thread {
      * Unloads any passengers for this current floor.
      */
     private void loadUnloadPassengers() {
-        int loadUnloadTime = passengers.get(this.curFloor);
-        this.passengerCount += loadUnloadTime;
-        this.loadUnloadTime = this.openCloseDoorsTime + (Math.max(0, loadUnloadTime) * DEFAULT_PASSENGER_BOARD_TIME);
+        int loadUnloadCount = passengers.get(this.curFloor);
+        this.passengerCount += loadUnloadCount;
+        this.loadUnloadTime = this.openCloseDoorsTime + (Math.max(0, loadUnloadCount) * DEFAULT_PASSENGER_BOARD_TIME);
         passengers.put(curFloor, 0);
     }
 
